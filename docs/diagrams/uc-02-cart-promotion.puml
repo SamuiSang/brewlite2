@@ -1,0 +1,37 @@
+@startuml uc-02-cart-promotion
+!pragma layout smetana
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam packageStyle rectangle
+skinparam ArrowColor #475569
+skinparam usecaseBackgroundColor #F0FDFA
+skinparam usecaseBorderColor #0F766E
+skinparam actorBorderColor #334155
+title UC-02 - Tùy biến đồ uống, Giỏ hàng và Khuyến mãi
+
+actor "Khách hàng\n(Customer / Guest)" as Customer
+
+rectangle "BrewLite - Chức năng 2 (FR-03)" {
+  usecase "UC-02.1\nTùy biến đồ uống\n(Size / Topping; đường / đá nếu hỗ trợ)" as Customize
+  usecase "Tính giá tạm tính\ntheo tùy chọn" as EstimatePrice
+  usecase "UC-02.2\nQuản lý giỏ hàng\n(Thêm, xem, đổi số lượng, xóa)\n--\nĐiểm mở rộng: Áp mã" as ManageCart
+  usecase "UC-02.3\nÁp dụng mã khuyến mãi" as ApplyPromotion
+  usecase "Kiểm tra điều kiện\nkhuyến mãi" as ValidatePromotion
+
+  Customize ..> EstimatePrice : <<include>>
+  ApplyPromotion ..> ManageCart : <<extend>>\n[Giỏ không rỗng và khách yêu cầu áp mã]
+  ApplyPromotion ..> ValidatePromotion : <<include>>
+}
+
+Customer -- Customize
+Customer -- ManageCart
+Customer -- ApplyPromotion
+
+legend bottom
+  Tùy biến và giỏ hàng không yêu cầu đăng nhập.
+  Đặt đơn, khóa tồn kho và thanh toán nằm ngoài UC-02.
+  Đường / đá: Should trong MVP; chỉ dùng tùy chọn món hỗ trợ.
+endlegend
+@enduml
