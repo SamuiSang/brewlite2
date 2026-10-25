@@ -1,0 +1,11 @@
+# Enforce standard LF line endings across Windows, macOS, Linux, and Docker
+* text=auto eol=lf
+*.md text eol=lf
+*.puml text eol=lf
+*.svg text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
