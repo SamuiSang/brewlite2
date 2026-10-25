@@ -1,17 +1,18 @@
 # BrewLite – Requirements to Deployment (Assignment 2)
 
-**Môn học:** Công nghệ Phần mềm – Học kỳ I (2026–2027)  
-**Trường:** Đại học Sài Gòn (SGU) – Khoa Công nghệ Thông tin  
-**Ngăn xếp kỹ thuật bắt buộc:** Next.js (Mobile-first / PWA), NestJS (Modular Monolith – 3-Tier Layered Architecture), PostgreSQL (Prisma ORM) và Docker.
+- **Môn học:** Công nghệ Phần mềm – Học kỳ I (2026–2027)
+- **Trường:** Đại học Sài Gòn (SGU) – Khoa Công nghệ Thông tin
+- **Ngăn xếp kỹ thuật bắt buộc:** Next.js (Mobile-first / PWA), NestJS (Modular Monolith – 3-Tier Layered Architecture), PostgreSQL (Prisma ORM) và Docker
 
 ---
 
-## 1. Giới thiệu Dự án & Phạm vi Sản phẩm
+## 1. Giới thiệu Dự án và Phạm vi Sản phẩm
 
 **BrewLite** là ứng dụng web đặt đồ uống trực tuyến theo hướng **Mobile-first / PWA**, giải quyết bài toán xếp hàng giờ cao điểm, sai sót khi ghi nhận tùy biến món (Size/Topping) thủ công, xung đột tồn kho khi nhiều khách đặt cùng lúc và rủi ro trừ tiền trùng lặp khi thanh toán.
 
 **Luồng nghiệp vụ cốt lõi (End-to-End):**
-> `Xem menu` → `Chọn tùy chọn (Size/Topping)` → `Giỏ hàng & Khuyến mãi` → `Đặt đơn (Khóa tồn kho đồng thời)` → `Thanh toán mô phỏng (Idempotency-Key)` → `Theo dõi đơn & Tích điểm thưởng`
+
+> `Xem menu` -> `Chọn tùy chọn (Size/Topping)` -> `Giỏ hàng & Khuyến mãi` -> `Đặt đơn (Khóa tồn kho đồng thời)` -> `Thanh toán mô phỏng (Idempotency-Key)` -> `Theo dõi đơn & Tích điểm thưởng`
 
 ---
 
@@ -19,7 +20,7 @@
 
 Mỗi thành viên phụ trách xuyên suốt **1 Module Chức năng** từ khâu Khai thác yêu cầu (FR/AC), Vẽ sơ đồ (Use Case, Activity, Sequence, Class), Thiết kế Kiến trúc (ADR) đến Hiện thực Code (Frontend & Backend) và Kiểm thử:
 
-| STT | Thành viên | Vai trò Scrum | Module Chức năng phụ trách xuyên suốt (Từ Sơ đồ → Code → Test) |
+| STT | Thành viên | Vai trò Scrum | Module Chức năng phụ trách xuyên suốt (Từ Sơ đồ -> Code -> Test) |
 | :-: | :--- | :--- | :--- |
 | **1** | **Duy** | Dev Team | **Chức năng 1 (`FR-01`, `FR-02`):** Hiển thị Menu, Tìm kiếm, Lọc theo Danh mục & Xem Chi tiết sản phẩm + E2E Test |
 | **2** | **Quỳnh** | Dev Team | **Chức năng 2 (`FR-03`):** Tùy biến Món (Size/Topping), Quản lý Giỏ hàng (`Zustand`) & Áp mã Khuyến mãi (`Promotion`) + CI Pipeline |
@@ -52,20 +53,24 @@ brewlite/
 
 ---
 
-## 4. Chiến lược Branch, Pull Request, Quy ước Commit & Definition of Done (Task 4.1 & 4.2)
+## 4. Chiến lược Branch, Pull Request, Quy ước Commit và Definition of Done (Task 4.1 & 4.2)
 
 ### 4.1 Quy tắc thực hiện tuần tự
-Toàn bộ dự án tuân thủ nghiêm ngặt quy tắc thực hiện tuần tự của đề bài:
-> **`Task 1 (Yêu cầu)` → `Task 2 (Mô hình hóa)` → `Task 3 (Kiến trúc)` → `Task 4 (MVP Sprint 1 & CI)` → `Task 5 (MVP Sprint 2, CD & Production)`**
 
-### 4.2 Chiến lược Nhánh (Branching Strategy) & Pull Request
+Toàn bộ dự án tuân thủ nghiêm ngặt quy tắc thực hiện tuần tự của đề bài:
+
+> **`Task 1 (Yêu cầu)` -> `Task 2 (Mô hình hóa)` -> `Task 3 (Kiến trúc)` -> `Task 4 (MVP Sprint 1 & CI)` -> `Task 5 (MVP Sprint 2, CD & Production)`**
+
+### 4.2 Chiến lược Nhánh (Branching Strategy) và Pull Request
+
 - Nhánh chính `main` được bảo vệ (**Branch Protection**): Không thành viên nào được push trực tiếp vào `main`.
 - Mọi bổ sung hoặc thay đổi về tài liệu yêu cầu, sơ đồ, kiến trúc hay mã nguồn đều phải tách nhánh riêng và tạo **Pull Request (PR)** ghi rõ lý do:
-  - Nhánh tài liệu & sơ đồ (Task 1–3): `docs/task1-<ten>`, `docs/task2-<ten>`, `docs/task3-<ten>`
+  - Nhánh tài liệu và sơ đồ (Task 1–3): `docs/task1-<ten>`, `docs/task2-<ten>`, `docs/task3-<ten>`
   - Nhánh tính năng (Task 4–5): `feat/<chuc-nang>-<ten>`
-  - Nhánh sửa lỗi / kiểm thử / CI-CD: `fix/<mo-ta>`, `test/<mo-ta>`, `ci/<mo-ta>`
+  - Nhánh sửa lỗi, kiểm thử, CI/CD: `fix/<mo-ta>`, `test/<mo-ta>`, `ci/<mo-ta>`
 
 ### 4.3 Quy ước Commit (Conventional Commits)
+
 - `docs(task1): ...` – Bổ sung/cập nhật tài liệu yêu cầu và sơ đồ Use Case (Task 1).
 - `docs(task2): ...` – Bổ sung/cập nhật Activity, Sequence, Class Diagram (Task 2).
 - `docs(task3): ...` – Bổ sung/cập nhật kiến trúc, ADR và Deployment Diagram (Task 3).
@@ -74,11 +79,13 @@ Toàn bộ dự án tuân thủ nghiêm ngặt quy tắc thực hiện tuần t�
 - `ci(workflow): ...` / `chore(docker): ...` – Thiết lập hạ tầng Docker và pipeline CI/CD.
 
 ### 4.4 Definition of Done (DoD)
+
 Một Task hoặc User Story chỉ được nghiệm thu (`Done`) khi thỏa mãn đầy đủ các tiêu chí:
+
 1. Tạo phẩm của Task trước đó đã tồn tại trên nhánh `main` với lịch sử commit/PR rõ ràng.
 2. Đối với Sơ đồ (Task 1–3): Lưu đầy đủ cả tệp mã nguồn `.puml` và ảnh kết xuất `.svg` trong `docs/diagrams/`, không mâu thuẫn với SRS và mô hình dữ liệu.
 3. Đối với Mã nguồn (Task 4–5):
    - Tuân thủ kiến trúc 3 tầng (Presentation – Business Logic – Data Access Layer); tổng tiền đơn hàng bắt buộc tính lại tại Business Logic Layer.
    - Đảm bảo an toàn đồng thời (Database Transaction + Optimistic Locking chống âm kho) và chống thanh toán trùng lặp (`Idempotency-Key`).
-   - Vượt qua toàn bộ bước kiểm tra tự động trên CI Pipeline (`Install → Lint → Unit Test → Build`).
+   - Vượt qua toàn bộ bước kiểm tra tự động trên CI Pipeline (`Install -> Lint -> Unit Test -> Build`).
 4. Được cập nhật đầy đủ vào bảng truy vết `docs/traceability-matrix.md`.
