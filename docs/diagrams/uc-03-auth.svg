@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="100%" height="100%">
+  <defs>
+    <style>
+      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 20px; font-weight: bold; fill: #1e293b; }
+      .box { fill: #f8fafc; stroke: #3b82f6; stroke-width: 2; rx: 12; }
+      .box-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: bold; fill: #1d4ed8; }
+      .actor-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 600; fill: #334155; text-anchor: middle; }
+      .uc-ellipse { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.8; }
+      .uc-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; font-weight: 600; fill: #1e3a8a; text-anchor: middle; }
+      .arrow { stroke: #64748b; stroke-width: 1.5; marker-end: url(#arrowhead); }
+      .arrow-dash { stroke: #0284c7; stroke-width: 1.5; stroke-dasharray: 4; marker-end: url(#arrowhead-blue); }
+      .rel-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; fill: #0369a1; font-style: italic; text-anchor: middle; }
+    </style>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#64748b" />
+    </marker>
+    <marker id="arrowhead-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#0284c7" />
+    </marker>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="100%" height="100%" fill="#ffffff" />
+
+  <!-- Title -->
+  <text x="450" y="35" text-anchor="middle" class="title">Use Case Diagram - UC-03: Đăng ký, Đăng nhập &amp; Xác thực Phân quyền JWT</text>
+
+  <!-- System Boundary Rectangle -->
+  <rect x="250" y="70" width="600" height="490" class="box" />
+  <text x="270" y="98" class="box-header">Hệ thống BrewLite (Authentication Subsystem)</text>
+
+  <!-- Actor 1: Guest Customer -->
+  <g transform="translate(110, 180)">
+    <circle cx="0" cy="-25" r="14" fill="#f1f5f9" stroke="#334155" stroke-width="2" />
+    <line x1="0" y1="-11" x2="0" y2="20" stroke="#334155" stroke-width="2" />
+    <line x1="-20" y1="2" x2="20" y2="2" stroke="#334155" stroke-width="2" />
+    <line x1="0" y1="20" x2="-14" y2="50" stroke="#334155" stroke-width="2" />
+    <line x1="0" y1="20" x2="14" y2="50" stroke="#334155" stroke-width="2" />
+    <text x="0" y="72" class="actor-text">Khách hàng vãng lai</text>
+    <text x="0" y="88" class="actor-text" font-size="11" fill="#64748b">(Guest Customer)</text>
+  </g>
+
+  <!-- Actor 2: Authenticated Customer -->
+  <g transform="translate(110, 420)">
+    <circle cx="0" cy="-25" r="14" fill="#e0f2fe" stroke="#0369a1" stroke-width="2" />
+    <line x1="0" y1="-11" x2="0" y2="20" stroke="#0369a1" stroke-width="2" />
+    <line x1="-20" y1="2" x2="20" y2="2" stroke="#0369a1" stroke-width="2" />
+    <line x1="0" y1="20" x2="-14" y2="50" stroke="#0369a1" stroke-width="2" />
+    <line x1="0" y1="20" x2="14" y2="50" stroke="#0369a1" stroke-width="2" />
+    <text x="0" y="72" class="actor-text" fill="#0369a1">Khách thành viên</text>
+    <text x="0" y="88" class="actor-text" font-size="11" fill="#64748b">(Authenticated User)</text>
+  </g>
+
+  <!-- Use Cases Inside System -->
+  <!-- UC-03.1 -->
+  <ellipse cx="430" cy="140" rx="140" ry="28" class="uc-ellipse" />
+  <text x="430" y="144" class="uc-text">UC-03.1: Đăng ký tài khoản mới</text>
+
+  <!-- UC-03.2 -->
+  <ellipse cx="430" cy="240" rx="140" ry="28" class="uc-ellipse" />
+  <text x="430" y="244" class="uc-text">UC-03.2: Đăng nhập &amp; Nhận JWT</text>
+
+  <!-- UC Included 1: Bcrypt -->
+  <ellipse cx="720" cy="180" rx="100" ry="24" class="uc-ellipse" fill="#f0fdf4" stroke="#16a34a" />
+  <text x="720" y="184" class="uc-text" fill="#15803d">Mã hóa mật khẩu Bcrypt</text>
+
+  <!-- UC Included 2: Issue JWT -->
+  <ellipse cx="720" cy="270" rx="100" ry="24" class="uc-ellipse" fill="#fdf4ff" stroke="#a855f7" />
+  <text x="720" y="274" class="uc-text" fill="#7e22ce">Ký cấp JWT AccessToken</text>
+
+  <!-- UC-03.3 -->
+  <ellipse cx="430" cy="350" rx="140" ry="28" class="uc-ellipse" />
+  <text x="430" y="354" class="uc-text">UC-03.3: Xem hồ sơ cá nhân (/auth/me)</text>
+
+  <!-- UC Redirect Login -->
+  <ellipse cx="430" cy="445" rx="140" ry="28" class="uc-ellipse" fill="#fffbeb" stroke="#d97706" />
+  <text x="430" y="449" class="uc-text" fill="#b45309">Đăng nhập tiếp tục đơn (?redirect)</text>
+
+  <!-- UC Health Check -->
+  <ellipse cx="720" cy="480" rx="100" ry="24" class="uc-ellipse" fill="#f8fafc" stroke="#64748b" />
+  <text x="720" y="484" class="uc-text" fill="#475569">Health Check (GET /health)</text>
+
+  <!-- Associations -->
+  <line x1="150" y1="180" x2="295" y2="145" class="arrow" />
+  <line x1="150" y1="200" x2="295" y2="235" class="arrow" />
+  <line x1="150" y1="230" x2="310" y2="430" class="arrow" />
+
+  <line x1="150" y1="420" x2="295" y2="355" class="arrow" />
+  <line x1="150" y1="400" x2="320" y2="260" class="arrow" />
+
+  <!-- Includes and Extends -->
+  <line x1="565" y1="145" x2="630" y2="170" class="arrow-dash" />
+  <text x="590" y="152" class="rel-text">&lt;&lt;include&gt;&gt;</text>
+
+  <line x1="565" y1="235" x2="625" y2="195" class="arrow-dash" />
+  <text x="600" y="212" class="rel-text">&lt;&lt;include&gt;&gt;</text>
+
+  <line x1="565" y1="250" x2="625" y2="265" class="arrow-dash" />
+  <text x="600" y="255" class="rel-text">&lt;&lt;include&gt;&gt;</text>
+
+  <line x1="430" y1="417" x2="430" y2="273" class="arrow-dash" />
+  <text x="475" y="315" class="rel-text">&lt;&lt;extend&gt;&gt;</text>
+</svg>

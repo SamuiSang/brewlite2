@@ -1,0 +1,40 @@
+@startuml uc-03-auth
+title Use Case Diagram - UC-03: Đăng ký, Đăng nhập & Xác thực JWT
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+skinparam monochrome false
+skinparam shadowing true
+
+actor "Khách hàng vãng lai\n(Guest Customer)" as Guest
+actor "Khách hàng thành viên\n(Authenticated Customer)" as Customer
+
+rectangle "Hệ thống BrewLite (Authentication Subsystem)" {
+    usecase "UC-03.1: Đăng ký tài khoản mới" as UC_Register
+    usecase "UC-03.2: Đăng nhập hệ thống & Nhận JWT" as UC_Login
+    usecase "Xác thực mật khẩu Bcrypt" as UC_Bcrypt
+    usecase "Cấp phát AccessToken (JWT)" as UC_IssueJWT
+    usecase "UC-03.3: Xem hồ sơ cá nhân (/auth/me)" as UC_Profile
+    usecase "Đăng nhập tiếp tục đơn hàng\n(?redirect=/checkout)" as UC_RedirectLogin
+    usecase "Kiểm tra sức khỏe hệ thống\n(GET /api/v1/health)" as UC_Health
+}
+
+Guest --> UC_Register
+Guest --> UC_Login
+Guest --> UC_RedirectLogin
+
+Customer --> UC_Profile
+Customer --> UC_Login
+
+UC_Login ..> UC_Bcrypt : <<include>>
+UC_Login ..> UC_IssueJWT : <<include>>
+UC_Register ..> UC_Bcrypt : <<include>>
+UC_Register ..> UC_IssueJWT : <<include>>
+UC_RedirectLogin .> UC_Login : <<extend>>
+
+note right of UC_Health
+  Hệ thống cung cấp endpoint
+  giám sát trạng thái Backend & DB
+end note
+
+@enduml
