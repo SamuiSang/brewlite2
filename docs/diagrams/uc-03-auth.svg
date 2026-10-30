@@ -1,103 +1,157 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 640" width="100%" height="100%">
   <defs>
     <style>
-      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 20px; font-weight: bold; fill: #1e293b; }
-      .box { fill: #f8fafc; stroke: #3b82f6; stroke-width: 2; rx: 12; }
-      .box-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: bold; fill: #1d4ed8; }
-      .actor-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 600; fill: #334155; text-anchor: middle; }
-      .uc-ellipse { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.8; }
-      .uc-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; font-weight: 600; fill: #1e3a8a; text-anchor: middle; }
-      .arrow { stroke: #64748b; stroke-width: 1.5; marker-end: url(#arrowhead); }
-      .arrow-dash { stroke: #0284c7; stroke-width: 1.5; stroke-dasharray: 4; marker-end: url(#arrowhead-blue); }
-      .rel-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; fill: #0369a1; font-style: italic; text-anchor: middle; }
+      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 19px; font-weight: 700; fill: #0f172a; }
+      .box { fill: #f8fafc; stroke: #0f766e; stroke-width: 2; rx: 12; }
+      .box-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 700; fill: #0f766e; }
+      .actor-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 700; fill: #1e293b; text-anchor: middle; }
+      .actor-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 500; fill: #64748b; text-anchor: middle; }
+      .uc-base { fill: #f0fdfa; stroke: #0f766e; stroke-width: 1.8; }
+      .uc-inc { fill: #f8fafc; stroke: #0284c7; stroke-width: 1.6; }
+      .uc-ext { fill: #fffbeb; stroke: #d97706; stroke-width: 1.6; }
+      .uc-tech { fill: #f1f5f9; stroke: #475569; stroke-width: 1.5; stroke-dasharray: 4 2; }
+      .uc-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 12px; font-weight: 700; fill: #0f172a; text-anchor: middle; }
+      .uc-desc { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 500; fill: #334155; text-anchor: middle; }
+      .arrow-solid { stroke: #475569; stroke-width: 1.5; fill: none; }
+      .arrow-inc { stroke: #0284c7; stroke-width: 1.5; stroke-dasharray: 5 3; fill: none; marker-end: url(#arrowhead-sky); }
+      .arrow-ext { stroke: #d97706; stroke-width: 1.5; stroke-dasharray: 5 3; fill: none; marker-end: url(#arrowhead-amber); }
+      .rel-tag-inc { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 10px; font-weight: 700; fill: #0369a1; text-anchor: middle; }
+      .rel-tag-ext { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 10px; font-weight: 700; fill: #b45309; text-anchor: middle; }
+      .legend-bg { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1; rx: 6; }
+      .legend-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 10.5px; fill: #334155; }
     </style>
-    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#64748b" />
-    </marker>
-    <marker id="arrowhead-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <marker id="arrowhead-sky" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
       <polygon points="0 0, 8 3, 0 6" fill="#0284c7" />
+    </marker>
+    <marker id="arrowhead-amber" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#d97706" />
     </marker>
   </defs>
 
-  <!-- Background Canvas -->
+  <!-- Background -->
   <rect width="100%" height="100%" fill="#ffffff" />
 
-  <!-- Title -->
-  <text x="450" y="35" text-anchor="middle" class="title">Use Case Diagram - UC-03: Đăng ký, Đăng nhập &amp; Xác thực Phân quyền JWT</text>
+  <!-- Diagram Title -->
+  <text x="590" y="36" text-anchor="middle" class="title">UC-03 - Sơ đồ Use Case: Đăng ký, Đăng nhập, Hồ sơ &amp; Xác thực Phân quyền JWT</text>
 
   <!-- System Boundary Rectangle -->
-  <rect x="250" y="70" width="600" height="490" class="box" />
-  <text x="270" y="98" class="box-header">Hệ thống BrewLite (Authentication Subsystem)</text>
+  <rect x="250" y="65" width="900" height="465" class="box" />
+  <text x="270" y="92" class="box-header">BrewLite - Chức năng 3 (FR-04): Quản lý Tài khoản, Xác thực JWT &amp; Giám sát Health</text>
 
-  <!-- Actor 1: Guest Customer -->
-  <g transform="translate(110, 180)">
-    <circle cx="0" cy="-25" r="14" fill="#f1f5f9" stroke="#334155" stroke-width="2" />
-    <line x1="0" y1="-11" x2="0" y2="20" stroke="#334155" stroke-width="2" />
+  <!-- Actor 1: Guest -->
+  <g transform="translate(115, 200)">
+    <circle cx="0" cy="-26" r="14" fill="#f8fafc" stroke="#334155" stroke-width="2" />
+    <line x1="0" y1="-12" x2="0" y2="20" stroke="#334155" stroke-width="2" />
     <line x1="-20" y1="2" x2="20" y2="2" stroke="#334155" stroke-width="2" />
-    <line x1="0" y1="20" x2="-14" y2="50" stroke="#334155" stroke-width="2" />
-    <line x1="0" y1="20" x2="14" y2="50" stroke="#334155" stroke-width="2" />
-    <text x="0" y="72" class="actor-text">Khách hàng vãng lai</text>
-    <text x="0" y="88" class="actor-text" font-size="11" fill="#64748b">(Guest Customer)</text>
+    <line x1="0" y1="20" x2="-14" y2="52" stroke="#334155" stroke-width="2" />
+    <line x1="0" y1="20" x2="14" y2="52" stroke="#334155" stroke-width="2" />
+    <text x="0" y="74" class="actor-title">Khách hàng vãng lai</text>
+    <text x="0" y="90" class="actor-sub">(Guest)</text>
   </g>
 
   <!-- Actor 2: Authenticated Customer -->
-  <g transform="translate(110, 420)">
-    <circle cx="0" cy="-25" r="14" fill="#e0f2fe" stroke="#0369a1" stroke-width="2" />
-    <line x1="0" y1="-11" x2="0" y2="20" stroke="#0369a1" stroke-width="2" />
-    <line x1="-20" y1="2" x2="20" y2="2" stroke="#0369a1" stroke-width="2" />
-    <line x1="0" y1="20" x2="-14" y2="50" stroke="#0369a1" stroke-width="2" />
-    <line x1="0" y1="20" x2="14" y2="50" stroke="#0369a1" stroke-width="2" />
-    <text x="0" y="72" class="actor-text" fill="#0369a1">Khách thành viên</text>
-    <text x="0" y="88" class="actor-text" font-size="11" fill="#64748b">(Authenticated User)</text>
+  <g transform="translate(115, 415)">
+    <circle cx="0" cy="-26" r="14" fill="#f0fdfa" stroke="#0f766e" stroke-width="2" />
+    <line x1="0" y1="-12" x2="0" y2="20" stroke="#0f766e" stroke-width="2" />
+    <line x1="-20" y1="2" x2="20" y2="2" stroke="#0f766e" stroke-width="2" />
+    <line x1="0" y1="20" x2="-14" y2="52" stroke="#0f766e" stroke-width="2" />
+    <line x1="0" y1="20" x2="14" y2="52" stroke="#0f766e" stroke-width="2" />
+    <text x="0" y="74" class="actor-title" fill="#0f766e">Khách thành viên</text>
+    <text x="0" y="90" class="actor-sub">(Authenticated Customer)</text>
   </g>
 
-  <!-- Use Cases Inside System -->
-  <!-- UC-03.1 -->
-  <ellipse cx="430" cy="140" rx="140" ry="28" class="uc-ellipse" />
-  <text x="430" y="144" class="uc-text">UC-03.1: Đăng ký tài khoản mới</text>
+  <!-- Core Column 1: Main Use Cases -->
+  <!-- UC-03.1: Đăng ký -->
+  <g transform="translate(450, 140)">
+    <ellipse cx="0" cy="0" rx="140" ry="28" class="uc-base" />
+    <text x="0" y="-4" class="uc-title">UC-03.1: Đăng ký tài khoản mới</text>
+    <text x="0" y="12" class="uc-desc">Họ tên, Email, SĐT, Mật khẩu</text>
+  </g>
 
-  <!-- UC-03.2 -->
-  <ellipse cx="430" cy="240" rx="140" ry="28" class="uc-ellipse" />
-  <text x="430" y="244" class="uc-text">UC-03.2: Đăng nhập &amp; Nhận JWT</text>
+  <!-- UC-03.2: Đăng nhập -->
+  <g transform="translate(450, 245)">
+    <ellipse cx="0" cy="0" rx="145" ry="32" class="uc-base" />
+    <text x="0" y="-8" class="uc-title">UC-03.2: Đăng nhập &amp; Nhận JWT</text>
+    <text x="0" y="8" class="uc-desc">Đối soát Bcrypt &amp; Cấp accessToken</text>
+    <text x="0" y="22" font-size="9.5" fill="#0f766e" font-style="italic">Điểm mở rộng: Chuyển hướng checkout</text>
+  </g>
 
-  <!-- UC Included 1: Bcrypt -->
-  <ellipse cx="720" cy="180" rx="100" ry="24" class="uc-ellipse" fill="#f0fdf4" stroke="#16a34a" />
-  <text x="720" y="184" class="uc-text" fill="#15803d">Mã hóa mật khẩu Bcrypt</text>
-
-  <!-- UC Included 2: Issue JWT -->
-  <ellipse cx="720" cy="270" rx="100" ry="24" class="uc-ellipse" fill="#fdf4ff" stroke="#a855f7" />
-  <text x="720" y="274" class="uc-text" fill="#7e22ce">Ký cấp JWT AccessToken</text>
-
-  <!-- UC-03.3 -->
-  <ellipse cx="430" cy="350" rx="140" ry="28" class="uc-ellipse" />
-  <text x="430" y="354" class="uc-text">UC-03.3: Xem hồ sơ cá nhân (/auth/me)</text>
+  <!-- UC-03.3: Hồ sơ cá nhân -->
+  <g transform="translate(450, 355)">
+    <ellipse cx="0" cy="0" rx="145" ry="28" class="uc-base" />
+    <text x="0" y="-4" class="uc-title">UC-03.3: Xem hồ sơ &amp; Điểm tích lũy</text>
+    <text x="0" y="12" class="uc-desc">GET /api/v1/auth/me (Bearer Token)</text>
+  </g>
 
   <!-- UC Redirect Login -->
-  <ellipse cx="430" cy="445" rx="140" ry="28" class="uc-ellipse" fill="#fffbeb" stroke="#d97706" />
-  <text x="430" y="449" class="uc-text" fill="#b45309">Đăng nhập tiếp tục đơn (?redirect)</text>
+  <g transform="translate(450, 460)">
+    <ellipse cx="0" cy="0" rx="145" ry="30" class="uc-ext" />
+    <text x="0" y="-6" class="uc-title" fill="#92400e">Đăng nhập tiếp tục đơn hàng</text>
+    <text x="0" y="10" class="uc-desc" fill="#b45309">?redirect=/checkout (Bảo toàn giỏ)</text>
+  </g>
 
-  <!-- UC Health Check -->
-  <ellipse cx="720" cy="480" rx="100" ry="24" class="uc-ellipse" fill="#f8fafc" stroke="#64748b" />
-  <text x="720" y="484" class="uc-text" fill="#475569">Health Check (GET /health)</text>
+  <!-- Core Column 2: Included & Tech Subsystems -->
+  <!-- Bcrypt Verification -->
+  <g transform="translate(860, 160)">
+    <ellipse cx="0" cy="0" rx="130" ry="27" class="uc-inc" />
+    <text x="0" y="-4" class="uc-title" fill="#0369a1">Xác thực mật khẩu Bcrypt</text>
+    <text x="0" y="12" class="uc-desc" fill="#0284c7">bcrypt.compare / saltRounds >= 10</text>
+  </g>
 
-  <!-- Associations -->
-  <line x1="150" y1="180" x2="295" y2="145" class="arrow" />
-  <line x1="150" y1="200" x2="295" y2="235" class="arrow" />
-  <line x1="150" y1="230" x2="310" y2="430" class="arrow" />
+  <!-- Issue JWT Token -->
+  <g transform="translate(860, 265)">
+    <ellipse cx="0" cy="0" rx="130" ry="27" class="uc-inc" />
+    <text x="0" y="-4" class="uc-title" fill="#0369a1">Cấp phát JWT AccessToken</text>
+    <text x="0" y="12" class="uc-desc" fill="#0284c7">Payload { sub, email, role } (24h)</text>
+  </g>
 
-  <line x1="150" y1="420" x2="295" y2="355" class="arrow" />
-  <line x1="150" y1="400" x2="320" y2="260" class="arrow" />
+  <!-- Health Monitoring -->
+  <g transform="translate(860, 420)">
+    <ellipse cx="0" cy="0" rx="130" ry="27" class="uc-tech" />
+    <text x="0" y="-4" class="uc-title" fill="#334155">Giám sát sức khỏe hệ thống</text>
+    <text x="0" y="12" class="uc-desc" fill="#64748b">GET /api/v1/health (SELECT 1 DB)</text>
+  </g>
 
-  <!-- Includes and Extends -->
-  <line x1="565" y1="145" x2="630" y2="170" class="arrow-dash" />
-  <text x="590" y="152" class="rel-text">&lt;&lt;include&gt;&gt;</text>
+  <!-- Lines from Guest -->
+  <line x1="165" y1="190" x2="315" y2="145" class="arrow-solid" />
+  <line x1="165" y1="205" x2="310" y2="240" class="arrow-solid" />
+  <line x1="165" y1="225" x2="310" y2="455" class="arrow-solid" />
 
-  <line x1="565" y1="235" x2="625" y2="195" class="arrow-dash" />
-  <text x="600" y="212" class="rel-text">&lt;&lt;include&gt;&gt;</text>
+  <!-- Lines from Customer -->
+  <line x1="165" y1="410" x2="310" y2="360" class="arrow-solid" />
+  <line x1="165" y1="395" x2="318" y2="265" class="arrow-solid" />
 
-  <line x1="565" y1="250" x2="625" y2="265" class="arrow-dash" />
-  <text x="600" y="255" class="rel-text">&lt;&lt;include&gt;&gt;</text>
+  <!-- Include Relationships from UC-03.1 -->
+  <path d="M 585 130 C 660 120, 710 135, 735 150" class="arrow-inc" />
+  <text x="670" y="130" class="rel-tag-inc">&lt;&lt;include&gt;&gt;</text>
 
-  <line x1="430" y1="417" x2="430" y2="273" class="arrow-dash" />
-  <text x="475" y="315" class="rel-text">&lt;&lt;extend&gt;&gt;</text>
+  <path d="M 585 145 C 650 170, 710 215, 745 245" class="arrow-inc" />
+  <text x="675" y="185" class="rel-tag-inc">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- Include Relationships from UC-03.2 -->
+  <path d="M 585 230 C 650 205, 705 185, 735 175" class="arrow-inc" />
+  <text x="660" y="210" class="rel-tag-inc">&lt;&lt;include&gt;&gt;</text>
+
+  <path d="M 595 255 C 650 260, 680 262, 725 264" class="arrow-inc" />
+  <text x="660" y="253" class="rel-tag-inc">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- Extend Relationship: Redirect Login extends UC_Login -->
+  <path d="M 450 430 L 450 282" class="arrow-ext" />
+  <rect x="456" y="345" width="125" height="30" fill="#fffbeb" stroke="#fcd34d" rx="4" />
+  <text x="518" y="358" class="rel-tag-ext">&lt;&lt;extend&gt;&gt;</text>
+  <text x="518" y="370" font-size="9" fill="#92400e" text-anchor="middle">[Chưa login khi đặt đơn]</text>
+
+  <!-- Note for Health Check -->
+  <path d="M 990 420 L 1025 420" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3 3" />
+  <rect x="1010" y="390" width="125" height="55" fill="#f8fafc" stroke="#94a3b8" rx="4" />
+  <text x="1072" y="408" font-size="9.5" font-weight="700" fill="#475569" text-anchor="middle">Kiểm tra kết nối</text>
+  <text x="1072" y="422" font-size="9" fill="#64748b" text-anchor="middle">Thực thi SELECT 1</text>
+  <text x="1072" y="435" font-size="9" fill="#64748b" text-anchor="middle">vào DB PostgreSQL</text>
+
+  <!-- Legend Bottom -->
+  <rect x="250" y="540" width="900" height="85" class="legend-bg" />
+  <text x="265" y="558" font-weight="700" font-size="11" fill="#0f766e">Ghi chú nghiệp vụ &amp; Ranh giới kiến trúc (Hiếu - PO):</text>
+  <text x="265" y="575" class="legend-text">• Mật khẩu bắt buộc băm bằng Bcrypt với hệ số muối saltRounds >= 10 tại AuthService trước khi lưu vào PostgreSQL, tuyệt đối không lưu plain-text.</text>
+  <text x="265" y="592" class="legend-text">• Đăng nhập thành công cấp accessToken (JWT 24h chứa sub, email, role). Axios Interceptor phía Client tự động đính kèm Authorization: Bearer &lt;token&gt;.</text>
+  <text x="265" y="609" class="legend-text">• Khách vãng lai bấm thanh toán được chuyển hướng sang /login?redirect=/checkout, bảo toàn 100% giỏ hàng trong Zustand Store sau khi đăng nhập.</text>
 </svg>

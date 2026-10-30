@@ -1,8 +1,9 @@
-﻿# BrewLite – Tóm tắt yêu cầu phần mềm (SRS)
+# BrewLite – Tóm tắt yêu cầu phần mềm (SRS)
 
 - **Giai đoạn:** Task 1.2 – Yêu cầu chức năng; Task 1.3 – Use Case.
 - **Thành viên đóng góp:**
   - **Quỳnh:** Chức năng 2 – Tùy biến món, Giỏ hàng và Khuyến mãi (`FR-03`, `UC-02`).
+  - **Hiếu (PO):** Chức năng 3 – Đăng ký, Đăng nhập, Quản lý Hồ sơ, Xác thực Phân quyền JWT & Giám sát Health Check (`FR-04`, `UC-03`).
   - **Chiến:** Chức năng 4 – Khởi tạo Đơn hàng, Tính tiền tại Business Layer & Khóa tồn kho đồng thời (`FR-05`).
 - **Nguồn:** `docs/phancong.docx`, Mục 2.1–2.2 & Mục 4.1–4.2; [Bối cảnh và phạm vi](context-and-scope.md), MVP-02 & MVP-04.
 - **Phạm vi tài liệu:** Tổng hợp yêu cầu chức năng, MoSCoW, Quy tắc nghiệp vụ, Tiêu chí nghiệm thu (AC) và sơ đồ Use Case của các phân hệ chức năng trong hệ thống BrewLite.

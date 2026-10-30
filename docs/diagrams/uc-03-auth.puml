@@ -1,40 +1,49 @@
 @startuml uc-03-auth
-title Use Case Diagram - UC-03: Đăng ký, Đăng nhập & Xác thực JWT
-skinparam actorStyle awesome
+!pragma layout smetana
+left to right direction
+skinparam nodesep 60
+skinparam ranksep 80
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName SansSerif
 skinparam packageStyle rectangle
-skinparam roundcorner 10
-skinparam monochrome false
-skinparam shadowing true
+skinparam ArrowColor #475569
+skinparam usecaseBackgroundColor #F0FDFA
+skinparam usecaseBorderColor #0F766E
+skinparam actorBorderColor #334155
+title UC-03 - Đăng ký, Đăng nhập, Quản lý Hồ sơ cá nhân & Xác thực Phân quyền JWT
 
-actor "Khách hàng vãng lai\n(Guest Customer)" as Guest
+actor "Khách hàng vãng lai\n(Guest)" as Guest
 actor "Khách hàng thành viên\n(Authenticated Customer)" as Customer
 
-rectangle "Hệ thống BrewLite (Authentication Subsystem)" {
-    usecase "UC-03.1: Đăng ký tài khoản mới" as UC_Register
-    usecase "UC-03.2: Đăng nhập hệ thống & Nhận JWT" as UC_Login
-    usecase "Xác thực mật khẩu Bcrypt" as UC_Bcrypt
-    usecase "Cấp phát AccessToken (JWT)" as UC_IssueJWT
-    usecase "UC-03.3: Xem hồ sơ cá nhân (/auth/me)" as UC_Profile
+rectangle "BrewLite - Chức năng 3 (FR-04): Quản lý Tài khoản, Xác thực JWT & Giám sát Health" {
+    usecase "UC-03.1\nĐăng ký tài khoản mới" as UC_Register
+    usecase "UC-03.2\nĐăng nhập hệ thống & Nhận JWT\n--\nĐiểm mở rộng: Chuyển hướng checkout" as UC_Login
+    usecase "UC-03.3\nXem hồ sơ cá nhân & Điểm thưởng\n(GET /api/v1/auth/me)" as UC_Profile
+    usecase "Xác thực mật khẩu\n(Bcrypt compare/hash)" as UC_Bcrypt
+    usecase "Cấp phát chuỗi ký số\nAccessToken (JWT payload)" as UC_IssueJWT
     usecase "Đăng nhập tiếp tục đơn hàng\n(?redirect=/checkout)" as UC_RedirectLogin
-    usecase "Kiểm tra sức khỏe hệ thống\n(GET /api/v1/health)" as UC_Health
+    usecase "Giám sát sức khỏe hệ thống\n(GET /api/v1/health)" as UC_Health
+
+    UC_Login ..> UC_Bcrypt : <<include>>
+    UC_Login ..> UC_IssueJWT : <<include>>
+    UC_Register ..> UC_Bcrypt : <<include>>
+    UC_Register ..> UC_IssueJWT : <<include>>
+    UC_RedirectLogin ..> UC_Login : <<extend>>\n[Chưa đăng nhập khi bấm đặt đơn]
 }
 
-Guest --> UC_Register
-Guest --> UC_Login
-Guest --> UC_RedirectLogin
+Guest -- UC_Register
+Guest -- UC_Login
+Guest -- UC_RedirectLogin
 
-Customer --> UC_Profile
-Customer --> UC_Login
+Customer -- UC_Profile
+Customer -- UC_Login
 
-UC_Login ..> UC_Bcrypt : <<include>>
-UC_Login ..> UC_IssueJWT : <<include>>
-UC_Register ..> UC_Bcrypt : <<include>>
-UC_Register ..> UC_IssueJWT : <<include>>
-UC_RedirectLogin .> UC_Login : <<extend>>
-
-note right of UC_Health
-  Hệ thống cung cấp endpoint
-  giám sát trạng thái Backend & DB
-end note
-
+legend bottom
+  - Quản lý tài khoản và phiên đăng nhập qua chuẩn RESTful API (/api/v1/auth/*).
+  - Mật khẩu người dùng bắt buộc băm 1 chiều bằng Bcrypt (saltRounds >= 10), tuyệt đối không lưu plain-text.
+  - Sau khi đăng nhập thành công, máy chủ cấp phát JWT Token (payload: sub, email, role), Client lưu và tự động đính kèm Authorization: Bearer <token>.
+  - Hỗ trợ chuyển hướng thông minh ?redirect=/checkout bảo toàn giỏ hàng khi khách vãng lai thanh toán.
+  - Cung cấp endpoint GET /api/v1/health phục vụ kiểm tra trạng thái hoạt động của Backend và kết nối PostgreSQL (SELECT 1).
+endlegend
 @enduml
