@@ -1,38 +1,45 @@
 @startuml uc-02-cart-promotion
-!pragma layout smetana
 left to right direction
 skinparam monochrome true
 skinparam shadowing false
 skinparam defaultFontName SansSerif
 skinparam backgroundColor white
+skinparam packageStyle rectangle
 
 title UC-02: Tùy biến đồ uống, Quản lý giỏ hàng và Áp mã khuyến mãi
 
 actor "Khách hàng\n(Customer / Guest)" as Customer
 
 rectangle "UC-02: Phân hệ Tùy biến đồ uống, Quản lý giỏ hàng và Khuyến mãi" {
-  usecase "UC-02.1: Tùy biến đồ uống\n(Size, Topping, Đường, Đá)" as UC_Customize
-  usecase "Tính giá tạm tính\ntheo tùy chọn" as UC_CalcPrice
-  usecase "Thêm món vào giỏ hàng" as UC_AddToCart
-  usecase "UC-02.2: Quản lý giỏ hàng\n(Xem giỏ, điều chỉnh số lượng, xóa món)" as UC_ManageCart
-  usecase "Kiểm tra tồn kho khả dụng" as UC_CheckStock
-  usecase "UC-02.3: Áp dụng mã khuyến mãi\n(Promotion)" as UC_ApplyPromo
-  usecase "Kiểm tra điều kiện\nkhuyến mãi" as UC_ValidatePromo
-  usecase "UC-02.4: Hủy áp dụng\nmã khuyến mãi" as UC_RemovePromo
+  together {
+    usecase "UC-02.1: Tùy biến đồ uống\n(Size, Topping, Đường, Đá)" as UC_Customize
+    usecase "Tính giá tạm tính\ntheo tùy chọn" as UC_CalcPrice
+    usecase "Thêm món vào giỏ hàng" as UC_AddToCart
+  }
+  
+  together {
+    usecase "UC-02.2: Quản lý giỏ hàng\n(Xem giỏ, điều chỉnh số lượng, xóa món)" as UC_ManageCart
+    usecase "UC-02.4: Hủy áp dụng\nmã khuyến mãi" as UC_RemovePromo
+    usecase "UC-02.3: Áp dụng mã khuyến mãi\n(Promotion)" as UC_ApplyPromo
+  }
+  
+  together {
+    usecase "Kiểm tra tồn kho khả dụng" as UC_CheckStock
+    usecase "Kiểm tra điều kiện\nkhuyến mãi" as UC_ValidatePromo
+  }
 
   Customer -- UC_Customize
   Customer -- UC_ManageCart
 
   UC_Customize ..> UC_CalcPrice : <<include>>
-  UC_AddToCart ..> UC_Customize : <<extend>>\n[Khách hàng xác nhận thêm vào giỏ]
+  UC_Customize <.. UC_AddToCart : <<extend>>\n[Khách hàng xác nhận thêm vào giỏ]
   UC_AddToCart ..> UC_CheckStock : <<include>>
 
   UC_ManageCart ..> UC_CheckStock : <<include>>
-
-  UC_ApplyPromo ..> UC_ManageCart : <<extend>>\n[Khách hàng nhập mã khuyến mãi]
+  UC_ManageCart <.. UC_RemovePromo : <<extend>>\n[Khách hàng yêu cầu hủy mã khuyến mãi]
+  UC_ManageCart <.. UC_ApplyPromo : <<extend>>\n[Khách hàng nhập mã khuyến mãi]
+  
   UC_ApplyPromo ..> UC_ValidatePromo : <<include>>
-
-  UC_RemovePromo ..> UC_ManageCart : <<extend>>\n[Khách hàng yêu cầu hủy mã khuyến mãi]
 }
 
 legend bottom
