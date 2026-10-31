@@ -1,0 +1,50 @@
+@startuml uc-02-cart-promotion
+!pragma layout smetana
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam packageStyle rectangle
+skinparam ArrowColor #475569
+skinparam usecaseBackgroundColor #F0FDFA
+skinparam usecaseBorderColor #0F766E
+skinparam actorBorderColor #334155
+
+title UC-02 - Tùy biến đồ uống, Quản lý giỏ hàng và Áp mã khuyến mãi (Promotion)
+
+actor "Khách hàng\n(Customer / Guest)" as Customer
+
+rectangle "BrewLite - Chức năng 2 (FR-03, FR-09): Tùy biến món, Giỏ hàng & Khuyến mãi" {
+  usecase "UC-02\nTùy biến đồ uống, Quản lý giỏ hàng\n& Áp dụng khuyến mãi\n--\nĐiểm mở rộng: Áp mã Voucher, Hủy mã" as UC_CartBase
+  usecase "UC-02.1\nTùy biến đồ uống\n(Size, Topping, Đường, Đá)" as UC_Customize
+  usecase "Tính giá tạm tính theo tùy chọn\n(Recalculate Preview Price)" as UC_CalcPreview
+  usecase "UC-02.2\nQuản lý giỏ hàng\n(Thêm món, sửa số lượng, gộp dòng, xóa)" as UC_ManageCart
+  usecase "Kiểm tra tồn kho khả dụng\n(Validate Stock Limit)" as UC_CheckStock
+  usecase "Đồng bộ lưu trữ trình duyệt\n(Zustand persist / localStorage)" as UC_Persist
+  usecase "UC-02.3\nÁp dụng mã khuyến mãi\n(Apply Promotion Voucher)" as UC_ApplyPromo
+  usecase "Kiểm tra điều kiện khuyến mãi\n(API POST /api/v1/promotions/validate)" as UC_ValidatePromo
+  usecase "UC-02.4\nHủy áp dụng mã khuyến mãi\n(Remove Voucher)" as UC_RemovePromo
+
+  Customer -- UC_Customize
+  Customer -- UC_ManageCart
+
+  UC_Customize ..> UC_CalcPreview : <<include>>
+  UC_Customize ..> UC_ManageCart : <<include>>\n[Thêm vào giỏ hàng]
+
+  UC_ManageCart ..> UC_CheckStock : <<include>>
+  UC_ManageCart ..> UC_Persist : <<include>>
+
+  UC_ApplyPromo ..> UC_ManageCart : <<extend>>\n[Giỏ hàng không rỗng & Nhập mã]
+  UC_ApplyPromo ..> UC_ValidatePromo : <<include>>
+
+  UC_RemovePromo ..> UC_ManageCart : <<extend>>\n[Đang áp mã & Khách yêu cầu hủy]
+}
+
+legend bottom
+  - Tùy biến món: Chọn Size S (+0đ), M (+6.000đ), L (+10.000đ), Topping, mức đường/đá.
+  - Quản lý giỏ hàng: Lưu trữ bằng Zustand persist (localStorage), tự động gộp dòng trùng cấu hình.
+  - Tồn kho: Kiểm tra số ly không vượt quá tồn kho khả dụng (stockQuantity / Recipe).
+  - Khuyến mãi: Xác thực qua API POST /api/v1/promotions/validate (1 voucher/lần, kiểm tra ngày, minOrderValue, usedCount).
+  - Phân định kiến trúc: Giá tại Client chỉ là TẠM TÍNH (Preview). Backend tính lại 100% tại Business Layer khi tạo đơn (UC-04 / FR-05).
+endlegend
+@enduml
