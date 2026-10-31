@@ -1,0 +1,43 @@
+@startuml uc-05-payment
+title UC-05 - Sơ đồ Use Case: Thanh toán Mô phỏng & Chống Trừ tiền Trùng lặp (Idempotency)
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+skinparam roundcorner 10
+skinparam actorStyle stickman
+skinparam packageStyle rectangle
+
+skinparam usecase {
+    BorderColor black
+    BackgroundColor white
+    ArrowColor black
+}
+
+skinparam actor {
+    BorderColor black
+    BackgroundColor white
+}
+
+left to right direction
+
+actor "Khách hàng đã đăng nhập\n(Authenticated Customer)" as Customer
+actor "Cổng thanh toán Mô phỏng\n(Mock Payment Gateway)" as MockGateway
+
+rectangle "BrewLite - Phân hệ Thanh toán & Chống Trừ tiền Trùng lặp (FR-06)" as System {
+    usecase "UC-05.1: Thanh toán đơn hàng qua Ví / Thẻ\n(Ví MoMo, VNPay, Thẻ ATM)" as UC_Pay
+    usecase "UC-05.2: Kiểm tra chống trừ tiền trùng lặp\n(Idempotency-Key Check)" as UC_Idempotency
+    usecase "Xác thực giao dịch qua Cổng thanh toán\n(Mô phỏng Sandbox Gateway)" as UC_GatewayAuth
+    usecase "UC-05.3: Hủy đơn & Hoàn trả tồn kho\n(Restock Rollback khi giao dịch lỗi)" as UC_Rollback
+}
+
+Customer --> UC_Pay
+Customer --> UC_Rollback
+
+UC_Pay ..> UC_Idempotency : <<include>>
+UC_Pay ..> UC_GatewayAuth : <<include>>
+UC_Rollback ..> UC_Pay : <<extend>>
+
+MockGateway --> UC_GatewayAuth
+
+@enduml
