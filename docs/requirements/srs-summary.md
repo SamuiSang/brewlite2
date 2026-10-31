@@ -164,28 +164,28 @@ Tại trang giỏ hàng (`/cart`), khách hàng có thể nhập mã khuyến m�
 ## 4. Sơ đồ Use Case Phân hệ Chức năng 2 (UC-02 Diagram)
 
 ### 4.1 Bảng Phân tích Actor và Ranh giới Hệ thống
-- **Actor chính:** Khách hàng (`Customer / Guest`) – Người dùng cuối tương tác trực tiếp với giao diện đặt đồ uống trên trình duyệt web.
-- **Ranh giới Phân hệ (Subsystem Boundary):** `BrewLite - Chức năng 2 (FR-03, FR-09): Tùy biến món, Giỏ hàng & Khuyến mãi`. Toàn bộ dữ liệu giỏ hàng được quản lý an toàn tại Client qua Zustand, trong khi việc kiểm tra mã được ủy quyền cho API Backend NestJS.
+- **Actor chính:** Khách hàng (`Customer / Guest`) – Người dùng cuối tương tác trực tiếp với giao diện đặt đồ uống trên ứng dụng web (cả khách vãng lai và thành viên).
+- **Ranh giới Hệ thống (System Boundary):** `UC-02: Phân hệ Tùy biến đồ uống, Quản lý giỏ hàng và Khuyến mãi`. Đóng vai trò là phạm vi bao bọc toàn bộ các Use Case thành phần thuộc Chức năng 2.
 
 ### 4.2 Sơ đồ Use Case (PlantUML & SVG Rendering)
 - Tệp định nghĩa PlantUML: [`docs/diagrams/uc-02-cart-promotion.puml`](../diagrams/uc-02-cart-promotion.puml)
-- Tệp ảnh đồ họa Vector: [`docs/diagrams/uc-02-cart-promotion.svg`](../diagrams/uc-02-cart-promotion.svg)
+- Tệp ảnh đồ họa Vector (Chuẩn đơn sắc Monochrome): [`docs/diagrams/uc-02-cart-promotion.svg`](../diagrams/uc-02-cart-promotion.svg)
 
 ![Sơ đồ Use Case UC-02](../diagrams/uc-02-cart-promotion.svg)
 
-### 4.3 Bảng Thành phần Use Case và Quan hệ Kỹ thuật
+### 4.3 Bảng Thành phần Use Case và Quan hệ Nghiệp vụ
 
-| Mã Use Case | Tên Use Case / Thành phần | Kiểu Quan hệ | Ý nghĩa Nghiệp vụ & Ràng buộc Kỹ thuật |
+| Thành phần Use Case | Tên Use Case / Hành động | Kiểu Quan hệ | Ý nghĩa Nghiệp vụ & Điều kiện |
 | :--- | :--- | :--- | :--- |
-| **UC-02** | **Tùy biến đồ uống, Quản lý giỏ hàng & Áp dụng khuyến mãi** | Base Use Case | Điểm vào chính phục vụ việc chuẩn bị và cấu hình các món đồ uống trước khi tiến hành tạo đơn hàng (Checkout). |
-| **UC-02.1** | **Tùy biến đồ uống (Size, Topping, Đường, Đá)** | Sub Use Case | Cho phép tùy chọn kích cỡ, thành phần topping và khẩu vị cá nhân cho sản phẩm đồ uống còn hàng. |
-| -- | *Tính giá tạm tính theo tùy chọn (Recalculate Preview Price)* | `<<include>>` (thuộc UC-02.1) | Bắt buộc tính toán lại đơn giá tức thời ngay trên giao diện modal khi khách hàng thay đổi bất kỳ tùy chọn nào. |
-| **UC-02.2** | **Quản lý giỏ hàng (Thêm món, sửa số lượng, gộp dòng, xóa)** | Sub Use Case | Quản lý danh mục các món đã chọn trong bộ nhớ Client Zustand Store. |
-| -- | *Kiểm tra tồn kho khả dụng (Validate Stock Limit)* | `<<include>>` (thuộc UC-02.2) | Bắt buộc kiểm soát tổng số lượng đặt của từng món không vượt quá số lượng tồn kho hoặc định mức nguyên vật liệu phục vụ được. |
-| -- | *Đồng bộ lưu trữ trình duyệt (Zustand persist / localStorage)* | `<<include>>` (thuộc UC-02.2) | Bắt buộc ghi nhớ trạng thái giỏ hàng vào `localStorage` để dữ liệu không bị biến mất khi người dùng F5 hoặc tắt trình duyệt. |
-| **UC-02.3** | **Áp dụng mã khuyến mãi (`Promotion` Voucher)** | `<<extend>>` (vào UC-02.2) | Kích hoạt tại điểm mở rộng khi giỏ hàng có sản phẩm và khách hàng nhập mã Voucher hợp lệ để nhận chiết khấu. |
-| -- | *Kiểm tra điều kiện khuyến mãi (`POST /api/v1/promotions/validate`)* | `<<include>>` (thuộc UC-02.3) | Bắt buộc gọi API máy chủ để thẩm định điều kiện thời hạn, số lượt và giá trị đơn tối thiểu từ nguồn dữ liệu CSDL PostgreSQL. |
-| **UC-02.4** | **Hủy áp dụng mã khuyến mãi (Remove Voucher)** | `<<extend>>` (vào UC-02.2) | Kích hoạt khi khách hàng đang áp dụng một mã voucher nhưng chủ động muốn hủy bỏ hoặc đổi sang mã khác. |
+| **System Boundary** | **UC-02: Phân hệ Tùy biến đồ uống, Quản lý giỏ hàng và Khuyến mãi** | Boundary Box | Ranh giới phân hệ bao gồm toàn bộ các chức năng cấu hình món, giỏ hàng và mã ưu đãi. |
+| **UC-02.1** | **Tùy biến đồ uống (Size, Topping, Đường, Đá)** | Primary Use Case | Khách hàng tương tác trực tiếp: chọn kích cỡ, thành phần topping và khẩu vị cho đồ uống. |
+| -- | *Tính giá tạm tính theo tùy chọn* | `<<include>>` (thuộc UC-02.1) | Bắt buộc tính toán lại đơn giá tức thời trên modal khi khách hàng thay đổi tùy chọn. |
+| **Thêm món** | **Thêm món vào giỏ hàng** | `<<extend>>` (vào UC-02.1) | Mở rộng sau khi tùy biến món khi [Khách hàng xác nhận thêm vào giỏ]. Tách riêng để phân biệt rõ hành động tùy biến và hành động bỏ vào giỏ. |
+| -- | *Kiểm tra tồn kho khả dụng* | `<<include>>` (thuộc Thêm món & UC-02.2) | Bắt buộc kiểm tra số lượng đặt không vượt quá lượng tồn kho khả dụng. |
+| **UC-02.2** | **Quản lý giỏ hàng (Xem giỏ, điều chỉnh số lượng, xóa món)** | Primary Use Case | Khách hàng tương tác trực tiếp: duyệt danh sách món trong giỏ, tăng/giảm số lượng hoặc xóa dòng món. |
+| **UC-02.3** | **Áp dụng mã khuyến mãi (`Promotion`)** | `<<extend>>` (vào UC-02.2) | Điểm mở rộng từ giỏ hàng khi [Khách hàng nhập mã khuyến mãi]. |
+| -- | *Kiểm tra điều kiện khuyến mãi* | `<<include>>` (thuộc UC-02.3) | Bắt buộc đối soát điều kiện thời hạn, lượt dùng và giá trị đơn tối thiểu. |
+| **UC-02.4** | **Hủy áp dụng mã khuyến mãi** | `<<extend>>` (vào UC-02.2) | Điểm mở rộng từ giỏ hàng khi [Khách hàng yêu cầu hủy mã khuyến mãi]. |
 
 ---
 
