@@ -9,7 +9,6 @@
 - **Tạo phẩm Sơ đồ đi kèm:**
   - [Sơ đồ Use Case Thanh toán UC-05 (.puml)](file:///c:/Users/shuut/Downloads/brewlit2/brewlite2/docs/diagrams/uc-05-payment.puml)
   - [Sơ đồ Use Case Thanh toán UC-05 (.svg)](file:///c:/Users/shuut/Downloads/brewlit2/brewlite2/docs/diagrams/uc-05-payment.svg)
-  - [Sơ đồ Use Case Thanh toán UC-05 (.png)](file:///c:/Users/shuut/Downloads/brewlit2/brewlite2/docs/diagrams/uc-05-payment.png)
 
 ---
 
@@ -286,5 +285,4 @@ Toàn bộ luồng tương tác và quan hệ nghiệp vụ giữa Khách hàng,
 
 > - **Mã nguồn PlantUML:** [`docs/diagrams/uc-05-payment.puml`](file:///c:/Users/shuut/Downloads/brewlit2/brewlite2/docs/diagrams/uc-05-payment.puml)
 > - **Ảnh Vector SVG:** [`docs/diagrams/uc-05-payment.svg`](file:///c:/Users/shuut/Downloads/brewlit2/brewlite2/docs/diagrams/uc-05-payment.svg)
-> - **Ảnh Raster PNG:** [`docs/diagrams/uc-05-payment.png`](file:///c:/Users/shuut/Downloads/brewlit2/brewlite2/docs/diagrams/uc-05-payment.png)
 

@@ -7,7 +7,7 @@
   - **Quang (Dev Team):**
     1. Đặc tả chi tiết Yêu cầu Chức năng **`FR-06: Thanh toán mô phỏng (Mock Payment) & Chống trừ tiền trùng lặp (Idempotency-Key)`** kèm Tiêu chí chấp nhận (`AC-06.1` đến `AC-06.4`).
     2. Tổng hợp toàn diện Danh mục Yêu cầu Phi Chức năng **`NFR-01` đến `NFR-05`** cho toàn bộ hệ thống BrewLite theo đúng phân công Assignment 2.
-    3. Thiết kế Sơ đồ Use Case phân hệ: `docs/diagrams/uc-05-payment.puml` (kèm kết xuất vector chuẩn `.svg` và `.png`).
+    3. Thiết kế Sơ đồ Use Case phân hệ: `docs/diagrams/uc-05-payment.puml` (kèm kết xuất vector chuẩn `.svg`).
 - **Liên kết tài liệu liên quan:**
   - [Bối cảnh và Phạm vi Hệ thống (Task 1.1)](file:///c:/Users/shuut/Downloads/brewlit2/brewlite2/docs/requirements/context-and-scope.md)
   - [Đặc tả Use Case Trọng tâm Đặt hàng & Thanh toán (Task 1.3)](file:///c:/Users/shuut/Downloads/brewlit2/brewlite2/docs/requirements/usecase-checkout-spec.md)
@@ -237,8 +237,7 @@ Dưới đây là sơ đồ Use Case chi tiết của **Phân hệ Thanh toán &
 ![UC-05 Diagram](file:///c:/Users/shuut/Downloads/brewlit2/brewlite2/docs/diagrams/uc-05-payment.svg)
 
 > *Tệp mã nguồn PlantUML:* [`docs/diagrams/uc-05-payment.puml`](file:///c:/Users/shuut/Downloads/brewlit2/brewlite2/docs/diagrams/uc-05-payment.puml)  
-> *Ảnh kết xuất Vector SVG:* [`docs/diagrams/uc-05-payment.svg`](file:///c:/Users/shuut/Downloads/brewlit2/brewlite2/docs/diagrams/uc-05-payment.svg)  
-> *Ảnh kết xuất PNG:* [`docs/diagrams/uc-05-payment.png`](file:///c:/Users/shuut/Downloads/brewlit2/brewlite2/docs/diagrams/uc-05-payment.png)
+> *Ảnh kết xuất Vector SVG:* [`docs/diagrams/uc-05-payment.svg`](file:///c:/Users/shuut/Downloads/brewlit2/brewlite2/docs/diagrams/uc-05-payment.svg)
 
 ### 4.1 Giải thích Các Thành phần trong Sơ đồ
 1. **Ranh giới Phân hệ (System Boundary):** Khung chữ nhật bao quanh mang tên `BrewLite - Phân hệ Thanh toán & Chống Trừ tiền Trùng lặp (FR-06)`, bao bọc các tính năng nghiệp vụ của phân hệ.
