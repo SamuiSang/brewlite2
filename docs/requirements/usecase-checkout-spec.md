@@ -37,12 +37,12 @@ Quy trình Checkout trong hệ thống BrewLite là luồng giao dịch có rủ
 
 ---
 
-## Mục 4: Chức năng 4 – UC-04: Đặt đơn hàng & Khóa tồn kho nguyên vật liệu theo công thức pha chế (Chiến)
+## Mục 4: Chức năng 4 – UC-04: Khởi tạo đơn hàng & Khóa tồn kho an toàn (Chiến)
 
 ### 4.1 Sơ đồ Use Case (Use Case Diagram)
 
-- **Actor chính:** Khách hàng (`Customer / Guest`) – Người dùng ứng dụng web BrewLite (bao gồm cả khách vãng lai và thành viên đã đăng nhập).
-- **Ranh giới hệ thống:** `BrewLite - Chức năng 4 (FR-05): Đặt đơn hàng & Khóa tồn kho nguyên vật liệu`. Toàn bộ quá trình tính giá, đối soát công thức pha chế, khóa kho nguyên vật liệu và lưu trữ được thực hiện nội bộ trong API Server và Cơ sở dữ liệu PostgreSQL.
+- **Actor chính:** Khách hàng đã đăng nhập (`Authenticated Customer`).
+- **Ranh giới hệ thống:** `BrewLite - Chức năng 4 (FR-05): Khởi tạo đơn hàng & Khóa tồn kho an toàn`.
 - **Tệp nguồn PlantUML:** [`docs/diagrams/uc-04-create-order.puml`](../diagrams/uc-04-create-order.puml)
 - **Tệp ảnh kết xuất SVG:** [`docs/diagrams/uc-04-create-order.svg`](../diagrams/uc-04-create-order.svg)
 
@@ -50,95 +50,81 @@ Quy trình Checkout trong hệ thống BrewLite là luồng giao dịch có rủ
 
 | Mã Use Case | Tên Use Case / Thành phần | Kiểu quan hệ | Ý nghĩa nghiệp vụ |
 | :--- | :--- | :--- | :--- |
-| **UC-04** | **Đặt đơn hàng & Khóa kho nguyên liệu** | Base Use Case | Điểm vào chính khi khách hàng bấm xác nhận đặt đơn từ màn hình Giỏ hàng / Checkout. |
-| **UC-04.1** | **Xác thực dữ liệu đầu vào (DTO Validation)** | `<<include>>` | Bắt buộc kiểm tra tính hợp lệ của danh sách món, số lượng nguyên dương, thông tin giao nhận theo chuẩn `CreateOrderDto`. |
-| **UC-04.2** | **Tính toán lại 100% tổng tiền tại Business Layer** | `<<include>>` | Bắt buộc tính lại toàn bộ đơn giá, phụ thu size/topping và voucher discount tại tầng Business Logic Layer (NestJS Service) dựa vào DB gốc, tuyệt đối không dùng giá Client gửi lên. |
-| **UC-04.3** | **Đối soát công thức & Khóa kho nguyên liệu (RecipeItem & Ingredient Optimistic Lock)** | `<<include>>` | Bắt buộc đối soát công thức pha chế (`RecipeItem`), tính tổng định mức nguyên vật liệu thô và trừ tồn kho bảng `Ingredient` trong `prisma.$transaction` với cơ chế Optimistic Locking (cột `version` của bảng `Ingredient`). Không lưu tồn kho theo ly thành phẩm (`Product`) theo đúng nguyên lý vận hành F&B thực tế. |
-| **UC-04.4** | **Khởi tạo bản ghi đơn hàng (Trạng thái PENDING)** | `<<include>>` | Bắt buộc sinh mã đơn `#BL-YYYYMMDD-XXXX`, ghi nhận các dòng `OrderItem`, `OrderItemTopping` và chuyển đơn sang trạng thái `PENDING` sẵn sàng thanh toán. |
-| **UC-04.5** | **Áp dụng giảm giá từ Voucher hợp lệ** | `<<extend>>` | Điểm mở rộng: Chỉ kích hoạt khi giỏ hàng có đính kèm `voucherCode` hợp lệ, còn hạn, còn lượt và đạt giá trị đơn tối thiểu. |
-| **UC-04.6** | **Thêm ghi chú đơn hàng (Ghi chú pha chế / giao nhận)** | `<<extend>>` | Điểm mở rộng: Kích hoạt khi khách hàng nhập thêm ghi chú đặc biệt cho quán (tối đa 255 ký tự). |
+| **UC-04.1** | **Gửi yêu cầu khởi tạo đơn hàng (Place Order)** | Base Use Case | Use Case trọng tâm: Khách hàng đã đăng nhập bấm xác nhận đặt đơn từ màn hình Giỏ hàng. |
+| **UC-04.2** | **Tính toán lại tổng tiền đơn hàng tại Business Logic Layer** | `<<include>>` | Quan hệ bắt buộc: Tính lại toàn bộ đơn giá, phụ thu size/topping và khuyến mãi tại Core Layer CSDL, tuyệt đối không dùng giá Client gửi lên (Tuân thủ kiến trúc phân tầng của Thầy Phiêu). |
+| **UC-04.3** | **Kiểm tra & Khóa trừ tồn kho đồng thời (Optimistic Locking Transaction)** | `<<include>>` | Quan hệ bắt buộc: Kiểm tra định lượng nguyên liệu thô theo `RecipeItem` (ví dụ: 1 ly = 10g cà phê + 1 ly nhựa) và trừ tồn kho `Ingredient` bằng Optimistic Locking trong `prisma.$transaction`. |
+| **Mở rộng** | **Áp dụng mã khuyến mãi (?promoCode)** | `<<extend>>` | Điểm mở rộng: Kích hoạt khi khách hàng có gửi kèm mã khuyến mãi hợp lệ. |
 
 #### Hiển thị Sơ đồ UC-04:
 
-![UC-04 – Đặt đơn hàng và Khóa tồn kho nguyên vật liệu theo công thức pha chế](../diagrams/uc-04-create-order.svg)
+![UC-04 – Khởi tạo đơn hàng và Khóa tồn kho an toàn](../diagrams/uc-04-create-order.svg)
 
 ---
 
-### 4.2 Đặc tả chi tiết Use Case UC-04
+### 4.2 Đặc tả chi tiết Use Case UC-04 (Use Case Trọng tâm Task 1.3 AS2)
 
 #### 4.2.1 Thông tin chung (General Information)
 
 | Thuộc tính | Nội dung quy định |
 | :--- | :--- |
-| **Mã Use Case** | **UC-04** |
-| **Tên Use Case** | **Đặt đơn hàng và Khóa tồn kho nguyên vật liệu theo công thức pha chế** |
+| **Mã & Tên Use Case** | **UC-04 – Khởi tạo đơn hàng và Khóa tồn kho an toàn (Database Transaction)** |
 | **Truy vết yêu cầu** | `FR-05.1` đến `FR-05.12`; `BR-05.1` đến `BR-05.8`; `AC-05.01` đến `AC-05.12`; Phạm vi `MVP-04`. |
-| **Actor chính** | Khách hàng (`Customer / Guest`). |
-| **Actor hỗ trợ / Hệ thống** | NestJS OrdersService (Business Layer), PostgreSQL Database Engine qua Prisma ORM. |
-| **Mục tiêu Use Case** | Chuyển đổi giỏ hàng thành một đơn hàng chính thức với trạng thái `PENDING`, tổng tiền được tính toán chuẩn xác từ nguồn dữ liệu có thẩm quyền của CSDL và số lượng tồn kho nguyên vật liệu thô (`Ingredient`) được đối soát công thức (`RecipeItem`) và khóa/trừ an toàn ngay lập tức. |
-| **Trigger (Sự kiện kích hoạt)** | Khách hàng nhấn nút **"Đặt hàng" / "Xác nhận thanh toán"** tại giao diện Giỏ hàng / Màn hình Checkout (`/checkout`). |
-| **Tiền điều kiện (Pre-conditions)** | 1. Giỏ hàng phía Client có ít nhất một món hợp lệ (`items.length > 0`).<br>2. Khách hàng đã cung cấp đủ thông tin người nhận (`customerName`, `customerPhone`) và phương thức nhận hàng (`deliveryAddress` hoặc Nhận tại quầy).<br>3. Hệ thống Backend API hoạt động bình thường và kết nối được PostgreSQL Database. |
-| **Hậu điều kiện thành công (Post-conditions)** | 1. Đơn hàng mới được tạo trong bảng `Order` với mã đơn dạng `#BL-YYYYMMDD-XXXX`, trạng thái là `PENDING`.<br>2. Các dòng sản phẩm chi tiết được lưu vào bảng `OrderItem` (bao gồm `productId`, `size`, `unitPrice`, `quantity`, `subtotal`, ghi nhận danh sách `toppings`).<br>3. Số lượng tồn kho của các nguyên vật liệu thô cấu thành tương ứng trong bảng `Ingredient` bị giảm đi đúng bằng tổng lượng tiêu hao theo định mức công thức pha chế: `stockQuantity = stockQuantity - (quantityRequired * quantity)` và cột `version` của `Ingredient` tăng thêm 1 (`version = version + 1`) trong cùng một Transaction.<br>4. Nếu có Voucher: Số lượt dùng của voucher tăng thêm 1 (`usedCount = usedCount + 1`) và gắn vào đơn hàng.<br>5. Giỏ hàng Zustand ở Client được làm rỗng (`clearCart`).<br>6. Hệ thống trả về `orderId`, `orderCode`, `totalAmount`, `paymentDeadline` để chuyển tiếp sang màn hình thanh toán (UC-05). |
-| **Bảo đảm khi thất bại (Failure Guarantees)** | 1. **Rollback toàn diện:** Toàn bộ thao tác kiểm tra giá, đối soát công thức, trừ kho nguyên vật liệu và tạo đơn được bọc trong một Database Transaction duy nhất (`prisma.$transaction`). Nếu có bất kỳ lỗi nào (thiếu nguyên liệu pha chế, xung đột version trên Ingredient, voucher lỗi, đứt mạng CSDL), giao dịch tự động Rollback 100%.<br>2. **Bảo toàn dữ liệu người dùng:** Không tạo đơn hàng rác, tồn kho nguyên vật liệu không bị trừ sai, giỏ hàng phía Client được giữ nguyên trạng thái kèm thông báo lỗi rõ ràng để khách hàng kịp thời điều chỉnh. |
+| **Actor chính** | **Khách hàng đã đăng nhập (`Authenticated Customer`).** *(Hệ thống chỉ hỗ trợ đặt hàng cho thành viên đã đăng nhập có token JWT hợp lệ, không hỗ trợ khách vãng lai).* |
+| **Actor hỗ trợ / Hệ thống** | NestJS `OrdersService` (Business Layer), PostgreSQL Database qua Prisma ORM. |
+| **Trigger (Sự kiện kích hoạt)** | Khách hàng nhấn nút **"Đặt hàng / Tiến hành thanh toán"** từ màn hình Giỏ hàng / Checkout. |
+| **Tiền điều kiện (Pre-conditions)** | 1. Khách hàng đã đăng nhập và sở hữu **JWT Token hợp lệ** (được kiểm tra qua `JwtAuthGuard`).<br>2. Giỏ hàng có ít nhất 1 sản phẩm hợp lệ (`items.length >= 1`).<br>3. Hệ thống Backend API và Database PostgreSQL hoạt động bình thường. |
+| **Hậu điều kiện thành công (Post-conditions)** | 1. Bản ghi `Order` với trạng thái `PENDING` và mã `#ID` cùng các bản ghi `OrderItem` được lưu vào CSDL.<br>2. Số lượng tồn kho nguyên liệu thô (`Ingredient.stockQuantity` theo định mức `RecipeItem`: ví dụ 1 ly = 10g cà phê + 1 cái ly) được trừ tương ứng và cột `version` tăng thêm 1 trong cùng một Database Transaction.<br>3. Nếu có mã khuyến mãi: `usedCount` tăng 1 và số tiền giảm giá được lưu trong đơn.<br>4. Giỏ hàng Zustand phía Client được làm rỗng (`clearCart`).<br>5. Hệ thống trả về thông tin đơn hàng trạng thái `PENDING` để chuyển sang bước Thanh toán (UC-05). |
+| **Bảo đảm khi thất bại (Failure Guarantees)** | **Rollback 100% Transaction:** Toàn bộ quá trình tính giá, đối soát công thức, trừ kho nguyên vật liệu và tạo đơn được bọc trong một Database Transaction duy nhất (`prisma.$transaction`). Nếu xảy ra bất kỳ lỗi nào (hết nguyên liệu, xung đột version, lỗi hệ thống), giao dịch tự động Rollback triệt để, không tạo đơn rác và không làm suy giảm tồn kho. |
 
 ---
 
-#### 4.2.2 Luồng sự kiện chính (Main Success Scenario)
+#### 4.2.2 Luồng sự kiện chính (Main Flow)
 
-1. **Khách hàng** kiểm tra giỏ hàng trên màn hình Checkout, điền đầy đủ họ tên, số điện thoại, địa chỉ nhận hàng (hoặc chọn nhận tại quầy) và bấm nút **"Đặt hàng"**.
-2. **Giao diện Client (Next.js)** thực hiện tiền kiểm tra dữ liệu form, vô hiệu hóa nút bấm đặt đơn để chống gửi kép (Double Submit) và gửi yêu cầu `POST /api/v1/orders` kèm payload `CreateOrderDto` chứa danh sách món (`items`), thông tin người nhận và mã `voucherCode` (nếu có).
-3. **Presentation Layer (NestJS OrdersController)** tiếp nhận yêu cầu, kích hoạt `ValidationPipe` để xác thực kiểu dữ liệu đầu vào.
-4. **OrdersController** gọi sang tầng nghiệp vụ `OrdersService.createOrder(dto, userId?)`.
-5. **Business Logic Layer (OrdersService)** khởi tạo một giao dịch CSDL độc lập: `prisma.$transaction(async (tx) => { ... })`.
-6. **Bên trong Transaction – Bước tính giá Server-Authoritative & Truy vấn công thức:**
-   - Hệ thống truy vấn thông tin mới nhất từ CSDL cho tất cả `productId` trong đơn hàng, bao gồm `basePrice`, `isAvailable`, bảng giá Topping, và bảng định mức công thức pha chế `RecipeItem` (kèm thông tin nguyên vật liệu `Ingredient`).
-   - Kiểm tra trạng thái món: Nếu món đang ngừng bán (`isAvailable == false`), ngắt giao dịch.
-   - Tính toán lại đơn giá từng dòng:
-     $$\text{itemPrice} = \text{basePrice} + \text{sizePrice} + \sum \text{toppingPrices}$$
-     $$\text{itemSubtotal} = \text{itemPrice} \times \text{quantity}$$
-     $$\text{rawTotal} = \sum \text{itemSubtotal}$$
-   - *Tuyệt đối bỏ qua và không sử dụng các trường giá tiền do Client gửi lên.*
-7. **Bên trong Transaction – Bước áp dụng Voucher (nếu có):**
-   - Truy vấn thông tin Voucher từ CSDL theo `voucherCode`.
-   - Xác thực: Voucher tồn tại, `isActive == true`, thời gian hiện tại nằm trong khoảng `[startDate, endDate]`, `usedCount < maxUsage`, và `rawTotal >= minOrderValue`.
-   - Tính toán số tiền giảm giá `discountAmount` (theo tỷ lệ phần trăm kèm chặn trần tối đa `maxDiscount`, hoặc theo số tiền cố định).
-   - Xác định tổng tiền thanh toán cuối cùng:
-     $$\text{finalTotal} = \max(0, \text{rawTotal} - \text{discountAmount})$$
-8. **Bên trong Transaction – Bước khóa tồn kho nguyên vật liệu bằng Optimistic Locking:**
-   - Quán F&B không lưu tồn kho theo ly cà phê pha sẵn (`Product`). Tồn kho thực tế được lưu tại bảng `Ingredient` (hạt cà phê, sữa đặc, đường, ly nhựa,...).
-   - Hệ thống duyệt qua từng món trong đơn, tra cứu bảng `RecipeItem` để nhân số lượng ly đặt với lượng nguyên liệu định mức:
-     $$\text{totalRequired}(\text{ingredientId}) = \sum_{\text{items}} (\text{item.quantity} \times \text{RecipeItem.quantityRequired})$$
-   - Đọc số lượng tồn kho `stockQuantity` và `currentVersion` từ bảng `Ingredient`.
-   - Kiểm tra điều kiện đủ nguyên liệu: $\text{stockQuantity} \ge \text{totalRequired}$.
-   - Thực thi câu lệnh cập nhật nguyên tử có kiểm tra phiên bản trên bảng `Ingredient` (Optimistic Concurrency Control):
-     ```sql
-     UPDATE "Ingredient"
-     SET "stockQuantity" = "stockQuantity" - :totalRequired,
-         "version" = "version" + 1
-     WHERE "id" = :ingredientId
-       AND "version" = :currentVersion
-       AND "stockQuantity" >= :totalRequired;
-     ```
-   - Nếu số bản ghi bị ảnh hưởng bằng 0 (`affectedRows === 0`), hệ thống ném ngoại lệ `InsufficientIngredientException` hoặc `OptimisticLockException` khiến Transaction lập tức `ROLLBACK`.
-9. **Bên trong Transaction – Bước tạo đơn hàng và chi tiết:**
-   - Sinh mã đơn hàng theo quy tắc chuẩn: `#BL-YYYYMMDD-XXXX` (trong đó `XXXX` là số ngẫu nhiên hoặc sequence tăng dần).
-   - Tạo bản ghi mới trong bảng `Order` với `totalAmount = finalTotal`, `status = PENDING`, `paymentDeadline = now() + 15 phút`.
-   - Tạo các bản ghi chi tiết trong bảng `OrderItem` và lưu danh sách topping đã chọn vào `OrderItemTopping`.
-   - Cập nhật số lượt sử dụng voucher: `usedCount = usedCount + 1`.
-10. **Transaction `COMMIT` thành công:**
-    - OrdersService trả về thông tin đơn hàng vừa tạo (`orderId`, `orderCode`, `totalAmount`, `status: 'PENDING'`).
-    - Client nhận mã phản hồi `201 Created`, xóa sạch giỏ hàng trong Zustand (`clearCart()`) và tự động điều hướng sang màn hình Thanh toán (UC-05).
+1. **Khách hàng** bấm nút "Đặt hàng", Client gửi request `POST /api/v1/orders` kèm JWT Token trong Header `Authorization` và danh sách payload `{ productId, size, toppings, quantity, promoCode }` *(tuyệt đối không dùng giá tiền từ Client gửi lên)*.
+2. **`JwtAuthGuard`** xác thực token JWT và **`ValidationPipe`** kiểm tra cấu trúc dữ liệu `CreateOrderDto`.
+3. Tại **`OrdersService`** (Business Logic Layer), hệ thống mở một giao dịch cơ sở dữ liệu `prisma.$transaction()`:
+   - **3.1. Truy vấn thông tin sản phẩm:** Truy vấn thông tin và đơn giá gốc (`basePrice`), trạng thái bán (`isAvailable`) của từng món từ bảng `Product`.
+   - **3.2. Tính toán tiền tại Core Layer:** Thực hiện công thức tính tiền chuẩn kiến trúc phân tầng:
+     $$\text{itemTotal} = (\text{basePrice} + \text{sizePrice} + \text{toppingsPrice}) \times \text{quantity}$$
+     $$\text{rawTotal} = \sum \text{itemTotal}$$
+     Trừ đi khuyến mãi hợp lệ để ra tổng thanh toán cuối cùng `finalAmount`. *(Tuân thủ tuyệt đối lời dặn của Thầy Phiêu về Kiến trúc phân tầng, không tin giá Client).*
+   - **3.3. Cập nhật trừ kho nguyên liệu thô bằng Optimistic Locking:**
+     - Đối soát định lượng nguyên liệu qua `RecipeItem` (ví dụ: 1 ly Cà phê đen = 10g hạt cà phê + 1 ly nhựa; kho còn 100g cà phê chỉ pha được tối đa 10 ly).
+     - Kiểm tra điều kiện đủ định lượng: $\text{stockQuantity} \ge \text{requiredQty}$.
+     - Thực thi câu lệnh cập nhật nguyên tử có kiểm tra phiên bản trên bảng `Ingredient`:
+       ```sql
+       UPDATE "Ingredient"
+       SET "stockQuantity" = "stockQuantity" - :requiredQty,
+           "version" = "version" + 1
+       WHERE "id" = :ingredientId
+         AND "version" = :currentVersion
+         AND "stockQuantity" >= :requiredQty;
+       ```
+   - **3.4. Tạo bản ghi đơn hàng:** Tạo bản ghi `Order` với trạng thái `PENDING`, mã đơn `#BL-YYYYMMDD-XXXX` và lưu chi tiết các dòng `OrderItem`, `OrderItemTopping`.
+4. **Transaction commit thành công:** Hệ thống trả về mã `201 Created` kèm thông tin đơn hàng mã `#ID` trạng thái `PENDING` để Client chuyển tiếp sang màn hình Thanh toán (UC-05).
 
 ---
 
-#### 4.2.3 Các luồng thay thế (Alternative Flows)
+#### 4.2.3 Luồng thay thế (Alternative Flow)
 
-| Mã luồng | Tình huống kích hoạt | Các bước xử lý của hệ thống | Điểm quay lại luồng chính |
-| :--- | :--- | :--- | :--- |
-| **A1** | **Khách hàng không dùng mã giảm giá** | Tại Bước 2, giỏ hàng không có `voucherCode`. Tại Bước 7, hệ thống bỏ qua bước tra cứu Voucher, gán `discountAmount = 0`, tổng tiền `finalTotal = rawTotal`. | Tiếp tục Bước 8 luồng chính. |
-| **A2** | **Khách hàng chọn Nhận tại quầy (Pick-up)** | Tại Bước 1, khách hàng tick chọn hình thức nhận tại quầy. Trường `deliveryAddress` được gán mặc định là `"Tại quầy cửa hàng BrewLite"`. Đơn hàng không yêu cầu điền địa chỉ nhà riêng. | Tiếp tục Bước 3 luồng chính. |
-| **A3** | **Đính kèm ghi chú đơn hàng** | Khách hàng điền thông tin vào ô "Ghi chú pha chế" (ví dụ: *"Giao trước 11h, nhiều đá riêng"*). Hệ thống lưu nội dung ghi chú vào trường `note` của bảng `Order` (cắt ngắn tối đa 255 ký tự). | Tiếp tục Bước 9 luồng chính. |
-| **A4** | **Khách hàng đã đăng nhập tài khoản (Authenticated)** | Request gửi lên kèm HTTP Header `Authorization: Bearer <JWT>`. OrdersService trích xuất `userId` từ token và gán trực tiếp vào trường `userId` của bảng `Order`. Đơn hàng được liên kết với lịch sử tài khoản của khách và sẵn sàng tích điểm Loyalty sau khi thanh toán. | Tiếp tục Bước 6 luồng chính. |
+- **3a. Khách hàng có áp dụng mã khuyến mãi hợp lệ:**
+  - Hệ thống kiểm tra điều kiện mã: còn hạn, còn lượt dùng và đạt giá trị đơn tối thiểu.
+  - Ghi nhận `promotionId`, trừ `discountAmount` vào `finalAmount` và tăng `usedCount` của mã khuyến mãi thêm 1 trong cùng Transaction.
+
+---
+
+#### 4.2.4 Luồng ngoại lệ (Exception Flow – Trọng tâm Thầy chấm điểm)
+
+- **3b. Hết hàng nguyên liệu hoặc Xung đột đặt hàng đồng thời (Concurrency):**
+  - **Tình huống:** Hai khách hàng cùng bấm mua ly cuối cùng trong 1 tích tắc, hoặc khách đặt 11 ly trong khi kho nguyên liệu chỉ còn 100g cà phê (tối đa pha 10 ly).
+  - **Cơ chế xử lý:** Câu lệnh cập nhật Optimistic Lock trả về `affectedRows === 0` (do `version` đã bị thay đổi bởi khách kia hoặc lượng nguyên liệu tồn kho $\text{stockQuantity} < \text{requiredQty}$).
+  - **Phản hồi hệ thống:** Hệ thống tự động `ROLLBACK 100%` Transaction, không tạo đơn rác và trả về HTTP `409 Conflict`:
+    > *"Sản phẩm/Nguyên liệu pha chế vừa hết hàng hoặc thay đổi tồn kho, vui lòng kiểm tra lại giỏ hàng."*
+- **3c. DTO Validation hoặc Token không hợp lệ:**
+  - `JwtAuthGuard` từ chối nếu không có token hoặc token hết hạn $\rightarrow$ trả về HTTP `401 Unauthorized`.
+  - `ValidationPipe` chặn nếu giỏ hàng rỗng hoặc số lượng âm $\rightarrow$ trả về HTTP `400 Bad Request`.
+- **3d. Sự cố kết nối cơ sở dữ liệu:**
+  - Transaction tự động Rollback, không lưu dữ liệu dở dang $\rightarrow$ trả về HTTP `500 Internal Server Error`.
 
 ---
 

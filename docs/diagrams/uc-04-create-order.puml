@@ -1,42 +1,34 @@
 @startuml uc-04-create-order
-!pragma layout smetana
-left to right direction
-skinparam backgroundColor white
-skinparam shadowing false
-skinparam defaultFontName SansSerif
+title Use Case Diagram - UC-04: Khởi tạo đơn hàng & Khóa tồn kho an toàn
+skinparam actorStyle awesome
 skinparam packageStyle rectangle
-skinparam ArrowColor #475569
-skinparam usecaseBackgroundColor #F0FDFA
-skinparam usecaseBorderColor #0F766E
-skinparam actorBorderColor #334155
-title UC-04 - Đặt đơn hàng và Khóa tồn kho nguyên vật liệu theo công thức pha chế
+skinparam roundcorner 10
+skinparam monochrome true
+skinparam shadowing false
+skinparam nodesep 70
+skinparam ranksep 60
 
-actor "Khách hàng\n(Customer / Guest)" as Customer
+skinparam ArrowColor black
+skinparam actorBorderColor black
+skinparam usecaseBackgroundColor white
+skinparam usecaseBorderColor black
+skinparam rectangleBorderColor black
+skinparam rectangleBackgroundColor white
 
-rectangle "BrewLite - Chức năng 4 (FR-05): Đặt đơn hàng & Khóa tồn kho nguyên vật liệu" {
-  usecase "UC-04\nĐặt đơn hàng & Khóa kho nguyên liệu\n--\nĐiểm mở rộng: Áp mã voucher, Ghi chú" as CreateOrder
-  usecase "Xác thực dữ liệu đầu vào\n(DTO Validation)" as ValidateDTO
-  usecase "Tính toán lại 100% tổng tiền\ntại Business Layer" as RecalculatePrice
-  usecase "Đối soát công thức & Khóa kho nguyên liệu\n(RecipeItem & Ingredient Optimistic Lock)" as LockInventory
-  usecase "Khởi tạo bản ghi đơn hàng\n(Trạng thái PENDING)" as InitOrder
-  usecase "Áp dụng giảm giá\ntừ Voucher hợp lệ" as ApplyVoucher
-  usecase "Thêm ghi chú đơn hàng\n(Ghi chú pha chế / giao nhận)" as AddNote
+actor "Khách hàng đã đăng nhập\n(Authenticated Customer)" as Customer
 
-  CreateOrder ..> ValidateDTO : <<include>>
-  CreateOrder ..> RecalculatePrice : <<include>>
-  CreateOrder ..> LockInventory : <<include>>
-  CreateOrder ..> InitOrder : <<include>>
-  ApplyVoucher ..> CreateOrder : <<extend>>\n[Giỏ hàng có mã voucher hợp lệ]
-  AddNote ..> CreateOrder : <<extend>>\n[Khách hàng nhập ghi chú]
+rectangle "Hệ thống BrewLite (Order Subsystem)" {
+    usecase "UC-04.1: Khởi tạo đơn hàng\n(Place Order)" as UC_PlaceOrder
+    usecase "UC-04.2: Tính toán lại tổng tiền đơn hàng\ntại Business Logic Layer" as UC_RecalculatePrice
+    usecase "UC-04.3: Kiểm tra & Khóa trừ tồn kho đồng thời\n(Optimistic Locking Transaction)" as UC_LockInventory
+    usecase "Áp dụng mã khuyến mãi\n(?promoCode)" as UC_Promotion
 }
 
-Customer -- CreateOrder
+Customer --> UC_PlaceOrder
 
-legend bottom
-  - Khởi tạo đơn qua endpoint POST /api/v1/orders.
-  - Tổng tiền đơn hàng bắt buộc tính lại 100% tại Business Logic Layer (NestJS Service).
-  - Không lưu tồn kho theo ly thành phẩm; tồn kho được quản lý theo Nguyên vật liệu (Ingredient).
-  - Khóa tồn kho đối soát qua RecipeItem, trừ Ingredient.stockQuantity trong prisma.$transaction kết hợp Optimistic Locking (Ingredient.version).
-  - Đơn hàng khởi tạo thành công ở trạng thái PENDING, chuyển tiếp sang UC-05 (Thanh toán).
-endlegend
+UC_PlaceOrder ..> UC_RecalculatePrice : <<include>>
+UC_PlaceOrder ..> UC_LockInventory : <<include>>
+
+UC_Promotion .> UC_PlaceOrder : <<extend>>
+
 @enduml
