@@ -556,16 +556,16 @@ Các tiêu chí nghiệm thu được chuẩn hóa theo định dạng **Given -
      - Cập nhật bản ghi `Order`: `status = PAID`.
   5. Trả về mã phản hồi `HTTP 200 OK` cho Webhook và điều hướng Client sang trang `/checkout/success`.
 
-#### Tiêu chí AC-06.3: Hoàn trả Tồn kho Tự động (Atomic Restock Rollback) khi Thanh toán Thất bại
-- **Given:** Đơn hàng `#ORD-2026-002` gồm 2 ly Cà phê sữa đá size M đã tạm khóa số lượng tồn kho (giảm 2 ly trong `Product.stock` và giảm 20g cà phê trong `Ingredient.stockQuantity`).
+#### Tiêu chí AC-06.3: Hoàn trả Tồn kho Nguyên liệu Tự động (Atomic Restock Rollback) khi Thanh toán Thất bại
+- **Given:** Đơn hàng `#ORD-2026-002` gồm 2 ly Cà phê sữa đá size M đã tạm khóa số lượng tồn kho nguyên liệu pha chế (giảm 20g hạt cà phê, 40ml sữa đặc và 2 ly nhựa trong `Ingredient.stockQuantity` theo định mức `RecipeItem`).
 - **When:** Khách hàng mô phỏng kịch bản thanh toán thất bại (thẻ không đủ số dư, nhập sai mã OTP, thẻ hết hạn) hoặc Cổng thanh toán trả về mã lỗi `{ success: false, errorCode: "PAYMENT_FAILED" }`.
 - **Then:**
   1. Trong cùng một Database Transaction duy nhất, hệ thống thực thi:
      - Cập nhật bản ghi `Payment`: `status = FAILED`, ghi nhận `failureReason`.
      - Chuyển trạng thái đơn hàng: `Order.status = CANCELLED`.
-     - Thực hiện hoàn kho (`Restock Rollback`): Tăng lại tồn kho sản phẩm `Product.stock = Product.stock + 2` và tăng lại tồn kho nguyên liệu `Ingredient.stockQuantity = Ingredient.stockQuantity + 20`.
+     - Thực hiện hoàn kho nguyên liệu (`Restock Rollback`): Cộng trả lại 100% số lượng nguyên liệu thô vào bảng `Ingredient` (`Ingredient.stockQuantity = Ingredient.stockQuantity + requiredQty` và tăng `version = version + 1` theo định mức `RecipeItem`).
   2. Backend trả về mã lỗi `HTTP 402 Payment Required` (hoặc `400 Bad Request`) kèm thông báo rõ ràng cho người dùng.
-  3. Kiểm tra CSDL xác nhận số lượng tồn kho của sản phẩm và nguyên liệu không bị thất thoát hoặc bị âm.
+  3. Kiểm tra CSDL xác nhận số lượng tồn kho của các nguyên vật liệu trong bảng `Ingredient` không bị thất thoát hoặc bị âm.
 
 #### Tiêu chí AC-06.4: Ràng buộc Toàn vẹn Header và An toàn Giao dịch
 - **Given:** Client gửi request gọi API `POST /api/v1/payments`.
@@ -712,13 +712,13 @@ Theo phân công của nhóm trong Đề bài Assignment 2 (Bảng I & Bảng II
      - Bảng `Payment` trong PostgreSQL bắt buộc đánh chỉ mục duy nhất (`UNIQUE INDEX`) trên cột `idempotencyKey`.
      - Cơ chế chốt chặn mức Database đảm bảo mọi nỗ lực ghi trùng lặp một mã `Idempotency-Key` đều bị chặn đứng, bảo vệ khách hàng không bao giờ bị trừ tiền 2 lần cho cùng một đơn hàng.
      - Thời gian duy trì hiệu lực của khóa (Idempotency Key Time-to-Live): Tối thiểu **24 giờ**.
-  3. **Chống bán âm kho tuyệt đối (`stock < 0`):** Áp dụng giải pháp Khóa lạc quan (**Optimistic Locking**) thông qua trường `version` trên bảng `Product` và `Ingredient`. Câu lệnh SQL cập nhật trừ kho bắt buộc có điều kiện ràng buộc:
+  3. **Chống bán âm kho nguyên liệu tuyệt đối (`stockQuantity < 0`):** Áp dụng giải pháp Khóa lạc quan (**Optimistic Locking**) thông qua trường `version` trên bảng nguyên vật liệu thô `Ingredient` (đối soát định mức qua bảng công thức `RecipeItem`). Câu lệnh SQL cập nhật trừ kho nguyên liệu bắt buộc có điều kiện ràng buộc:
      ```sql
-     UPDATE "Product"
-     SET "stock" = "stock" - $qty, "version" = "version" + 1
-     WHERE "id" = $productId AND "version" = $currentVersion AND "stock" >= $qty;
+     UPDATE "Ingredient"
+     SET "stockQuantity" = "stockQuantity" - $requiredQty, "version" = "version" + 1
+     WHERE "id" = $ingredientId AND "version" = $currentVersion AND "stockQuantity" >= $requiredQty;
      ```
-     Nếu 2 khách hàng cùng bấm mua ly cuối cùng tại cùng một tích tắc, câu lệnh của khách hàng thứ 2 trả về `affectedRows = 0`, hệ thống rollback ngay lập tức và báo hết hàng, triệt tiêu hoàn toàn rủi ro bán vượt kho.
+     Nếu 2 khách hàng cùng bấm mua ly cuối cùng tại cùng một tích tắc, câu lệnh của khách hàng thứ 2 trả về `affectedRows = 0`, hệ thống rollback ngay lập tức và báo hết nguyên liệu pha chế (`HTTP 409 Conflict`), triệt tiêu hoàn toàn rủi ro bán vượt kho.
   4. **Độ sẵn sàng hệ thống (System Availability):** Hệ thống đạt mức độ sẵn sàng tối thiểu **99.9% uptime** trong suốt thời gian hoạt động bán hàng của chuỗi.
 
 ---

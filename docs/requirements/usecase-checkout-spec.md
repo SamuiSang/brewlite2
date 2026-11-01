@@ -648,7 +648,7 @@ model Promotion {
 1. **Đầy đủ Cấu trúc Đặc tả Use Case chuẩn quốc tế:** Tài liệu bao gồm đầy đủ Metadata, Tiền điều kiện, Hậu điều kiện, Failure Guarantees, Sơ đồ Use Case, Luồng chính từng bước, Luồng thay thế (AF-01 đến AF-07), Luồng ngoại lệ (EF-01 đến EF-09), Hợp đồng Dữ liệu DTO và Ma trận truy vết.
 2. **Sơ đồ Use Case hợp chuẩn UML 2.5:** Sơ đồ được vẽ chi tiết bằng PlantUML (`.puml`), kết xuất file vector `.svg` chất lượng cao, thể hiện chính xác các mối quan hệ `<<include>>` và `<<extend>>`.
 3. **Phân định rõ ranh giới Kiến trúc:** Giải trình rõ ràng nguyên tắc Giá Client chỉ là tạm tính (Preview Non-Authoritative) và việc khóa tồn kho / trừ lượt dùng voucher chỉ được thực hiện ở Backend trong Database Transaction tại `UC-04`.
-4. **Tính tương thích và Không xung đột:** Tài liệu phân tách độc lập, sẵn sàng tích hợp với `usecase-checkout-spec.md` (Chiến – `UC-04`) và `usecase-auth-spec.md` (Hiếu – `UC-03`).
+4. **Tính tương thích và Không xung đột:** Tài liệu được hợp nhất xuyên suốt từ `UC-01` đến `UC-06` trong `docs/requirements/usecase-checkout-spec.md`, liên kết chặt chẽ giữa `UC-02` (Quỳnh), `UC-03` (Hiếu), `UC-04` (Chiến) và `UC-05` (Quang).
 
 ---
 
@@ -906,20 +906,20 @@ model Promotion {
 
 ---
 
-#### 4.2.4 Các luồng ngoại lệ (Exception Flows)
+#### 4.2.5 Bảng tổng hợp các mã lỗi ngoại lệ (Exception Matrix)
 
 | Mã lỗi | Điểm phát sinh | Nguyên nhân & Điều kiện | Xử lý của Hệ thống & Phản hồi | Hướng xử lý của Khách hàng |
 | :--- | :--- | :--- | :--- | :--- |
-| **E1** | Bước 3 | DTO Validation thất bại: Giỏ hàng rỗng (`items: []`), số lượng âm/bằng 0, số điện thoại không đúng định dạng. | Controller ngắt xử lý, không mở Transaction. Trả về HTTP `400 Bad Request` kèm thông báo lỗi chi tiết theo từng trường dữ liệu vi phạm. | Khách hàng kiểm tra lại thông tin trên form và giỏ hàng trước khi gửi lại. |
-| **E2** | Bước 6 | Món trong giỏ đã bị Quản lý tắt bán (`isAvailable == false`). | Transaction tự động ROLLBACK. Trả về HTTP `409 Conflict` với thông báo: *"Món [Tên sản phẩm] hiện đã ngừng kinh doanh. Vui lòng xóa món khỏi giỏ hàng."* | Giao diện đánh dấu món bị ngừng bán, khách hàng xóa món và đặt lại. |
-| **E3** | Bước 8 | Hết hoặc không đủ nguyên vật liệu để pha chế (`Ingredient.stockQuantity < totalRequired`). | Transaction tự động ROLLBACK. Trả về HTTP `409 Conflict` với mã lỗi `INSUFFICIENT_INGREDIENT`: *"Không đủ nguyên liệu [Tên nguyên vật liệu] để pha chế món [Tên sản phẩm] (thiếu X [đơn vị g/ml/cái]). Vui lòng chọn món khác hoặc giảm số lượng."* | Giỏ hàng được giữ nguyên; khách hàng giảm số lượng hoặc chọn món khác. |
-| **E4** | Bước 8 | Xung đột đồng thời Optimistic Locking trên bảng `Ingredient` (`version mismatch` do có đơn khác vừa chốt tiêu hao cùng nguyên liệu). | Transaction tự động ROLLBACK. Trả về HTTP `409 Conflict` với mã lỗi `CONCURRENCY_CONFLICT`: *"Hệ thống đang phục vụ nhiều đơn hàng cùng lúc. Vui lòng bấm đặt lại để cập nhật tồn kho mới nhất."* | Khách hàng bấm lại nút "Đặt hàng" để hệ thống kiểm tra tồn kho phiên bản mới. |
-| **E5** | Bước 7 | Mã giảm giá không còn hợp lệ (Hết hạn, hết lượt, hoặc giỏ hàng không đạt giá trị tối thiểu). | Transaction tự động ROLLBACK. Trả về HTTP `400 Bad Request` với mã `INVALID_VOUCHER`: *"Mã khuyến mãi không hợp lệ hoặc đã hết lượt sử dụng."* | Giao diện hủy áp dụng mã voucher lỗi và đề xuất khách đặt đơn không dùng mã hoặc nhập mã khác. |
+| **E1** | Bước 2 | DTO Validation thất bại: Giỏ hàng rỗng (`items: []`), số lượng âm/bằng 0, hoặc thiếu JWT Token hợp lệ. | Controller ngắt xử lý, không mở Transaction. Trả về HTTP `400 Bad Request` (hoặc `401 Unauthorized`) kèm thông báo lỗi chi tiết. | Khách hàng kiểm tra lại giỏ hàng hoặc đăng nhập lại trước khi gửi yêu cầu. |
+| **E2** | Bước 3.1 | Món trong giỏ đã bị Quản lý tắt bán (`isAvailable == false`). | Transaction tự động ROLLBACK. Trả về HTTP `409 Conflict` với thông báo: *"Món [Tên sản phẩm] hiện đã ngừng kinh doanh. Vui lòng xóa món khỏi giỏ hàng."* | Giao diện đánh dấu món bị ngừng bán, khách hàng xóa món và đặt lại. |
+| **E3** | Bước 3.3 | Hết hoặc không đủ nguyên vật liệu để pha chế (`Ingredient.stockQuantity < requiredQty`). | Transaction tự động ROLLBACK. Trả về HTTP `409 Conflict` với mã lỗi `INSUFFICIENT_INGREDIENT`: *"Không đủ nguyên liệu [Tên nguyên vật liệu] để pha chế món [Tên sản phẩm] (thiếu X [đơn vị g/ml/cái]). Vui lòng chọn món khác hoặc giảm số lượng."* | Giỏ hàng được giữ nguyên; khách hàng giảm số lượng hoặc chọn món khác. |
+| **E4** | Bước 3.3 | Xung đột đồng thời Optimistic Locking trên bảng `Ingredient` (`version mismatch` do có đơn khác vừa chốt tiêu hao cùng nguyên liệu). | Transaction tự động ROLLBACK. Trả về HTTP `409 Conflict` với mã lỗi `CONCURRENCY_CONFLICT`: *"Hệ thống đang phục vụ nhiều đơn hàng cùng lúc. Vui lòng bấm đặt lại để cập nhật tồn kho mới nhất."* | Khách hàng bấm lại nút "Đặt hàng" để hệ thống kiểm tra tồn kho phiên bản mới. |
+| **E5** | Bước 3.2 | Mã giảm giá không còn hợp lệ (Hết hạn, hết lượt, hoặc giỏ hàng không đạt giá trị tối thiểu). | Transaction tự động ROLLBACK. Trả về HTTP `400 Bad Request` với mã `INVALID_VOUCHER`: *"Mã khuyến mãi không hợp lệ hoặc đã hết lượt sử dụng."* | Giao diện hủy áp dụng mã voucher lỗi và đề xuất khách đặt đơn không dùng mã hoặc nhập mã khác. |
 | **E6** | Bất kỳ bước nào trong Transaction | Mất kết nối CSDL PostgreSQL hoặc lỗi hệ thống nội bộ. | Database Transaction tự động `ROLLBACK` triệt để. Hệ thống ghi log lỗi và trả về HTTP `500 Internal Server Error`: *"Hệ thống gián đoạn tạm thời. Đơn hàng của bạn chưa được tạo và chưa bị trừ tiền/tồn kho."* | Khách hàng thử lại sau vài giây; dữ liệu giỏ hàng phía Client được bảo toàn nguyên vẹn. |
 
 ---
 
-#### 4.2.5 Ranh giới kiến trúc, Thiết kế giao dịch và Ràng buộc phi chức năng
+#### 4.2.6 Ranh giới kiến trúc, Thiết kế giao dịch và Ràng buộc phi chức năng
 
 ##### 1. Phân định trách nhiệm kiến trúc phân tầng 3-Tier (Architectural Separation):
 
@@ -1080,7 +1080,7 @@ Hệ thống cam kết đạt được các trạng thái sau khi Use Case kết
 2. **Trường hợp Thanh toán Thất bại (Failure & Restock Rollback):**
    - Bản ghi `Payment` được đánh dấu `FAILED`, lưu vết lý do lỗi (`failureReason`).
    - Bản ghi `Order` được chuyển sang trạng thái `CANCELLED`.
-   - **Kích hoạt Cơ chế Hoàn trả Tồn kho Tức thì (Restock Rollback):** Toàn bộ số lượng tồn kho sản phẩm (`Product.stock`) và nguyên liệu thô pha chế (`Ingredient.stockQuantity` theo định mức `RecipeItem`) được cộng hoàn trả lại 100% nguyên vẹn trong cùng một Database Transaction.
+   - **Kích hoạt Cơ chế Hoàn trả Tồn kho Nguyên liệu Tức thì (Restock Rollback):** Toàn bộ số lượng nguyên vật liệu thô pha chế (`Ingredient.stockQuantity` theo định mức công thức `RecipeItem`) được cộng hoàn trả lại 100% nguyên vẹn trong cùng một Database Transaction.
    - Giao diện hiển thị thông báo lỗi chi tiết và hướng dẫn khách hàng chọn phương thức thanh toán khác hoặc thử lại.
 3. **Trường hợp Gửi trùng Lặp (Idempotency Protection):**
    - Nếu nhận request có cùng `Idempotency-Key` trong vòng 24 giờ, hệ thống trả về ngay kết quả giao dịch đã có trong CSDL (HTTP 200 OK) mà không khởi tạo thêm giao dịch mới và không trừ tiền lần 2.
@@ -1131,19 +1131,14 @@ Hệ thống cam kết đạt được các trạng thái sau khi Use Case kết
   2. `PaymentsService` lập tức mở một PostgreSQL Database Transaction (`prisma.$transaction()`) để thực thi chuỗi hành động hoàn kho:
      - **Cập nhật Payment:** `UPDATE "Payment" SET "status" = 'FAILED', "failureReason" = $errorCode WHERE "id" = $paymentId;`
      - **Cập nhật Order:** `UPDATE "Order" SET "status" = 'CANCELLED' WHERE "id" = $orderId;`
-     - **Hoàn trả Tồn kho Sản phẩm:** Duyệt qua toàn bộ danh sách `OrderItem` của đơn hàng và cộng trả lại số lượng:
-       ```sql
-       UPDATE "Product"
-       SET "stock" = "stock" + $itemQty
-       WHERE "id" = $itemProductId;
-       ```
-     - **Hoàn trả Tồn kho Nguyên liệu Thô:** Dựa vào công thức pha chế (`RecipeItem`), cộng hoàn trả lại số lượng nguyên liệu thô (`Ingredient`):
+     - **Hoàn trả Tồn kho Nguyên liệu Thô:** Duyệt qua danh sách `OrderItem` của đơn hàng, đối chiếu định mức công thức pha chế (`RecipeItem`) và cộng hoàn trả lại 100% số lượng nguyên vật liệu thô (`Ingredient`):
        ```sql
        UPDATE "Ingredient"
-       SET "stockQuantity" = "stockQuantity" + $requiredQty
+       SET "stockQuantity" = "stockQuantity" + $requiredQty,
+           "version" = "version" + 1
        WHERE "id" = $ingredientId;
        ```
-     - **Commit Transaction:** Toàn bộ trạng thái cập nhật và khôi phục tồn kho được ghi nhận nguyên tử và vĩnh viễn vào CSDL.
+     - **Commit Transaction:** Toàn bộ trạng thái cập nhật và khôi phục tồn kho nguyên liệu được ghi nhận nguyên tử và vĩnh viễn vào CSDL.
   3. Backend trả về mã trạng thái lỗi `HTTP 402 Payment Required` (hoặc `HTTP 400 Bad Request`) kèm thông điệp chi tiết: *"Giao dịch thanh toán không thành công. Đơn hàng đã được tự động hủy và toàn bộ số lượng tồn kho đã được hoàn trả nguyên vẹn."*
   4. Giao diện Next.js hiển thị thông báo lỗi rõ ràng, cung cấp nút "Chọn phương thức khác" và nút "Thử lại".
 
@@ -1182,7 +1177,7 @@ Hệ thống cam kết đạt được các trạng thái sau khi Use Case kết
 | :---: | :--- | :--- |
 | **`BR-PAY-01`** | **Tính Bất biến & Duy nhất của Idempotency-Key** | Mã `Idempotency-Key` bắt buộc phải là một chuỗi UUID v4 chuẩn. Cột `idempotencyKey` trong bảng `Payment` được đánh chỉ mục duy nhất (`UNIQUE INDEX`). Trong khung thời gian 24 giờ kể từ thời điểm tạo, mọi request có cùng key đều trả về nguyên trạng kết quả giao dịch trước đó, không được phép trừ tiền lần 2. |
 | **`BR-PAY-02`** | **Quy tắc 2 Bước (Cấm Gán PAID Khống)** | Nghiêm cấm tuyệt đối việc gán trạng thái `Order = PAID` ngay tại thời điểm nhận request thanh toán từ Client. Việc chuyển trạng thái sang `PAID` bắt buộc phải trải qua 2 bước độc lập: (1) Khởi tạo bản ghi `Payment` trạng thái `PENDING`; (2) Chỉ cập nhật sang `PAID` khi nhận được bản tin Webhook Callback hợp lệ có đối soát chữ ký số từ Cổng thanh toán Sandbox. |
-| **`BR-PAY-03`** | **Hoàn kho Nguyên tử (Atomic Restock Rollback)** | Khi một giao dịch thanh toán bị xác định thất bại hoặc hủy bỏ, việc cập nhật `Payment = FAILED`, `Order = CANCELLED` và việc cộng trả lại số lượng tồn kho sản phẩm (`Product.stock`) và nguyên liệu thô (`Ingredient.stockQuantity`) bắt buộc phải được đóng gói trong **cùng 1 Database Transaction duy nhất**. Nếu transaction gặp sự cố, hệ thống phải rollback toàn bộ. |
+| **`BR-PAY-03`** | **Hoàn kho Nguyên tử (Atomic Restock Rollback)** | Khi một giao dịch thanh toán bị xác định thất bại hoặc hủy bỏ, việc cập nhật `Payment = FAILED`, `Order = CANCELLED` và việc cộng trả lại số lượng tồn kho nguyên vật liệu thô (`Ingredient.stockQuantity` theo định mức `RecipeItem`) bắt buộc phải được đóng gói trong **cùng 1 Database Transaction duy nhất**. Nếu transaction gặp sự cố, hệ thống phải rollback toàn bộ. |
 | **`BR-PAY-04`** | **Bảo toàn Đơn giá phía Máy chủ** | Số tiền thanh toán (`Payment.amount`) bắt buộc phải được lấy trực tiếp từ trường `Order.finalAmount` đã được tính toán độc lập tại tầng Business Logic Layer (`OrdersService`), tuyệt đối không chấp nhận bất kỳ số tiền nào do Client tự ý gửi lên trong payload. |
 | **`BR-PAY-05`** | **Thời hạn Hết hạn Thanh toán (Payment Timeout)** | Một phiên thanh toán có thời hạn hiệu lực tối đa là **15 phút**. Nếu sau 15 phút không nhận được bản tin Webhook Callback xác thực từ cổng thanh toán, đơn hàng sẽ tự động hết hạn, chuyển sang trạng thái `CANCELLED` và kích hoạt luồng hoàn trả tồn kho tự động. |
 
