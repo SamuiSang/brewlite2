@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 420" width="920" height="420" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <!-- Arrow marker for include/extend dashed lines -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9" fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .title { font-size: 15px; font-weight: bold; fill: #000000; text-anchor: middle; }
+      .boundary-title { font-size: 12px; font-weight: bold; fill: #000000; }
+      .actor-title { font-size: 11px; font-weight: bold; fill: #000000; text-anchor: middle; }
+      .actor-sub { font-size: 10px; fill: #444444; text-anchor: middle; }
+      .uc-title { font-size: 11px; font-weight: bold; fill: #000000; text-anchor: middle; }
+      .uc-sub { font-size: 9.5px; fill: #444444; text-anchor: middle; }
+      .rel-label { font-size: 9.5px; fill: #000000; text-anchor: middle; font-style: italic; }
+    </style>
+  </defs>
+
+  <!-- Diagram Title -->
+  <text x="460" y="28" class="title">UC-05 - Sơ đồ Use Case: Thanh toán Mô phỏng &amp; Chống Trừ tiền Trùng lặp (Idempotency)</text>
+
+  <!-- System Boundary -->
+  <rect x="175" y="48" width="570" height="345" rx="8" ry="8" fill="none" stroke="#000000" stroke-width="1.8"/>
+  <text x="192" y="70" class="boundary-title">BrewLite - Phân hệ Thanh toán &amp; Chống Trừ tiền Trùng lặp (FR-06)</text>
+
+  <!-- Left Actor: Khách hàng đã đăng nhập -->
+  <g transform="translate(85, 140)">
+    <circle cx="0" cy="0" r="13" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+    <line x1="0" y1="13" x2="0" y2="52" stroke="#000000" stroke-width="1.8"/>
+    <line x1="-22" y1="26" x2="22" y2="26" stroke="#000000" stroke-width="1.8"/>
+    <line x1="0" y1="52" x2="-18" y2="86" stroke="#000000" stroke-width="1.8"/>
+    <line x1="0" y1="52" x2="18" y2="86" stroke="#000000" stroke-width="1.8"/>
+    <text x="0" y="105" class="actor-title">Khách hàng đã đăng nhập</text>
+    <text x="0" y="119" class="actor-sub">(Authenticated Customer)</text>
+  </g>
+
+  <!-- Right Actor: Cổng thanh toán Mô phỏng -->
+  <g transform="translate(835, 140)">
+    <circle cx="0" cy="0" r="13" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+    <line x1="0" y1="13" x2="0" y2="52" stroke="#000000" stroke-width="1.8"/>
+    <line x1="-22" y1="26" x2="22" y2="26" stroke="#000000" stroke-width="1.8"/>
+    <line x1="0" y1="52" x2="-18" y2="86" stroke="#000000" stroke-width="1.8"/>
+    <line x1="0" y1="52" x2="18" y2="86" stroke="#000000" stroke-width="1.8"/>
+    <text x="0" y="105" class="actor-title">Cổng thanh toán Mô phỏng</text>
+    <text x="0" y="119" class="actor-sub">(Mock Payment Gateway)</text>
+  </g>
+
+  <!-- Ellipse 1: UC-05.1 (Main Feature) -->
+  <g transform="translate(310, 180)">
+    <ellipse cx="0" cy="0" rx="115" ry="24" fill="#ffffff" stroke="#000000" stroke-width="1.6"/>
+    <text x="0" y="-4" class="uc-title">UC-05.1: Thanh toán đơn hàng qua Ví / Thẻ</text>
+    <text x="0" y="11" class="uc-sub">(Ví MoMo, VNPay, Thẻ ATM)</text>
+  </g>
+
+  <!-- Ellipse 2: UC-05.2 (Include from UC-05.1) -->
+  <g transform="translate(470, 105)">
+    <ellipse cx="0" cy="0" rx="125" ry="23" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="0" y="-4" class="uc-title">UC-05.2: Kiểm tra chống trừ tiền trùng lặp</text>
+    <text x="0" y="11" class="uc-sub">(Idempotency-Key Check)</text>
+  </g>
+
+  <!-- Ellipse 3: Xác thực qua Cổng thanh toán (Secondary Actor interaction) -->
+  <g transform="translate(605, 180)">
+    <ellipse cx="0" cy="0" rx="115" ry="24" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="0" y="-4" class="uc-title">Xác thực giao dịch qua Cổng thanh toán</text>
+    <text x="0" y="11" class="uc-sub">(Mô phỏng Sandbox Gateway)</text>
+  </g>
+
+  <!-- Ellipse 4: UC-05.3 (Extend to UC-05.1) -->
+  <g transform="translate(310, 310)">
+    <ellipse cx="0" cy="0" rx="115" ry="24" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="0" y="-4" class="uc-title">UC-05.3: Hủy đơn &amp; Hoàn trả tồn kho</text>
+    <text x="0" y="11" class="uc-sub">(Restock Rollback khi giao dịch lỗi)</text>
+  </g>
+
+  <!-- Solid Connections from Actors to Use Cases (No crossing) -->
+  <!-- Khách hàng -> UC-05.1 (Straight horizontal) -->
+  <line x1="108" y1="180" x2="195" y2="180" stroke="#000000" stroke-width="1.5"/>
+
+  <!-- Khách hàng -> UC-05.3 (Diagonal down-right, clean below line 1) -->
+  <line x1="108" y1="205" x2="205" y2="300" stroke="#000000" stroke-width="1.5"/>
+
+  <!-- Cổng thanh toán Mô phỏng -> Xác thực giao dịch (Straight horizontal) -->
+  <line x1="812" y1="180" x2="720" y2="180" stroke="#000000" stroke-width="1.5"/>
+
+  <!-- Relationships between Use Cases (Dashed arrows with markers, zero intersection) -->
+  <!-- UC-05.1 -> UC-05.2 (<<include>>: diagonal up-right) -->
+  <path d="M 370 157 L 420 128" fill="none" stroke="#000000" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <rect x="372" y="136" width="48" height="13" fill="#ffffff"/>
+  <text x="396" y="146" class="rel-label">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- UC-05.1 -> Xác thực giao dịch (<<include>>: straight horizontal) -->
+  <path d="M 425 180 L 490 180" fill="none" stroke="#000000" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <rect x="434" y="173" width="48" height="13" fill="#ffffff"/>
+  <text x="458" y="183" class="rel-label">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- UC-05.3 -> UC-05.1 (<<extend>>: straight vertical up) -->
+  <path d="M 310 286 L 310 204" fill="none" stroke="#000000" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <rect x="286" y="240" width="48" height="13" fill="#ffffff"/>
+  <text x="310" y="250" class="rel-label">&lt;&lt;extend&gt;&gt;</text>
+</svg>
