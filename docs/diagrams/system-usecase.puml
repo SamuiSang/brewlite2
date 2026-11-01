@@ -1,0 +1,64 @@
+@startuml system-usecase
+title Sơ đồ Use Case Tổng quát Toàn hệ thống BrewLite (UC-01 đến UC-06)
+
+left to right direction
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+skinparam packageStyle rectangle
+skinparam roundcorner 8
+skinparam nodesep 55
+skinparam ranksep 80
+
+skinparam actor {
+    BorderColor black
+    BackgroundColor white
+    FontColor black
+}
+
+skinparam usecase {
+    BorderColor black
+    BackgroundColor white
+    FontColor black
+    ArrowColor black
+}
+
+skinparam rectangle {
+    BorderColor black
+    BackgroundColor white
+    FontColor black
+}
+
+actor "Khách vãng lai\n(Guest)" as Guest
+actor "Khách thành viên\n(Authenticated Customer)" as Customer
+actor "Nhân viên Quầy / Quản lý\n(Barista / Store Manager)" as Staff
+actor "Cổng Thanh toán Sandbox\n(VNPay / MoMo / VietQR)" as Gateway
+
+Customer -up-|> Guest
+
+rectangle "Hệ thống Đặt đồ uống Trực tuyến BrewLite (Next.js PWA + NestJS API + PostgreSQL)" as BrewLite {
+    usecase "UC-01: Duyệt Menu, Lọc danh mục,\nTìm kiếm & Xem chi tiết món\n(Duy - FR-01, FR-02)" as UC01
+    usecase "UC-02: Tùy biến món (Size/Topping),\nQuản lý Giỏ hàng & Áp mã Khuyến mãi\n(Quỳnh - FR-03, FR-09)" as UC02
+    usecase "UC-03: Đăng ký, Đăng nhập,\nXác thực JWT & Health Check\n(Hiếu - FR-04)" as UC03
+    usecase "UC-04: Khởi tạo Đơn hàng, Tính tiền tại\nBusiness Layer & Khóa kho Nguyên liệu\n(Chiến - FR-05)" as UC04
+    usecase "UC-05: Thanh toán Sandbox/Webhook 2 bước\n& Chống trừ tiền trùng lặp (Idempotency)\n(Quang - FR-06)" as UC05
+    usecase "UC-06: Xem Biên nhận, Lịch sử đơn,\nTheo dõi Trạng thái & Điểm thưởng Loyalty\n(Sang - FR-07, FR-08, FR-10)" as UC06
+}
+
+Guest -- UC01
+Guest -- UC02
+Guest -- UC03
+
+Customer -- UC04
+Customer -- UC05
+Customer -- UC06
+
+UC05 -- Gateway
+UC06 -- Staff
+
+UC04 .up.> UC03 : <<include>>\n(Xác thực JWT)
+UC05 .up.> UC04 : <<include>>\n(Đơn hàng PENDING)
+UC06 .up.> UC05 : <<include>>\n(Tích điểm khi PAID)
+
+@enduml
