@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 450" width="100%" height="100%">
+  <defs>
+    <style>
+      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 20px; font-weight: bold; fill: #000000; }
+      .box { fill: #ffffff; stroke: #000000; stroke-width: 1.8; rx: 12; }
+      .box-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: bold; fill: #000000; }
+      .actor-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 600; fill: #000000; text-anchor: middle; }
+      .uc-ellipse { fill: #ffffff; stroke: #000000; stroke-width: 1.8; }
+      .uc-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12.5px; font-weight: 600; fill: #000000; text-anchor: middle; }
+      .arrow { stroke: #000000; stroke-width: 1.5; marker-end: url(#arrowhead); }
+      .arrow-dash { stroke: #000000; stroke-width: 1.4; stroke-dasharray: 4; marker-end: url(#arrowhead); }
+      .rel-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; fill: #000000; font-style: italic; font-weight: 600; text-anchor: middle; }
+    </style>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#000000" />
+    </marker>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="100%" height="100%" fill="#ffffff" />
+
+  <!-- Title -->
+  <text x="530" y="36" text-anchor="middle" class="title">Use Case Diagram - UC-04: Khởi tạo đơn hàng &amp; Khóa tồn kho an toàn</text>
+
+  <!-- System Boundary Rectangle -->
+  <rect x="250" y="65" width="770" height="355" class="box" />
+  <text x="275" y="94" class="box-header">Hệ thống BrewLite (Order Subsystem)</text>
+
+  <!-- Actor: Authenticated Customer (Only 1 Actor) -->
+  <g transform="translate(125, 255)">
+    <circle cx="0" cy="-25" r="15" fill="#ffffff" stroke="#000000" stroke-width="2" />
+    <line x1="0" y1="-10" x2="0" y2="24" stroke="#000000" stroke-width="2" />
+    <line x1="-22" y1="4" x2="22" y2="4" stroke="#000000" stroke-width="2" />
+    <line x1="0" y1="24" x2="-16" y2="56" stroke="#000000" stroke-width="2" />
+    <line x1="0" y1="24" x2="16" y2="56" stroke="#000000" stroke-width="2" />
+    <text x="0" y="80" class="actor-text">Khách hàng đã đăng nhập</text>
+    <text x="0" y="96" class="actor-text" font-size="11" fill="#444444">(Authenticated Customer)</text>
+  </g>
+
+  <!-- Main Use Case: UC-04.1 -->
+  <ellipse cx="440" cy="255" rx="145" ry="34" class="uc-ellipse" stroke-width="2.2" />
+  <text x="440" y="251" class="uc-text" font-size="13px" font-weight="700">UC-04.1: Khởi tạo đơn hàng</text>
+  <text x="440" y="268" class="uc-text" font-size="11.5px">(Place Order)</text>
+
+  <!-- Extended UC: Promotion -->
+  <ellipse cx="440" cy="135" rx="135" ry="26" class="uc-ellipse" />
+  <text x="440" y="139" class="uc-text">Áp dụng mã khuyến mãi (?promoCode)</text>
+
+  <!-- Included UC 1: Recalculate Price (UC-04.2) -->
+  <ellipse cx="820" cy="180" rx="165" ry="30" class="uc-ellipse" />
+  <text x="820" y="176" class="uc-text">UC-04.2: Tính toán lại tổng tiền đơn hàng</text>
+  <text x="820" y="192" class="uc-text" font-size="11px">tại Business Logic Layer</text>
+
+  <!-- Included UC 2: Lock Inventory (UC-04.3) -->
+  <ellipse cx="820" cy="325" rx="165" ry="32" class="uc-ellipse" />
+  <text x="820" y="321" class="uc-text">UC-04.3: Kiểm tra &amp; Khóa trừ tồn kho</text>
+  <text x="820" y="337" class="uc-text" font-size="11px">(Optimistic Locking Transaction)</text>
+
+  <!-- Association: Actor to Main UC -->
+  <line x1="165" y1="255" x2="290" y2="255" class="arrow" />
+
+  <!-- Extends Relationship: Promotion to UC-04.1 -->
+  <line x1="440" y1="161" x2="440" y2="221" class="arrow-dash" />
+  <text x="485" y="195" class="rel-text">&lt;&lt;extend&gt;&gt;</text>
+
+  <!-- Includes Relationships: UC-04.1 to Included UCs -->
+  <!-- 1. To UC-04.2 (Recalculate Price) -->
+  <line x1="565" y1="240" x2="675" y2="200" class="arrow-dash" />
+  <text x="625" y="212" class="rel-text">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- 2. To UC-04.3 (Lock Inventory) -->
+  <line x1="565" y1="270" x2="675" y2="310" class="arrow-dash" />
+  <text x="625" y="300" class="rel-text">&lt;&lt;include&gt;&gt;</text>
+</svg>

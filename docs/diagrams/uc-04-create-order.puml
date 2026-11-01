@@ -1,0 +1,34 @@
+@startuml uc-04-create-order
+title Use Case Diagram - UC-04: Khởi tạo đơn hàng & Khóa tồn kho an toàn
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+skinparam monochrome true
+skinparam shadowing false
+skinparam nodesep 70
+skinparam ranksep 60
+
+skinparam ArrowColor black
+skinparam actorBorderColor black
+skinparam usecaseBackgroundColor white
+skinparam usecaseBorderColor black
+skinparam rectangleBorderColor black
+skinparam rectangleBackgroundColor white
+
+actor "Khách hàng đã đăng nhập\n(Authenticated Customer)" as Customer
+
+rectangle "Hệ thống BrewLite (Order Subsystem)" {
+    usecase "UC-04.1: Khởi tạo đơn hàng\n(Place Order)" as UC_PlaceOrder
+    usecase "UC-04.2: Tính toán lại tổng tiền đơn hàng\ntại Business Logic Layer" as UC_RecalculatePrice
+    usecase "UC-04.3: Kiểm tra & Khóa trừ tồn kho đồng thời\n(Optimistic Locking Transaction)" as UC_LockInventory
+    usecase "Áp dụng mã khuyến mãi\n(?promoCode)" as UC_Promotion
+}
+
+Customer --> UC_PlaceOrder
+
+UC_PlaceOrder ..> UC_RecalculatePrice : <<include>>
+UC_PlaceOrder ..> UC_LockInventory : <<include>>
+
+UC_Promotion .> UC_PlaceOrder : <<extend>>
+
+@enduml
