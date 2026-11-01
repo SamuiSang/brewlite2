@@ -1,0 +1,58 @@
+@startuml uc-06-history-loyalty
+title UC-06 - Sơ đồ Use Case: Biên nhận, Lịch sử Đơn hàng, Theo dõi Trạng thái & Điểm thưởng Loyalty
+
+left to right direction
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+skinparam packageStyle rectangle
+skinparam roundcorner 8
+skinparam nodesep 65
+skinparam ranksep 85
+
+skinparam actor {
+    BorderColor black
+    BackgroundColor white
+    FontColor black
+}
+
+skinparam usecase {
+    BorderColor black
+    BackgroundColor white
+    FontColor black
+    ArrowColor black
+}
+
+skinparam rectangle {
+    BorderColor black
+    BackgroundColor white
+    FontColor black
+}
+
+actor "Khách hàng đã đăng nhập\n(Authenticated Customer)" as Customer
+actor "Nhân viên pha chế / Quản lý\n(Barista / Store Manager)" as Staff
+
+rectangle "BrewLite - Phân hệ Biên nhận, Lịch sử Đơn, Trạng thái & Điểm thưởng Loyalty (FR-07, FR-08, FR-10)" as System {
+    usecase "UC-06.1: Xem biên nhận điện tử &\nTheo dõi tiến trình trạng thái đơn hàng\n(OrderStatusStepper)" as UC_ReceiptTrack
+    usecase "UC-06.2: Tra cứu danh sách\nlịch sử đơn hàng cá nhân\n(GET /api/v1/orders/my-orders)" as UC_OrderHistory
+    usecase "UC-06.3: Tra cứu số dư &\nlịch sử biến động điểm thưởng\n(GET /api/v1/loyalty/balance)" as UC_LoyaltyHistory
+    usecase "UC-06.4: Cập nhật trạng thái\nchế biến & hoàn tất đơn hàng\n(PAID -> PREPARING -> COMPLETED)" as UC_UpdateStatus
+
+    usecase "Tích lũy điểm thưởng tự động\nkhi đơn hàng chuyển sang PAID\n(LoyaltyTransaction: EARN)" as UC_EarnPoints
+    usecase "Sử dụng điểm thưởng\nđể giảm giá đơn hàng\n(LoyaltyTransaction: REDEEM)" as UC_RedeemPoints
+    usecase "Kiểm tra quyền sở hữu đơn hàng\n& xác thực phiên JWT" as UC_VerifyOwner
+}
+
+Customer -- UC_ReceiptTrack
+Customer -- UC_OrderHistory
+Customer -- UC_LoyaltyHistory
+
+UC_UpdateStatus -- Staff
+
+UC_ReceiptTrack .right.> UC_VerifyOwner : <<include>>
+UC_OrderHistory .right.> UC_VerifyOwner : <<include>>
+UC_UpdateStatus .up.> UC_EarnPoints : <<include>>
+UC_RedeemPoints .up.> UC_LoyaltyHistory : <<extend>>
+
+@enduml
