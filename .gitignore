@@ -9,7 +9,7 @@ out/
 dist/
 build/
 coverage/
-
+scratch/
 # Environment variables (Never commit secrets!)
 .env
 .env.local
