@@ -1,51 +1,45 @@
 @startuml uc-02-cart-promotion
+title UC-02 - Sơ đồ Use Case: Tùy biến Đồ uống, Quản lý Giỏ hàng & Áp mã Khuyến mãi (FR-03, FR-09)
+
 left to right direction
 skinparam monochrome true
 skinparam shadowing false
-skinparam defaultFontName SansSerif
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
 skinparam backgroundColor white
 skinparam packageStyle rectangle
 
-title UC-02: Tùy biến đồ uống, Quản lý giỏ hàng và Áp mã khuyến mãi
-
 actor "Khách hàng\n(Customer / Guest)" as Customer
 
-rectangle "UC-02: Phân hệ Tùy biến đồ uống, Quản lý giỏ hàng và Khuyến mãi" {
-  together {
-    usecase "UC-02.1: Tùy biến đồ uống\n(Size, Topping, Đường, Đá)" as UC_Customize
-    usecase "Tính giá tạm tính\ntheo tùy chọn" as UC_CalcPrice
-    usecase "Thêm món vào giỏ hàng" as UC_AddToCart
-  }
-  
-  together {
-    usecase "UC-02.2: Quản lý giỏ hàng\n(Xem giỏ, điều chỉnh số lượng, xóa món)" as UC_ManageCart
-    usecase "UC-02.4: Hủy áp dụng\nmã khuyến mãi" as UC_RemovePromo
-    usecase "UC-02.3: Áp dụng mã khuyến mãi\n(Promotion)" as UC_ApplyPromo
-  }
-  
-  together {
-    usecase "Kiểm tra tồn kho khả dụng" as UC_CheckStock
-    usecase "Kiểm tra điều kiện\nkhuyến mãi" as UC_ValidatePromo
-  }
+rectangle "BrewLite - Phân hệ Tùy biến Đồ uống, Quản lý Giỏ hàng & Khuyến mãi (FR-03, FR-09)" {
+  usecase "UC-02.1: Tùy biến đồ uống\n(Size, Topping, Đường, Đá)" as UC_Customize
+  usecase "Tính giá tạm tính tức thời\ntheo tùy chọn (Preview Price)" as UC_CalcPrice
+  usecase "Thêm món vào giỏ hàng\n(Gộp dòng theo itemKey)" as UC_AddToCart
+
+  usecase "UC-02.2: Quản lý giỏ hàng\n(Xem giỏ, tăng/giảm SL, xóa món)" as UC_ManageCart
+  usecase "UC-02.3: Áp dụng mã khuyến mãi\n(Promotion Voucher)" as UC_ApplyPromo
+  usecase "UC-02.4: Hủy áp dụng\nmã khuyến mãi" as UC_RemovePromo
+
+  usecase "Kiểm tra giới hạn tồn kho khả dụng\n(sum(qty) <= availableStock)" as UC_CheckStock
+  usecase "Thẩm định điều kiện khuyến mãi\n(POST /api/v1/promotions/validate)" as UC_ValidatePromo
 
   Customer -- UC_Customize
   Customer -- UC_ManageCart
 
   UC_Customize ..> UC_CalcPrice : <<include>>
-  UC_Customize <.. UC_AddToCart : <<extend>>\n[Khách hàng xác nhận thêm vào giỏ]
+  UC_Customize <.. UC_AddToCart : <<extend>>\n[Xác nhận thêm vào giỏ]
   UC_AddToCart ..> UC_CheckStock : <<include>>
 
   UC_ManageCart ..> UC_CheckStock : <<include>>
-  UC_ManageCart <.. UC_RemovePromo : <<extend>>\n[Khách hàng yêu cầu hủy mã khuyến mãi]
-  UC_ManageCart <.. UC_ApplyPromo : <<extend>>\n[Khách hàng nhập mã khuyến mãi]
-  
+  UC_ManageCart <.. UC_ApplyPromo : <<extend>>\n[Nhập mã khuyến mãi]
+  UC_ManageCart <.. UC_RemovePromo : <<extend>>\n[Yêu cầu hủy mã]
+
   UC_ApplyPromo ..> UC_ValidatePromo : <<include>>
 }
 
 legend bottom
-  Ghi chú nghiệp vụ:
-  - Khách hàng tùy biến quy cách đồ uống (Size, Topping, khẩu vị) và xem giá tạm tính trước khi quyết định thêm vào giỏ.
-  - Khách hàng quản lý giỏ hàng (xem giỏ, tăng/giảm số lượng, xóa món).
-  - Khách hàng có thể áp dụng mã khuyến mãi hợp lệ hoặc yêu cầu hủy mã đang áp dụng.
+  Ghi chú nghiệp vụ Chức năng 2 (Quỳnh - Dev Team | Chuẩn đơn sắc đen-trắng):
+  • Khách hàng tùy biến quy cách đồ uống (Size S/M/L, Topping, Đường/Đá) và xem giá tạm tính tức thời trước khi xác nhận thêm vào giỏ.
+  • Giỏ hàng Zustand tự động gộp dòng cùng itemKey, lưu bền vững vào localStorage và khống chế số lượng đặt <= availableStock.
+  • Mã khuyến mãi được thẩm định Read-only qua API POST /api/v1/promotions/validate (kiểm tra hạn dùng, lượt dùng, minOrderValue).
 endlegend
 @enduml

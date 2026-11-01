@@ -8,67 +8,33 @@ skinparam backgroundColor white
 skinparam defaultFontName "Segoe UI", "Arial", sans-serif
 skinparam packageStyle rectangle
 skinparam roundcorner 8
-skinparam nodesep 60
-skinparam ranksep 80
 
-skinparam actor {
-    BorderColor black
-    BackgroundColor white
-    FontColor black
-}
+actor "Khách vãng lai\n(Guest Customer)" as Guest
+actor "Khách thành viên\n(Authenticated Customer)" as Customer
 
-skinparam usecase {
-    BorderColor black
-    BackgroundColor white
-    FontColor black
-    ArrowColor black
-}
-
-skinparam rectangle {
-    BorderColor black
-    BackgroundColor white
-    FontColor black
-}
-
-actor "Khách hàng vãng lai\n(Guest)" as Guest
-actor "Khách hàng thành viên\n(Authenticated Customer)" as Customer
-
-Customer -left-|> Guest
+Customer -up-|> Guest
 
 rectangle "BrewLite - Phân hệ Thực đơn, Lọc danh mục & Chi tiết món (FR-01, FR-02)" as System {
     usecase "UC-01.1: Xem danh sách thực đơn đồ uống\n(GET /api/v1/products)" as UC_BrowseMenu
     usecase "UC-01.2: Lọc đồ uống theo danh mục\n(?category=COFFEE, TEA, FREEZE, PASTRY)" as UC_FilterCategory
     usecase "UC-01.3: Tìm kiếm đồ uống theo từ khóa tên món\n(?search=... | Debounce 300ms)" as UC_SearchKeyword
-    usecase "UC-01.4: Xem thông tin chi tiết món\n(GET /api/v1/products/:id)" as UC_ViewDetail
-
-    usecase "Kiểm tra trạng thái tồn kho khả dụng\n(availableStock từ nguyên liệu thô)" as UC_CheckStock
-    usecase "Xử lý phản hồi 3 trạng thái giao diện UI\n(Skeleton Shimmer, Empty, Error)" as UC_HandleUIState
+    usecase "UC-01.4: Xem thông tin chi tiết món\n& Mở Modal tùy biến (GET /api/v1/products/:id)" as UC_ViewDetail
+    usecase "Kiểm tra tồn kho khả dụng theo thời gian thực\n(availableStock từ Ingredient & RecipeItem)" as UC_CheckStock
 }
 
 Guest -- UC_BrowseMenu
+Guest -- UC_ViewDetail
 
-UC_FilterCategory .up.> UC_BrowseMenu : <<extend>>\n(Chọn tab danh mục)
-UC_SearchKeyword .up.> UC_BrowseMenu : <<extend>>\n(Nhập từ khóa tìm kiếm)
-
-UC_BrowseMenu ..> UC_ViewDetail : <<include>>\n(Chọn xem chi tiết món)
+UC_BrowseMenu ..> UC_CheckStock : <<include>>
 UC_ViewDetail ..> UC_CheckStock : <<include>>
-UC_BrowseMenu ..> UC_HandleUIState : <<include>>
 
-note right of UC_CheckStock
-  Định mức nguyên liệu thô:
-  availableStock tính động theo thời gian thực
-  từ tồn kho Ingredient chia định mức RecipeItem.
-  Nếu availableStock == 0:
-  Tự động mờ thẻ món 50%, gắn nhãn "Hết hàng"
-  và vô hiệu hóa (disabled) nút chọn món.
-end note
+UC_FilterCategory .up.> UC_BrowseMenu : <<extend>>\n[Chọn tab danh mục]
+UC_SearchKeyword .up.> UC_BrowseMenu : <<extend>>\n[Nhập từ khóa tìm kiếm]
 
 legend bottom
-  Ghi chú nghiệp vụ Chức năng 1 (Phương Duy phụ trách - Task 1.2 & 1.3):
-  - Khách hàng (Guest/Customer) duyệt thực đơn đồ uống trên giao diện Mobile-first PWA mượt mà.
-  - Hỗ trợ lọc theo 4 nhóm danh mục và tìm kiếm tên món không phân biệt hoa/thường, có dấu/không dấu.
-  - Kiểm soát tồn kho an toàn: CSDL không lưu số ly pha sẵn mà kiểm tra số lượng nguyên liệu thô thực tế.
-  - Quản lý 3 trạng thái UI: Skeleton Loading giữ ổn định layout, Empty State khi rỗng và Error State có nút Thử lại.
+  Ghi chú nghiệp vụ Chức năng 1 (Phương Duy - Dev Team | Chuẩn đơn sắc đen-trắng):
+  • Khách hàng (cả Guest và Thành viên) tự do duyệt thực đơn, lọc theo 4 danh mục (COFFEE, TEA, FREEZE, PASTRY) và tìm kiếm có Debounce 300ms.
+  • Kiểm soát tồn kho nguyên liệu thô: availableStock = min(floor(Ingredient.stockQuantity / RecipeItem.quantityRequired)).
+  • Chốt chặn tồn kho phía Client: Món có availableStock == 0 tự động mờ 50%, gắn nhãn "Hết hàng (Sold Out)" và khóa (disabled) nút chọn món.
 endlegend
-
 @enduml

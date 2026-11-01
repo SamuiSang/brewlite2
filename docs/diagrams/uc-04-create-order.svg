@@ -1,74 +1,101 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 450" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 520" width="1120" height="520" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
   <defs>
-    <style>
-      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 20px; font-weight: bold; fill: #000000; }
-      .box { fill: #ffffff; stroke: #000000; stroke-width: 1.8; rx: 12; }
-      .box-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: bold; fill: #000000; }
-      .actor-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 600; fill: #000000; text-anchor: middle; }
-      .uc-ellipse { fill: #ffffff; stroke: #000000; stroke-width: 1.8; }
-      .uc-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12.5px; font-weight: 600; fill: #000000; text-anchor: middle; }
-      .arrow { stroke: #000000; stroke-width: 1.5; marker-end: url(#arrowhead); }
-      .arrow-dash { stroke: #000000; stroke-width: 1.4; stroke-dasharray: 4; marker-end: url(#arrowhead); }
-      .rel-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; fill: #000000; font-style: italic; font-weight: 600; text-anchor: middle; }
-    </style>
-    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#000000" />
+    <marker id="arrow-open" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9" fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </marker>
+    <style>
+      .title { font-size: 16px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .boundary-box { fill: #ffffff; stroke: #000000; stroke-width: 1.8; rx: 8; ry: 8; }
+      .boundary-title { font-size: 12.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .actor-title { font-size: 11.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .actor-sub { font-size: 10px; fill: #000000; text-anchor: middle; }
+      .uc-ellipse { fill: #ffffff; stroke: #000000; stroke-width: 1.6; }
+      .uc-ellipse-core { fill: #ffffff; stroke: #000000; stroke-width: 2.1; }
+      .uc-title { font-size: 11px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .uc-sub { font-size: 9.5px; fill: #000000; text-anchor: middle; }
+      .assoc-line { stroke: #000000; stroke-width: 1.5; fill: none; }
+      .dep-line { stroke: #000000; stroke-width: 1.3; stroke-dasharray: 5,3; fill: none; marker-end: url(#arrow-open); }
+      .rel-tag-bg { fill: #ffffff; stroke: #000000; stroke-width: 0.8; rx: 3; ry: 3; }
+      .rel-label { font-size: 9.5px; font-style: italic; font-weight: 600; fill: #000000; text-anchor: middle; }
+      .legend-box { fill: #ffffff; stroke: #000000; stroke-width: 1.2; rx: 5; ry: 5; }
+      .legend-title { font-size: 11px; font-weight: 700; fill: #000000; }
+      .legend-text { font-size: 10px; fill: #000000; }
+    </style>
   </defs>
 
-  <!-- Background Canvas -->
-  <rect width="100%" height="100%" fill="#ffffff" />
+  <!-- White Canvas -->
+  <rect width="100%" height="100%" fill="#ffffff"/>
 
-  <!-- Title -->
-  <text x="530" y="36" text-anchor="middle" class="title">Use Case Diagram - UC-04: Khởi tạo đơn hàng &amp; Khóa tồn kho an toàn</text>
+  <!-- Diagram Title -->
+  <text x="560" y="28" class="title">UC-04 - Sơ đồ Use Case: Khởi tạo Đơn hàng, Tính tiền tại Business Layer &amp; Khóa kho Nguyên liệu (FR-05)</text>
 
-  <!-- System Boundary Rectangle -->
-  <rect x="250" y="65" width="770" height="355" class="box" />
-  <text x="275" y="94" class="box-header">Hệ thống BrewLite (Order Subsystem)</text>
+  <!-- System Boundary -->
+  <rect x="220" y="48" width="830" height="355" class="boundary-box"/>
+  <text x="635" y="70" class="boundary-title">BrewLite - Phân hệ Khởi tạo Đơn hàng &amp; Khóa Tồn kho Nguyên liệu (FR-05)</text>
 
-  <!-- Actor: Authenticated Customer (Only 1 Actor) -->
-  <g transform="translate(125, 255)">
-    <circle cx="0" cy="-25" r="15" fill="#ffffff" stroke="#000000" stroke-width="2" />
-    <line x1="0" y1="-10" x2="0" y2="24" stroke="#000000" stroke-width="2" />
-    <line x1="-22" y1="4" x2="22" y2="4" stroke="#000000" stroke-width="2" />
-    <line x1="0" y1="24" x2="-16" y2="56" stroke="#000000" stroke-width="2" />
-    <line x1="0" y1="24" x2="16" y2="56" stroke="#000000" stroke-width="2" />
-    <text x="0" y="80" class="actor-text">Khách hàng đã đăng nhập</text>
-    <text x="0" y="96" class="actor-text" font-size="11" fill="#444444">(Authenticated Customer)</text>
+  <!-- Left Actor: Authenticated Customer -->
+  <g transform="translate(105, 205)">
+    <circle cx="0" cy="-24" r="13" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+    <line x1="0" y1="-11" x2="0" y2="24" stroke="#000000" stroke-width="1.8"/>
+    <line x1="-20" y1="2" x2="20" y2="2" stroke="#000000" stroke-width="1.8"/>
+    <line x1="0" y1="24" x2="-15" y2="54" stroke="#000000" stroke-width="1.8"/>
+    <line x1="0" y1="24" x2="15" y2="54" stroke="#000000" stroke-width="1.8"/>
+    <text x="0" y="72" class="actor-title">Khách hàng đã đăng nhập</text>
+    <text x="0" y="86" class="actor-sub">(Authenticated Customer)</text>
   </g>
 
-  <!-- Main Use Case: UC-04.1 -->
-  <ellipse cx="440" cy="255" rx="145" ry="34" class="uc-ellipse" stroke-width="2.2" />
-  <text x="440" y="251" class="uc-text" font-size="13px" font-weight="700">UC-04.1: Khởi tạo đơn hàng</text>
-  <text x="440" y="268" class="uc-text" font-size="11.5px">(Place Order)</text>
+  <!-- Column 1: Core Base Use Case (x = 405, y = 215) -->
+  <g transform="translate(405, 215)">
+    <ellipse cx="0" cy="0" rx="145" ry="30" class="uc-ellipse-core"/>
+    <text x="0" y="-4" class="uc-title">UC-04.1: Khởi tạo đơn hàng</text>
+    <text x="0" y="11" class="uc-sub">(POST /api/v1/orders → Order PENDING)</text>
+  </g>
 
-  <!-- Extended UC: Promotion -->
-  <ellipse cx="440" cy="135" rx="135" ry="26" class="uc-ellipse" />
-  <text x="440" y="139" class="uc-text">Áp dụng mã khuyến mãi (?promoCode)</text>
+  <!-- Column 2: Included & Extended Use Cases (x = 845) -->
+  <!-- UC-04.2: Recalculate Price -->
+  <g transform="translate(845, 120)">
+    <ellipse cx="0" cy="0" rx="165" ry="28" class="uc-ellipse"/>
+    <text x="0" y="-4" class="uc-title">UC-04.2: Tính lại 100% tổng tiền đơn hàng</text>
+    <text x="0" y="11" class="uc-sub">tại Business Logic Layer (Bỏ qua giá Client)</text>
+  </g>
 
-  <!-- Included UC 1: Recalculate Price (UC-04.2) -->
-  <ellipse cx="820" cy="180" rx="165" ry="30" class="uc-ellipse" />
-  <text x="820" y="176" class="uc-text">UC-04.2: Tính toán lại tổng tiền đơn hàng</text>
-  <text x="820" y="192" class="uc-text" font-size="11px">tại Business Logic Layer</text>
+  <!-- UC-04.3: Optimistic Lock Ingredient Inventory -->
+  <g transform="translate(845, 215)">
+    <ellipse cx="0" cy="0" rx="165" ry="28" class="uc-ellipse"/>
+    <text x="0" y="-4" class="uc-title">UC-04.3: Đối soát RecipeItem &amp; Khóa trừ kho</text>
+    <text x="0" y="11" class="uc-sub">Nguyên liệu Ingredient (Optimistic Lock)</text>
+  </g>
 
-  <!-- Included UC 2: Lock Inventory (UC-04.3) -->
-  <ellipse cx="820" cy="325" rx="165" ry="32" class="uc-ellipse" />
-  <text x="820" y="321" class="uc-text">UC-04.3: Kiểm tra &amp; Khóa trừ tồn kho</text>
-  <text x="820" y="337" class="uc-text" font-size="11px">(Optimistic Locking Transaction)</text>
+  <!-- UC-04.4: Apply Promotion in Transaction -->
+  <g transform="translate(845, 315)">
+    <ellipse cx="0" cy="0" rx="165" ry="28" class="uc-ellipse"/>
+    <text x="0" y="-4" class="uc-title">UC-04.4: Áp dụng &amp; Ghi nhận lượt dùng</text>
+    <text x="0" y="11" class="uc-sub">mã khuyến mãi hợp lệ (usedCount + 1)</text>
+  </g>
 
-  <!-- Association: Actor to Main UC -->
-  <line x1="165" y1="255" x2="290" y2="255" class="arrow" />
+  <!-- Solid Association Line (Undirected UML standard) -->
+  <line x1="135" y1="215" x2="260" y2="215" class="assoc-line"/>
 
-  <!-- Extends Relationship: Promotion to UC-04.1 -->
-  <line x1="440" y1="161" x2="440" y2="221" class="arrow-dash" />
-  <text x="485" y="195" class="rel-text">&lt;&lt;extend&gt;&gt;</text>
+  <!-- <<include>> & <<extend>> Relationships -->
+  <!-- UC-04.1 -> UC-04.2 (<<include>>) -->
+  <line x1="535" y1="198" x2="690" y2="132" class="dep-line"/>
+  <rect x="578" y="152" width="66" height="16" class="rel-tag-bg"/>
+  <text x="611" y="164" class="rel-label">&lt;&lt;include&gt;&gt;</text>
 
-  <!-- Includes Relationships: UC-04.1 to Included UCs -->
-  <!-- 1. To UC-04.2 (Recalculate Price) -->
-  <line x1="565" y1="240" x2="675" y2="200" class="arrow-dash" />
-  <text x="625" y="212" class="rel-text">&lt;&lt;include&gt;&gt;</text>
+  <!-- UC-04.1 -> UC-04.3 (<<include>>) -->
+  <line x1="550" y1="215" x2="680" y2="215" class="dep-line"/>
+  <rect x="580" y="196" width="66" height="16" class="rel-tag-bg"/>
+  <text x="613" y="208" class="rel-label">&lt;&lt;include&gt;&gt;</text>
 
-  <!-- 2. To UC-04.3 (Lock Inventory) -->
-  <line x1="565" y1="270" x2="675" y2="310" class="arrow-dash" />
-  <text x="625" y="300" class="rel-text">&lt;&lt;include&gt;&gt;</text>
+  <!-- UC-04.4 -> UC-04.1 (<<extend>>) -->
+  <line x1="690" y1="302" x2="535" y2="232" class="dep-line"/>
+  <rect x="546" y="264" width="138" height="16" class="rel-tag-bg"/>
+  <text x="615" y="276" class="rel-label">&lt;&lt;extend&gt;&gt; [Có promoCode]</text>
+
+  <!-- Legend Box -->
+  <rect x="120" y="418" width="880" height="84" class="legend-box"/>
+  <text x="138" y="436" class="legend-title">Ghi chú nghiệp vụ Chức năng 4 - Use Case Trọng tâm Phần 1 (Chiến - Dev Team | Chuẩn đơn sắc đen-trắng):</text>
+  <text x="138" y="454" class="legend-text">• Tính tiền tuyệt đối tại Business Layer (OrdersService): unitPrice = basePrice + sizePrice + sum(toppingPrices); không dùng giá Client.</text>
+  <text x="138" y="471" class="legend-text">• Quản lý kho nguyên liệu thô (Ingredient) &amp; công thức (RecipeItem): Trừ tồn kho bằng Optimistic Locking (cột version) trong prisma.$transaction.</text>
+  <text x="138" y="488" class="legend-text">• Chống bán âm kho (stockQuantity &lt; 0): Nếu 2 khách cùng đặt ly cuối cùng dẫn đến xung đột version, tự động Rollback 100% và trả về 409 Conflict.</text>
 </svg>

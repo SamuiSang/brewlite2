@@ -1,34 +1,32 @@
 @startuml uc-04-create-order
-title Use Case Diagram - UC-04: Khởi tạo đơn hàng & Khóa tồn kho an toàn
-skinparam actorStyle awesome
-skinparam packageStyle rectangle
-skinparam roundcorner 10
+title UC-04 - Sơ đồ Use Case: Khởi tạo Đơn hàng, Tính tiền tại Business Layer & Khóa kho Nguyên liệu (FR-05)
+
+left to right direction
 skinparam monochrome true
 skinparam shadowing false
-skinparam nodesep 70
-skinparam ranksep 60
-
-skinparam ArrowColor black
-skinparam actorBorderColor black
-skinparam usecaseBackgroundColor white
-skinparam usecaseBorderColor black
-skinparam rectangleBorderColor black
-skinparam rectangleBackgroundColor white
+skinparam backgroundColor white
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+skinparam packageStyle rectangle
 
 actor "Khách hàng đã đăng nhập\n(Authenticated Customer)" as Customer
 
-rectangle "Hệ thống BrewLite (Order Subsystem)" {
-    usecase "UC-04.1: Khởi tạo đơn hàng\n(Place Order)" as UC_PlaceOrder
-    usecase "UC-04.2: Tính toán lại tổng tiền đơn hàng\ntại Business Logic Layer" as UC_RecalculatePrice
-    usecase "UC-04.3: Kiểm tra & Khóa trừ tồn kho đồng thời\n(Optimistic Locking Transaction)" as UC_LockInventory
-    usecase "Áp dụng mã khuyến mãi\n(?promoCode)" as UC_Promotion
+rectangle "BrewLite - Phân hệ Khởi tạo Đơn hàng & Khóa Tồn kho Nguyên liệu (FR-05)" {
+    usecase "UC-04.1: Khởi tạo đơn hàng\n(POST /api/v1/orders -> Order PENDING)" as UC_PlaceOrder
+    usecase "UC-04.2: Tính toán lại 100% tổng tiền\ntại Business Logic Layer (Bỏ qua giá Client)" as UC_RecalculatePrice
+    usecase "UC-04.3: Đối soát RecipeItem & Khóa trừ kho\nNguyên liệu Ingredient (Optimistic Lock)" as UC_LockInventory
+    usecase "UC-04.4: Áp dụng & Ghi nhận lượt dùng\nmã khuyến mãi (usedCount + 1)" as UC_Promotion
 }
 
-Customer --> UC_PlaceOrder
+Customer -- UC_PlaceOrder
 
 UC_PlaceOrder ..> UC_RecalculatePrice : <<include>>
 UC_PlaceOrder ..> UC_LockInventory : <<include>>
+UC_Promotion .up.> UC_PlaceOrder : <<extend>>\n[Có đính kèm promoCode hợp lệ]
 
-UC_Promotion .> UC_PlaceOrder : <<extend>>
-
+legend bottom
+  Ghi chú nghiệp vụ Chức năng 4 - Use Case Trọng tâm Phần 1 (Chiến - Dev Team | Chuẩn đơn sắc đen-trắng):
+  • Tính tiền tuyệt đối tại Business Layer (OrdersService): unitPrice = basePrice + sizePrice + sum(toppingPrices); không dùng giá Client.
+  • Quản lý kho nguyên liệu thô (Ingredient) & công thức pha chế (RecipeItem): Trừ tồn kho bằng Optimistic Locking (cột version) trong prisma.$transaction.
+  • Chống bán âm kho (stockQuantity < 0): Nếu 2 khách cùng đặt ly cuối cùng dẫn đến xung đột version, tự động Rollback 100% và trả về 409 Conflict.
+endlegend
 @enduml

@@ -1,1 +1,129 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" data-diagram-type="DESCRIPTION" style="width:2076px;height:684px;background:#FFFFFF;" width="2076px" height="684px" viewBox="0 0 2076 684" zoomAndPan="magnify" preserveAspectRatio="none" contentStyleType="text/css"><?plantuml 1.2026.9beta4?><defs/><g font-family="sans-serif" lengthAdjust="spacing"><g class="title" data-source-line="1"><text x="636.116" y="22.995" fill="#000" font-size="14" textLength="797.371" font-weight="700" font-family="'Segoe UI', 'Arial', sans-serif">UC-01 - Sơ đồ Use Case: Duyệt Thực đơn, Tìm kiếm, Lọc Danh mục &amp; Xem Chi tiết Món (FR-01, FR-02)</text></g><!--cluster System--><g class="cluster" data-qualified-name="System" id="ent0005" data-source-line="37"><rect x="253.32" y="44.297" width="1407.02" height="510" fill="#FFF" style="stroke:#000;stroke-width:1;" rx="4" ry="4"/><text x="665.154" y="59.292" fill="#000" font-size="14" textLength="583.352" font-weight="700" font-family="'Segoe UI', 'Arial', sans-serif">BrewLite - Phân hệ Thực đơn, Lọc danh mục &amp; Chi tiết món (FR-01, FR-02)</text></g><!--entity UC_BrowseMenu--><g class="entity" data-qualified-name="System.UC_BrowseMenu" id="ent0006" data-source-line="38"><ellipse cx="428.488" cy="303.3" rx="159.168" ry="34.234" fill="#FFF" style="stroke:#000;stroke-width:0.5;"/><text x="277.728" y="307.949" fill="#000" font-size="14" textLength="301.52" font-family="'Segoe UI', 'Arial', sans-serif">UC-01.1: Xem danh sách thực đơn đồ uống</text><text x="349.605" y="324.246" fill="#000" font-size="14" textLength="157.767" font-family="'Segoe UI', 'Arial', sans-serif">(GET /api/v1/products)</text></g><!--entity UC_FilterCategory--><g class="entity" data-qualified-name="System.UC_FilterCategory" id="ent0007" data-source-line="39"><ellipse cx="1010.403" cy="502.295" rx="168.643" ry="36.129" fill="#FFF" style="stroke:#000;stroke-width:0.5;"/><text x="879.734" y="494.732" fill="#000" font-size="14" textLength="261.338" font-family="'Segoe UI', 'Arial', sans-serif">UC-01.2: Lọc đồ uống theo danh mục</text><text x="856.468" y="511.029" fill="#000" font-size="14" textLength="307.87" font-family="'Segoe UI', 'Arial', sans-serif">(?category=COFFEE, TEA, FREEZE, PASTRY)</text></g><!--entity UC_SearchKeyword--><g class="entity" data-qualified-name="System.UC_SearchKeyword" id="ent0008" data-source-line="40"><ellipse cx="1010.401" cy="367.295" rx="181.741" ry="38.748" fill="#FFF" style="stroke:#000;stroke-width:0.5;"/><text x="836.365" y="371.944" fill="#000" font-size="14" textLength="348.072" font-family="'Segoe UI', 'Arial', sans-serif">UC-01.3: Tìm kiếm đồ uống theo từ khóa tên món</text><text x="896.966" y="388.24" fill="#000" font-size="14" textLength="226.871" font-family="'Segoe UI', 'Arial', sans-serif">(?search=... | Debounce 300ms)</text></g><!--entity UC_ViewDetail--><g class="entity" data-qualified-name="System.UC_ViewDetail" id="ent0009" data-source-line="41"><ellipse cx="1010.402" cy="237.293" rx="141.982" ry="30.796" fill="#FFF" style="stroke:#000;stroke-width:0.5;"/><text x="883.67" y="238.679" fill="#000" font-size="14" textLength="253.463" font-family="'Segoe UI', 'Arial', sans-serif">UC-01.4: Xem thông tin chi tiết món</text><text x="920.414" y="254.976" fill="#000" font-size="14" textLength="179.977" font-family="'Segoe UI', 'Arial', sans-serif">(GET /api/v1/products/:id)</text></g><!--entity UC_CheckStock--><g class="entity" data-qualified-name="System.UC_CheckStock" id="ent0010" data-source-line="43"><ellipse cx="1490.74" cy="237.297" rx="153.6" ry="33.12" fill="#FFF" style="stroke:#000;stroke-width:0.5;"/><text x="1360.608" y="234.933" fill="#000" font-size="14" textLength="260.265" font-family="'Segoe UI', 'Arial', sans-serif">Kiểm tra trạng thái tồn kho khả dụng</text><text x="1367.929" y="251.23" fill="#000" font-size="14" textLength="245.622" font-family="'Segoe UI', 'Arial', sans-serif">(availableStock từ nguyên liệu thô)</text></g><!--entity UC_HandleUIState--><g class="entity" data-qualified-name="System.UC_HandleUIState" id="ent0011" data-source-line="44"><ellipse cx="1010.396" cy="113.296" rx="155.846" ry="33.569" fill="#FFF" style="stroke:#000;stroke-width:0.5;"/><text x="872.839" y="112.766" fill="#000" font-size="14" textLength="275.112" font-family="'Segoe UI', 'Arial', sans-serif">Xử lý phản hồi 3 trạng thái giao diện UI</text><text x="891.731" y="129.063" fill="#000" font-size="14" textLength="237.33" font-family="'Segoe UI', 'Arial', sans-serif">(Skeleton Shimmer, Empty, Error)</text></g><!--entity Guest--><g class="entity" data-qualified-name="Guest" id="ent0001" data-source-line="32"><ellipse cx="97.164" cy="265.497" rx="8" ry="8" fill="#FFF" style="stroke:#000;stroke-width:0.5;"/><path d="M97.164,273.497 L97.164,300.497 M84.164,281.497 L110.164,281.497 M97.164,300.497 L84.164,315.497 M97.164,300.497 L110.164,315.497" style="stroke:#000;stroke-width:0.5;" fill="none"/><text x="25.79" y="329.992" fill="#000" font-size="14" textLength="142.748" font-family="'Segoe UI', 'Arial', sans-serif">Khách hàng vãng lai</text><text x="25.79" y="346.289" fill="#000" font-size="14" textLength="52.042" font-family="'Segoe UI', 'Arial', sans-serif">(Guest)</text></g><!--entity Customer--><g class="entity" data-qualified-name="Customer" id="ent0002" data-source-line="33"><ellipse cx="97.161" cy="418.497" rx="8" ry="8" fill="#FFF" style="stroke:#000;stroke-width:0.5;"/><path d="M97.161,426.497 L97.161,453.497 M84.161,434.497 L110.161,434.497 M97.161,453.497 L84.161,468.497 M97.161,453.497 L110.161,468.497" style="stroke:#000;stroke-width:0.5;" fill="none"/><text x="6" y="482.992" fill="#000" font-size="14" textLength="162.114" font-family="'Segoe UI', 'Arial', sans-serif">Khách hàng thành viên</text><text x="6" y="499.289" fill="#000" font-size="14" textLength="182.321" font-family="'Segoe UI', 'Arial', sans-serif">(Authenticated Customer)</text></g><g class="entity" data-qualified-name="GMN20" id="ent0021" data-source-line="57"><path d="M1725.34,190.897 L1725.34,233.297 L1644.67,237.297 L1725.34,241.297 L1725.34,283.694 A4,4 0 0 0 1729.34,287.694 L2057.603,287.694 A4,4 0 0 0 2061.603,283.694 L2061.603,196.897 L2051.603,186.897 L1729.34,186.897 A4,4 0 0 0 1725.34,190.897" style="stroke:#181818;stroke-width:0.5;" fill="#FAFAFA"/><path d="M2051.603,186.897 L2051.603,194.897 A2,2 0 0 0 2053.603,196.897 L2061.603,196.897 L2051.603,186.897" style="stroke:#181818;stroke-width:0.5;" fill="#FAFAFA"/><text x="1731.34" y="203.964" fill="#000" font-size="13" textLength="172.536" font-family="'Segoe UI', 'Arial', sans-serif">Định mức nguyên liệu thô:</text><text x="1731.34" y="219.097" fill="#000" font-size="13" textLength="288.317" font-family="'Segoe UI', 'Arial', sans-serif">availableStock tính động theo thời gian thực</text><text x="1731.34" y="234.229" fill="#000" font-size="13" textLength="315.263" font-family="'Segoe UI', 'Arial', sans-serif">từ tồn kho Ingredient chia định mức RecipeItem.</text><text x="1731.34" y="249.362" fill="#000" font-size="13" textLength="167.451" font-family="'Segoe UI', 'Arial', sans-serif">Nếu availableStock == 0:</text><text x="1731.34" y="264.495" fill="#000" font-size="13" textLength="314.571" font-family="'Segoe UI', 'Arial', sans-serif">Tự động mờ thẻ món 50%, gắn nhãn "Hết hàng"</text><text x="1731.34" y="279.628" fill="#000" font-size="13" textLength="263.485" font-family="'Segoe UI', 'Arial', sans-serif">và vô hiệu hóa (disabled) nút chọn món.</text></g><!--reverse link Guest to Customer--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk4" data-source-line="35" data-link-type="extension"><path d="M97.16,367.837 C97.16,387.787 97.16,389.737 97.16,409.677" style="stroke:#000;stroke-width:1;" fill="none" id="Guest-backto-Customer"/><polygon points="97.16,349.837,91.16,367.837,103.16,367.837,97.16,349.837" fill="none" style="stroke:#000;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/></g><!--link Guest to UC_BrowseMenu--><g class="link" data-entity-1="ent0001" data-entity-2="ent0006" id="lnk12" data-source-line="47" data-link-type="association"><path d="M168.81,303.297 C198.29,303.297 233.83,303.297 268.98,303.297" style="stroke:#000;stroke-width:1;" fill="none" id="Guest-UC_BrowseMenu"/></g><!--reverse link UC_BrowseMenu to UC_FilterCategory--><g class="link" data-entity-1="ent0006" data-entity-2="ent0007" id="lnk14" data-source-line="49" data-link-type="dependency"><path d="M483.096,338.859 C522.056,363.489 574.32,393.697 627.66,414.297 C706.96,444.927 799.84,466.627 874.12,480.817" style="stroke:#000;stroke-width:1;stroke-dasharray:7,7;" fill="none" id="UC_BrowseMenu-backto-UC_FilterCategory"/><polygon points="478.87,336.187,484.34,344.377,483.096,338.859,488.615,337.615,478.87,336.187" fill="#000" style="stroke:#000;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/><text x="677.624" y="395.364" fill="#000" font-size="13" textLength="61.185" font-family="'Segoe UI', 'Arial', sans-serif">«extend»</text><text x="639.16" y="410.497" fill="#000" font-size="13" textLength="138.112" font-family="'Segoe UI', 'Arial', sans-serif">(Chọn tab danh mục)</text></g><!--reverse link UC_BrowseMenu to UC_SearchKeyword--><g class="link" data-entity-1="ent0006" data-entity-2="ent0008" id="lnk16" data-source-line="50" data-link-type="dependency"><path d="M527.765,332.45 C560.585,341.09 593.06,348.357 627.66,353.297 C692.82,362.607 764.83,366.797 828.59,368.447" style="stroke:#000;stroke-width:1;stroke-dasharray:7,7;" fill="none" id="UC_BrowseMenu-backto-UC_SearchKeyword"/><polygon points="522.93,331.177,530.615,337.336,527.765,332.45,532.652,329.6,522.93,331.177" fill="#000" style="stroke:#000;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/><text x="677.594" y="334.364" fill="#000" font-size="13" textLength="61.185" font-family="'Segoe UI', 'Arial', sans-serif">«extend»</text><text x="628.66" y="349.497" fill="#000" font-size="13" textLength="159.053" font-family="'Segoe UI', 'Arial', sans-serif">(Nhập từ khóa tìm kiếm)</text></g><!--link UC_BrowseMenu to UC_ViewDetail--><g class="link" data-entity-1="ent0006" data-entity-2="ent0009" id="lnk17" data-source-line="52" data-link-type="dependency"><path d="M569.87,287.317 C665.74,276.407 786.682,262.642 879.152,252.122" style="stroke:#000;stroke-width:1;stroke-dasharray:7,7;" fill="none" id="UC_BrowseMenu-to-UC_ViewDetail"/><polygon points="884.12,251.557,874.726,248.6,879.152,252.122,875.63,256.549,884.12,251.557" fill="#000" style="stroke:#000;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/><text x="676.755" y="244.364" fill="#000" font-size="13" textLength="63.007" font-family="'Segoe UI', 'Arial', sans-serif">«include»</text><text x="629.16" y="259.497" fill="#000" font-size="13" textLength="158.196" font-family="'Segoe UI', 'Arial', sans-serif">(Chọn xem chi tiết món)</text></g><!--link UC_ViewDetail to UC_CheckStock--><g class="link" data-entity-1="ent0009" data-entity-2="ent0010" id="lnk18" data-source-line="53" data-link-type="dependency"><path d="M1152.65,237.297 C1210.52,237.297 1272.62,237.297 1331.65,237.297" style="stroke:#000;stroke-width:1;stroke-dasharray:7,7;" fill="none" id="UC_ViewDetail-to-UC_CheckStock"/><polygon points="1336.65,237.297,1327.65,233.297,1331.65,237.297,1327.65,241.297,1336.65,237.297" fill="#000" style="stroke:#000;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/><text x="1233.14" y="233.364" fill="#000" font-size="13" textLength="63.007" font-family="'Segoe UI', 'Arial', sans-serif">«include»</text></g><!--link UC_BrowseMenu to UC_HandleUIState--><g class="link" data-entity-1="ent0006" data-entity-2="ent0011" id="lnk19" data-source-line="54" data-link-type="dependency"><path d="M494.55,271.777 C532.75,254.027 582.29,232.277 627.66,216.297 C718.63,184.257 819.87,157.541 897.09,138.891" style="stroke:#000;stroke-width:1;stroke-dasharray:7,7;" fill="none" id="UC_BrowseMenu-to-UC_HandleUIState"/><polygon points="901.95,137.717,892.262,135.942,897.09,138.891,894.141,143.718,901.95,137.717" fill="#000" style="stroke:#000;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/><text x="676.66" y="165.364" fill="#000" font-size="13" textLength="63.007" font-family="'Segoe UI', 'Arial', sans-serif">«include»</text></g><g class="legend" data-source-line="65"><rect x="632.821" y="574.297" width="803.96" height="91.484" fill="none" style="stroke:#000;stroke-width:1;" rx="4" ry="4"/><text x="637.821" y="592.292" fill="#000" font-size="14" textLength="512.477" font-family="'Segoe UI', 'Arial', sans-serif">Ghi chú nghiệp vụ Chức năng 1 (Phương Duy phụ trách - Task 1.2 &amp; 1.3):</text><text x="637.821" y="608.589" fill="#000" font-size="14" textLength="687.381" font-family="'Segoe UI', 'Arial', sans-serif">- Khách hàng (Guest/Customer) duyệt thực đơn đồ uống trên giao diện Mobile-first PWA mượt mà.</text><text x="637.821" y="624.886" fill="#000" font-size="14" textLength="738.664" font-family="'Segoe UI', 'Arial', sans-serif">- Hỗ trợ lọc theo 4 nhóm danh mục và tìm kiếm tên món không phân biệt hoa/thường, có dấu/không dấu.</text><text x="637.821" y="641.183" fill="#000" font-size="14" textLength="737.427" font-family="'Segoe UI', 'Arial', sans-serif">- Kiểm soát tồn kho an toàn: CSDL không lưu số ly pha sẵn mà kiểm tra số lượng nguyên liệu thô thực tế.</text><text x="637.821" y="657.479" fill="#000" font-size="14" textLength="793.96" font-family="'Segoe UI', 'Arial', sans-serif">- Quản lý 3 trạng thái UI: Skeleton Loading giữ ổn định layout, Empty State khi rỗng và Error State có nút Thử lại.</text></g><?plantuml-src hLPTQnj757tVNt4HjDYWBoTf2I9sSMGvCN5IrxBRj1JAQ7UyEsXtHipEsX5Dd_AGXn9eC2Nq8M3NvA4V8IbENxIKFcpm_zX_qdjdPMcbAD276EJzchddtdFFFRj6c933VhlMN84QT2zEuUtJF3s6_PX3cyMy1Hl9C4yV6zWBylGl5nzVdCegx6L_Hj0N-UZVg0hRUVh4XGqc0uZoz8KB7yDz7a4x461eYO6xsRc4fSrTXAa27QuiEqx83mmO1LhuWG5FQEuQeQGJzuKSCCqYY9HKRg1LnC7eX9UUn07pr96GFXomC2u_wJ6txskLIA-jGgNXA12c_DpZ1om9pQQIvXx3m9KkznLIi5MfGcLT2nRYISnaN8kv5WUbdGECp7pUDKEaZ99bqW_BeIsggxJa6gwNxalbyPWFuDDcUJ6JVRfvlUcKxZBNOCxVEu1_DvNsk2wgw8K8NjnTM1yzePBAgtye1qvYxc8_Fr1ekhUkjJfwBzw4dmzNJC5DvKwGdRe11Da9TlymEyF_8HFVogLR2O_DSWLO3FPquGP3Xm0EHVQxn3thYGcuDC9bXdlGJcA3OjD5aCihnxayWnffjlPmRGpWJAkitDJyQ1kpnp7Q2R9V9U2yF9wRcc9GlFAWb8OaUdT8R1xTOMnmd0eUB_jOiJDRNsdPKRCXOrkcAI6EXpd9qwVI9uOwUz1W0z4uN6aCjF8IryG5ndxxkvlOpfZVvJ9P17IbDSw-71B1k2hLWn2V4PE-qiFLzkURcvqEMaLddShfTBx1YvtrxjxkrnFCJH4QLCLuooBSgwsoron0Dtdw1_I3x9o1mPvQ5YcFc3Fj1glrUXqUmWRleSXS3bURpMXQSjUkkSE7HwZEHUZN2dfHD6y8JqXmP_lr7b8RBU5DKBuK_6Y36oP2PnRZZiZJHnXTO-ew7vqMyZmLLDEnnA8K_lBH6NX8hcqWEyGeh1UY2IctNzGk_MH8XOSOxN5YSvr0jmFkzktQMUJxUVeImkmV651ygzLZ0LVdql05m-vIM8d-YF3TFW-vKHAwWOXm7ghGYGPcY0Vq0Zr1lSsa5_BzhQx1njBascc1McrEPiux2e1wCgYlpIw35joumHyOBhsrDKoYZSa-aM1OhwIyPMU-dVydr3si_kLWLa8JhItR_4gRwqMuQJjjE27TCF5uERK7A9avdTZyIZl7iQRzcOsr67c6rxaDZbHuhtYLgeDtUl_sfppziI3hDtUHP5guQ5vTsKlSGHFtosJOiC3dLXXoR3IupT8tbUoMz3Nt1BegaS1iW2dqBdV5W6-XeTLnwpqaA9d7NLs59gMpX_4dyBZxEK6Eqi8dFsb-L0K_7xsI80Dy2K3bjYNRkdm5Tnzc9_Xx0q5He-tkaYTYml6MGMOZoi_sYmBM7HG548dqOUBJHKyPT7qCTGjxwGRP27cpqGPmY9e3wZQH-VOHvhS2Ipl1nUiBcXxyPAB1mYL6Mq-kmHwB-u0kYewFdhPCvTLWviLKlBuQarSGUECFh_SQEaN79fQdzAxgYP3N3eJ6UTlvQXsYYzTvUaOQFAbRpDjv-ep6F3s3qFgvxUir8l4yAh-QYB_ID4pDbIQ5t71Wtt8zOPCC56kOWC2UIxyARdQEfZLwaJJ6Y-r5aS7OzMALdPgIR4XH2fbeGRkxiNq94bwyJY36SY4aJXcUZ_wcF4uehqltB1ROKd7F0dLVacYmb2ABBn9hVEI1yxQtlzM2YTDjA-RHPwQFmLv1dlui9u8EsL0bPko1K0nb7wM2v3wpdoOdXI-E7n4dLdNqJO3kYv32ggwGsty0?></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" width="1120" height="560" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <marker id="arrow-open" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9" fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arrow-inherit" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="9" markerHeight="9" orient="auto">
+      <polygon points="0 1, 11 6, 0 11" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    </marker>
+    <style>
+      .title { font-size: 16px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .boundary-box { fill: #ffffff; stroke: #000000; stroke-width: 1.8; rx: 8; ry: 8; }
+      .boundary-title { font-size: 12.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .actor-title { font-size: 11.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .actor-sub { font-size: 10px; fill: #000000; text-anchor: middle; }
+      .uc-ellipse { fill: #ffffff; stroke: #000000; stroke-width: 1.6; }
+      .uc-title { font-size: 11px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .uc-sub { font-size: 9.5px; fill: #000000; text-anchor: middle; }
+      .assoc-line { stroke: #000000; stroke-width: 1.5; fill: none; }
+      .inherit-line { stroke: #000000; stroke-width: 1.5; fill: none; marker-end: url(#arrow-inherit); }
+      .dep-line { stroke: #000000; stroke-width: 1.3; stroke-dasharray: 5,3; fill: none; marker-end: url(#arrow-open); }
+      .rel-tag-bg { fill: #ffffff; stroke: #000000; stroke-width: 0.8; rx: 3; ry: 3; }
+      .rel-label { font-size: 9.5px; font-style: italic; font-weight: 600; fill: #000000; text-anchor: middle; }
+      .legend-box { fill: #ffffff; stroke: #000000; stroke-width: 1.2; rx: 5; ry: 5; }
+      .legend-title { font-size: 11px; font-weight: 700; fill: #000000; }
+      .legend-text { font-size: 10px; fill: #000000; }
+    </style>
+  </defs>
+
+  <!-- White Canvas -->
+  <rect width="100%" height="100%" fill="#ffffff"/>
+
+  <!-- Diagram Title -->
+  <text x="560" y="28" class="title">UC-01 - Sơ đồ Use Case: Duyệt Thực đơn, Tìm kiếm, Lọc Danh mục &amp; Xem Chi tiết Món (FR-01, FR-02)</text>
+
+  <!-- System Boundary -->
+  <rect x="220" y="48" width="840" height="395" class="boundary-box"/>
+  <text x="640" y="70" class="boundary-title">BrewLite - Phân hệ Thực đơn, Lọc danh mục &amp; Chi tiết món (FR-01, FR-02)</text>
+
+  <!-- Left Top Actor: Guest -->
+  <g transform="translate(105, 165)">
+    <circle cx="0" cy="-24" r="13" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+    <line x1="0" y1="-11" x2="0" y2="24" stroke="#000000" stroke-width="1.8"/>
+    <line x1="-20" y1="2" x2="20" y2="2" stroke="#000000" stroke-width="1.8"/>
+    <line x1="0" y1="24" x2="-15" y2="54" stroke="#000000" stroke-width="1.8"/>
+    <line x1="0" y1="24" x2="15" y2="54" stroke="#000000" stroke-width="1.8"/>
+    <text x="0" y="72" class="actor-title">Khách vãng lai</text>
+    <text x="0" y="86" class="actor-sub">(Guest Customer)</text>
+  </g>
+
+  <!-- Left Bottom Actor: Authenticated Customer -->
+  <g transform="translate(105, 345)">
+    <circle cx="0" cy="-24" r="13" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+    <line x1="0" y1="-11" x2="0" y2="24" stroke="#000000" stroke-width="1.8"/>
+    <line x1="-20" y1="2" x2="20" y2="2" stroke="#000000" stroke-width="1.8"/>
+    <line x1="0" y1="24" x2="-15" y2="54" stroke="#000000" stroke-width="1.8"/>
+    <line x1="0" y1="24" x2="15" y2="54" stroke="#000000" stroke-width="1.8"/>
+    <text x="0" y="72" class="actor-title">Khách thành viên</text>
+    <text x="0" y="86" class="actor-sub">(Authenticated Customer)</text>
+  </g>
+
+  <!-- Generalization: Customer inherits Guest -->
+  <line x1="105" y1="305" x2="105" y2="262" class="inherit-line"/>
+
+  <!-- Column 1 Use Cases (x = 415) -->
+  <!-- UC-01.1: Browse Menu -->
+  <g transform="translate(415, 195)">
+    <ellipse cx="0" cy="0" rx="155" ry="28" class="uc-ellipse"/>
+    <text x="0" y="-4" class="uc-title">UC-01.1: Xem danh sách thực đơn đồ uống</text>
+    <text x="0" y="11" class="uc-sub">(GET /api/v1/products)</text>
+  </g>
+
+  <!-- UC-01.4: View Product Detail -->
+  <g transform="translate(415, 345)">
+    <ellipse cx="0" cy="0" rx="155" ry="28" class="uc-ellipse"/>
+    <text x="0" y="-4" class="uc-title">UC-01.4: Xem thông tin chi tiết món</text>
+    <text x="0" y="11" class="uc-sub">&amp; Mở Modal tùy biến (GET /api/v1/products/:id)</text>
+  </g>
+
+  <!-- Column 2 Use Cases (x = 855) -->
+  <!-- UC-01.2: Filter Category (extends UC-01.1) -->
+  <g transform="translate(855, 115)">
+    <ellipse cx="0" cy="0" rx="165" ry="27" class="uc-ellipse"/>
+    <text x="0" y="-4" class="uc-title">UC-01.2: Lọc đồ uống theo danh mục</text>
+    <text x="0" y="11" class="uc-sub">(?category=COFFEE, TEA, FREEZE, PASTRY)</text>
+  </g>
+
+  <!-- UC-01.3: Search Keyword (extends UC-01.1) -->
+  <g transform="translate(855, 210)">
+    <ellipse cx="0" cy="0" rx="165" ry="27" class="uc-ellipse"/>
+    <text x="0" y="-4" class="uc-title">UC-01.3: Tìm kiếm đồ uống theo từ khóa</text>
+    <text x="0" y="11" class="uc-sub">(?search=... | Debounce 300ms)</text>
+  </g>
+
+  <!-- Included UC: Check Available Stock -->
+  <g transform="translate(855, 335)">
+    <ellipse cx="0" cy="0" rx="165" ry="28" class="uc-ellipse"/>
+    <text x="0" y="-4" class="uc-title">Kiểm tra tồn kho khả dụng theo thời gian thực</text>
+    <text x="0" y="11" class="uc-sub">(availableStock từ Ingredient &amp; RecipeItem)</text>
+  </g>
+
+  <!-- Solid Association Lines -->
+  <line x1="135" y1="165" x2="260" y2="190" class="assoc-line"/>
+  <line x1="135" y1="185" x2="270" y2="335" class="assoc-line"/>
+
+  <!-- <<extend>> Relationships (UC-01.2 -> UC-01.1, UC-01.3 -> UC-01.1) -->
+  <line x1="690" y1="120" x2="555" y2="178" class="dep-line"/>
+  <rect x="572" y="130" width="142" height="17" class="rel-tag-bg"/>
+  <text x="643" y="142" class="rel-label">&lt;&lt;extend&gt;&gt; [Chọn danh mục]</text>
+
+  <line x1="690" y1="208" x2="570" y2="198" class="dep-line"/>
+  <rect x="576" y="193" width="136" height="17" class="rel-tag-bg"/>
+  <text x="644" y="205" class="rel-label">&lt;&lt;extend&gt;&gt; [Nhập từ khóa]</text>
+
+  <!-- <<include>> Relationships (UC-01.1 -> CheckStock, UC-01.4 -> CheckStock) -->
+  <line x1="540" y1="212" x2="715" y2="318" class="dep-line"/>
+  <rect x="595" y="256" width="66" height="16" class="rel-tag-bg"/>
+  <text x="628" y="268" class="rel-label">&lt;&lt;include&gt;&gt;</text>
+
+  <line x1="570" y1="345" x2="690" y2="340" class="dep-line"/>
+  <rect x="597" y="334" width="66" height="16" class="rel-tag-bg"/>
+  <text x="630" y="346" class="rel-label">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- Legend Box -->
+  <rect x="120" y="458" width="880" height="84" class="legend-box"/>
+  <text x="138" y="476" class="legend-title">Ghi chú nghiệp vụ Chức năng 1 (Phương Duy - Dev Team | Chuẩn đơn sắc đen-trắng phục vụ in ấn báo cáo LaTeX):</text>
+  <text x="138" y="494" class="legend-text">• Khách hàng (Guest &amp; Thành viên) tự do duyệt thực đơn, lọc theo 4 danh mục (COFFEE, TEA, FREEZE, PASTRY) và tìm kiếm có Debounce 300ms.</text>
+  <text x="138" y="511" class="legend-text">• Kiểm soát tồn kho nguyên liệu thô: availableStock = min(floor(Ingredient.stockQuantity / RecipeItem.quantityRequired)).</text>
+  <text x="138" y="528" class="legend-text">• Chốt chặn tồn kho phía Client: Món có availableStock == 0 tự động mờ 50%, gắn nhãn "Hết hàng (Sold Out)" và khóa (disabled) nút chọn món.</text>
+</svg>

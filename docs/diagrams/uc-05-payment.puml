@@ -1,43 +1,35 @@
 @startuml uc-05-payment
-title UC-05 - Sơ đồ Use Case: Thanh toán Mô phỏng & Chống Trừ tiền Trùng lặp (Idempotency)
-
-skinparam monochrome true
-skinparam shadowing false
-skinparam defaultFontName "Segoe UI", "Arial", sans-serif
-skinparam roundcorner 10
-skinparam actorStyle stickman
-skinparam packageStyle rectangle
-
-skinparam usecase {
-    BorderColor black
-    BackgroundColor white
-    ArrowColor black
-}
-
-skinparam actor {
-    BorderColor black
-    BackgroundColor white
-}
+title UC-05 - Sơ đồ Use Case: Thanh toán Sandbox/Webhook 2 Bước & Chống Trừ tiền Trùng lặp (FR-06)
 
 left to right direction
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+skinparam packageStyle rectangle
 
 actor "Khách hàng đã đăng nhập\n(Authenticated Customer)" as Customer
-actor "Cổng thanh toán Mô phỏng\n(Mock Payment Gateway)" as MockGateway
+actor "Cổng Thanh toán Sandbox\n(Mock Payment Gateway)" as MockGateway
 
-rectangle "BrewLite - Phân hệ Thanh toán & Chống Trừ tiền Trùng lặp (FR-06)" as System {
-    usecase "UC-05.1: Thanh toán đơn hàng qua Ví / Thẻ\n(Ví MoMo, VNPay, Thẻ ATM)" as UC_Pay
-    usecase "UC-05.2: Kiểm tra chống trừ tiền trùng lặp\n(Idempotency-Key Check)" as UC_Idempotency
-    usecase "Xác thực giao dịch qua Cổng thanh toán\n(Mô phỏng Sandbox Gateway)" as UC_GatewayAuth
-    usecase "UC-05.3: Hủy đơn & Hoàn trả tồn kho\n(Restock Rollback khi giao dịch lỗi)" as UC_Rollback
+rectangle "BrewLite - Phân hệ Thanh toán 2 Bước & Chống Trừ tiền Trùng lặp (FR-06)" as System {
+    usecase "UC-05.1: Khởi tạo & Thực hiện thanh toán\n(POST /api/v1/payments -> Payment PENDING)" as UC_Pay
+    usecase "UC-05.2: Kiểm tra chống trừ tiền trùng lặp\n(Idempotency-Key UUIDv4 Check)" as UC_Idempotency
+    usecase "UC-05.3: Xác thực giao dịch 2 bước\n& Đối soát Webhook Callback (-> Order PAID)" as UC_GatewayAuth
+    usecase "UC-05.4: Hủy đơn & Hoàn trả tồn kho nguyên liệu\n(Restock Rollback Ingredient khi giao dịch lỗi)" as UC_Rollback
 }
 
-Customer --> UC_Pay
-Customer --> UC_Rollback
+Customer -- UC_Pay
 
 UC_Pay ..> UC_Idempotency : <<include>>
 UC_Pay ..> UC_GatewayAuth : <<include>>
-UC_Rollback ..> UC_Pay : <<extend>>
+UC_Rollback .up.> UC_Pay : <<extend>>\n[Thanh toán thất bại / Quá hạn 15p]
 
-MockGateway --> UC_GatewayAuth
+UC_GatewayAuth -- MockGateway
 
+legend bottom
+  Ghi chú nghiệp vụ Chức năng 5 - Use Case Trọng tâm Phần 2 (Quang - Dev Team | Chuẩn đơn sắc đen-trắng):
+  • Chống trừ tiền trùng lặp (Idempotency): Kiểm tra UNIQUE INDEX trên cột idempotencyKey; nếu gửi trùng trong 24h sẽ trả về kết quả cũ (200 OK).
+  • Quy trình 2 bước nghiêm ngặt: Không tự ý gán Order = PAID một chiều; chỉ chuyển sang PAID khi nhận Webhook Callback hợp lệ từ Sandbox Gateway.
+  • Hoàn kho nguyên tử (Restock Rollback): Khi thanh toán lỗi/timeout, tự động chuyển Order = CANCELLED và cộng hoàn trả 100% Ingredient.stockQuantity.
+endlegend
 @enduml
