@@ -6,7 +6,7 @@
     <style>
       .title { font-size: 16px; font-weight: 700; fill: #000000; text-anchor: middle; }
       .boundary-box { fill: #ffffff; stroke: #000000; stroke-width: 1.8; rx: 8; ry: 8; }
-      .boundary-title { font-size: 12.5px; font-weight: 700; fill: #000000; }
+      .boundary-title { font-size: 12.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
       .actor-title { font-size: 11.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
       .actor-sub { font-size: 10px; fill: #000000; text-anchor: middle; }
       .uc-ellipse { fill: #ffffff; stroke: #000000; stroke-width: 1.6; }
@@ -30,7 +30,7 @@
 
   <!-- System Boundary -->
   <rect x="200" y="48" width="720" height="395" class="boundary-box"/>
-  <text x="218" y="70" class="boundary-title">BrewLite - Phân hệ Biên nhận, Lịch sử Đơn, Trạng thái &amp; Điểm thưởng Loyalty (FR-07, FR-08, FR-10)</text>
+  <text x="560" y="70" class="boundary-title">BrewLite - Phân hệ Biên nhận, Lịch sử Đơn, Trạng thái &amp; Điểm thưởng Loyalty (FR-07, FR-08, FR-10)</text>
 
   <!-- Left Actor: Khách hàng đã đăng nhập -->
   <g transform="translate(95, 195)">
@@ -133,10 +133,10 @@
   <rect x="380" y="352" width="58" height="15" class="rel-tag-bg"/>
   <text x="409" y="363" class="rel-label">&lt;&lt;extend&gt;&gt;</text>
 
-  <!-- Legend Box (Monochrome) -->
-  <rect x="200" y="458" width="720" height="84" class="legend-box"/>
-  <text x="216" y="476" class="legend-title">Ghi chú nghiệp vụ Chức năng 6 (Sang - Scrum Master | Chuẩn đơn sắc đen-trắng phục vụ in ấn báo cáo LaTeX):</text>
-  <text x="216" y="494" class="legend-text">• Sau khi đơn hàng chuyển sang PAID (UC-05), hệ thống tự động cộng điểm thưởng (EARN: mỗi 10.000đ = +1 điểm) vào LoyaltyTransaction.</text>
-  <text x="216" y="511" class="legend-text">• Khách hàng chỉ xem được biên nhận và lịch sử đơn thuộc đúng userId của mình (chống truy cập chéo IDOR -> trả về 403 Forbidden).</text>
-  <text x="216" y="528" class="legend-text">• Nhân viên pha chế / Quản lý cập nhật tiến trình đơn (PAID → PREPARING → COMPLETED); thanh OrderStatusStepper cập nhật tương ứng.</text>
+  <!-- Legend Box (Widened to 880px so text never overflows the right border) -->
+  <rect x="120" y="458" width="880" height="84" class="legend-box"/>
+  <text x="138" y="476" class="legend-title">Ghi chú nghiệp vụ Chức năng 6 (Sang - Scrum Master | Chuẩn đơn sắc đen-trắng phục vụ in ấn báo cáo LaTeX):</text>
+  <text x="138" y="494" class="legend-text">• Sau khi đơn hàng chuyển sang PAID (UC-05), hệ thống tự động cộng điểm thưởng (EARN: mỗi 10.000đ = +1 điểm) vào LoyaltyTransaction.</text>
+  <text x="138" y="511" class="legend-text">• Khách hàng chỉ xem được biên nhận và lịch sử đơn thuộc đúng userId của mình (chống truy cập chéo IDOR → trả về 403 Forbidden).</text>
+  <text x="138" y="528" class="legend-text">• Nhân viên pha chế / Quản lý cập nhật tiến trình đơn (PAID → PREPARING → COMPLETED); thanh OrderStatusStepper cập nhật tương ứng.</text>
 </svg>
