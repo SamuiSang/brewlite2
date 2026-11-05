@@ -1209,7 +1209,7 @@ Hệ thống cam kết đạt được các trạng thái sau khi Use Case kết
       "amount": 75000,
       "method": "MOMO",
       "status": "PENDING",
-      "paymentUrl": "https://sandbox.brewlite.vn/pay/momo?token=mock_token_123",
+      "paymentUrl": "https://sandbox.brewlite.vn/pay/momo?token=sandbox_token_123",
       "createdAt": "2026-10-31T12:00:00.000Z"
     }
   }
@@ -1227,7 +1227,7 @@ Hệ thống cam kết đạt được các trạng thái sau khi Use Case kết
       "amount": 75000,
       "method": "MOMO",
       "status": "SUCCESS",
-      "transactionRef": "MOCK-MOMO-987654",
+      "transactionRef": "SANDBOX-MOMO-987654",
       "paidAt": "2026-10-31T12:00:15.000Z"
     }
   }
@@ -1241,7 +1241,7 @@ Hệ thống cam kết đạt được các trạng thái sau khi Use Case kết
   ```json
   {
     "orderId": "c3a9f7d2-4e6b-4c8a-9a1d-2b3e4f5a6b7c",
-    "transactionRef": "MOCK-MOMO-987654",
+    "transactionRef": "SANDBOX-MOMO-987654",
     "status": "SUCCESS", // Hoặc "FAILED"
     "amount": 75000,
     "timestamp": 1793450000

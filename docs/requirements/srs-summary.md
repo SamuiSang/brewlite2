@@ -552,7 +552,7 @@ Các tiêu chí nghiệm thu được chuẩn hóa theo định dạng **Given -
   2. Trạng thái của đơn hàng `Order.status` vẫn được giữ nguyên là `PENDING` (tuyệt đối không được gán `PAID` khống).
   3. Cổng thanh toán Sandbox phản hồi kết quả người dùng đã chuyển khoản thành công bằng cách gửi bản tin Webhook Callback `POST /api/v1/payments/webhook` kèm `orderId`, `transactionRef` và chữ ký số hợp lệ.
   4. Backend xác thực chữ ký Webhook thành công và mở một `prisma.$transaction()`:
-     - Cập nhật bản ghi `Payment`: `status = SUCCESS`, `transactionRef = "MOCK-TX-987654"`, `paidAt = DateTime.now()`.
+     - Cập nhật bản ghi `Payment`: `status = SUCCESS`, `transactionRef = "SANDBOX-TX-987654"`, `paidAt = DateTime.now()`.
      - Cập nhật bản ghi `Order`: `status = PAID`.
   5. Trả về mã phản hồi `HTTP 200 OK` cho Webhook và điều hướng Client sang trang `/checkout/success`.
 
