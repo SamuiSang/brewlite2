@@ -1,0 +1,155 @@
+@startuml activity-02-cart
+!pragma useVerticalIf on
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam backgroundColor white
+title Activity-02: Tùy biến món, quản lý giỏ hàng và khuyến mãi
+|Khách hàng|
+start
+:Mở Menu hoặc Giỏ hàng;
+|Next.js UI & Zustand Store|
+:Đọc localStorage trong try/catch;
+if (Đọc được?) then (Có)
+  if (Dữ liệu hợp lệ hoặc chưa có dữ liệu?) then (Có)
+    :Nạp state đã lưu hoặc giỏ rỗng;
+  else (Không)
+    :Khởi tạo giỏ rỗng; thử dọn key hỏng;\nbắt lỗi nếu không xóa được key;
+  endif
+else (Không)
+  :Dùng state trong bộ nhớ hoặc giỏ rỗng;\nbáo không thể khôi phục giỏ đã lưu;
+endif
+:Khi mở /cart: lấy trạng thái mới nhất của\ncác productId từ API sản phẩm (FR-01/02);
+if (Lấy trạng thái thành công?) then (Có)
+  :Đánh dấu dòng ngừng bán / không còn tồn tại;\ncập nhật availableStock;
+else (Không)
+  :Giữ giỏ; báo lỗi và cho thử lại;\nkhóa checkout đến khi kiểm tra được;
+endif
+note right
+  Guest được dùng giỏ hàng, không bắt buộc login.
+  Giá và tồn kho Client chỉ là dữ liệu tham khảo.
+end note
+
+|Khách hàng|
+while (Tiếp tục quản lý giỏ hàng?) is (Có)
+  :Chọn thao tác;
+  |Next.js UI & Zustand Store|
+  if (Tùy biến / thêm món?) then (Có)
+    if (Món đang bán và availableStock > 0?) then (Có)
+      :Mở ProductCustomizationModal;
+      |Khách hàng|
+      :Chọn size S/M/L, topping, đường, đá, quantity;
+      |Next.js UI & Zustand Store|
+      :Cập nhật giá tạm tính theo tùy chọn;
+      if (Xác nhận thêm?) then (Có)
+        :Kiểm tra tùy chọn và quantity nguyên dương;
+        if (Đầu vào hợp lệ và tổng quantity của productId\ntrên mọi dòng + quantity thêm <= availableStock?) then (Có)
+          :Sinh itemKey từ productId, size,\nsortedToppingIds, sugar, ice;
+          if (Đã có itemKey?) then (Có)
+            :Cộng quantity vào dòng hiện có;
+          else (Không)
+            :Thêm CartItem mới;
+          endif
+        else (Không)
+          :Giữ nguyên giỏ; báo lỗi đầu vào / tồn kho;\nkhóa nút tăng khi chạm giới hạn;
+        endif
+      else (Hủy)
+        :Đóng Modal; giữ nguyên giỏ;
+      endif
+    else (Không)
+      :Báo hết hàng / ngừng phục vụ; khóa thêm món;
+    endif
+  elseif (Đổi số lượng / xóa?) then (Có)
+    if (Xóa dòng, xóa tất cả hoặc giảm về 0?) then (Có)
+      :Hiển thị xác nhận xóa;
+      |Khách hàng|
+      if (Đồng ý xóa?) then (Có)
+        |Next.js UI & Zustand Store|
+        :Xóa dòng hoặc toàn bộ giỏ;
+      else (Không)
+        |Next.js UI & Zustand Store|
+        :Giữ nguyên giỏ;
+      endif
+    else (Không)
+      if (quantity mới nguyên dương và tổng quantity\ncủa productId <= availableStock?) then (Có)
+        :Cập nhật quantity;
+      else (Không)
+        :Chặn cập nhật; báo chỉ còn X sản phẩm;
+      endif
+    endif
+  elseif (Áp / đổi mã?) then (Có)
+    if (Giỏ có món?) then (Có)
+      |Khách hàng|
+      :Nhập code và bấm Áp dụng;
+      |Next.js UI & Zustand Store|
+      :Chụp requestCartVersion = cartVersion;\nhiển thị loading; chặn gửi lặp;\nPOST /api/v1/promotions/validate\n{ code, cartSubtotal };
+      |NestJS Promotions API & Database|
+      :ValidationPipe kiểm tra code,\ncartSubtotal hữu hạn và không âm;
+      if (DTO hợp lệ?) then (Có)
+        :Chuẩn hóa code; truy vấn Promotion qua Prisma;
+        if (Truy vấn thành công?) then (Có)
+          if (Tồn tại, isActive, startDate <= now <= endDate,\nusedCount < usageLimit, subtotal >= minOrderValue?) then (Có)
+            :PERCENTAGE: min(subtotal, subtotal * value / 100,\nmaxDiscountAmount nếu có);\nFIXED_AMOUNT: min(value, subtotal);
+            :HTTP 200 { valid, promoId, code, discountAmount,\ndiscountType, discountValue, minOrderValue, maxDiscountAmount };
+            |Next.js UI & Zustand Store|
+            if (requestCartVersion == cartVersion?) then (Có)
+              :Thay mã cũ bằng mã mới; không cộng dồn;
+            else (Không)
+              :Bỏ kết quả cũ; yêu cầu áp lại mã\nvới giỏ hiện tại;
+            endif
+          else (Không)
+            |NestJS Promotions API & Database|
+            :HTTP 400 kèm lý do;
+            |Next.js UI & Zustand Store|
+            :Báo lỗi; giữ mã cũ nếu còn hợp lệ;
+          endif
+        else (Không)
+          |NestJS Promotions API & Database|
+          :HTTP 500;
+          |Next.js UI & Zustand Store|
+          :Báo lỗi máy chủ; giữ giỏ và mã cũ;
+        endif
+      else (Không)
+        |NestJS Promotions API & Database|
+        :HTTP 400 lỗi DTO;
+        |Next.js UI & Zustand Store|
+        :Báo lỗi đầu vào; giữ nguyên giỏ;
+      endif
+      :Kết thúc loading; lỗi mạng / timeout\nđược báo và giữ nguyên giỏ;
+    else (Không)
+      :Hiển thị giỏ rỗng; không gọi API;
+    endif
+  else (Hủy mã)
+    :appliedPromotion = null; discountAmount = 0;
+  endif
+  :Nếu items hoặc mã áp dụng thực sự đổi:\ntăng cartVersion (kể cả subtotal không đổi);\ntính lại subtotal và Cart Badge;
+  if (Giỏ rỗng hoặc không đạt minOrderValue?) then (Có)
+    :Gỡ mã đang áp dụng; discountAmount = 0;
+  else (Không)
+    if (Subtotal đổi và có mã?) then (Có)
+      :Tính lại giảm dự kiến theo mã hiện tại;\nkhông giữ discountAmount của subtotal cũ;
+    endif
+  endif
+  :Thử đồng bộ Zustand xuống localStorage;
+  if (Ghi thành công?) then (Có)
+    :State đã lưu bền vững;
+  else (Không)
+    :Giữ state trong bộ nhớ; báo giỏ chưa lưu được,\ncó thể mất thay đổi khi tải lại trang;
+  endif
+  :Hiển thị tổng dự kiến = max(0, subtotal - discountAmount);
+  |Khách hàng|
+endwhile (Không)
+if (Chọn đặt hàng, giỏ có món, trạng thái đã kiểm tra\nvà không có dòng ngừng bán / không tồn tại?) then (Có)
+  |Next.js UI & Zustand Store|
+  :Bàn giao items và promotionCode sang UC-04;
+  note right
+    UC-02 không giữ / trừ kho, không tăng usedCount.
+    UC-04 tính lại giá, tồn kho và voucher từ DB
+    trong transaction; không tin giá Client gửi.
+  end note
+else (Không)
+  |Next.js UI & Zustand Store|
+  :Giữ giỏ cho lần truy cập sau;
+endif
+stop
+@enduml
