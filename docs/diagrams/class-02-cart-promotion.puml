@@ -1,0 +1,143 @@
+@startuml class-02-cart-promotion
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam backgroundColor white
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide empty members
+title Class-02: Domain giỏ hàng và khuyến mãi
+package "Client Domain — Next.js & Zustand (không phải bảng DB)" as ClientDomain {
+  class Cart <<client model>> {
+    - items: CartItemModel[]
+    - cartVersion: Int
+    - appliedPromotion: AppliedPromotion [0..1]
+    + addItem(product, options, quantity: Int): void
+    + updateQuantity(itemKey: String, quantity: Int): void
+    + removeItem(itemKey: String): void
+    + clearCart(): void
+    + removePromotion(): void
+    + getPreviewSubtotal(): Money
+    + getPreviewTotal(): Money
+    + getBadgeCount(): Int
+  }
+  class CartItemModel <<client model>> {
+    - itemKey: String
+    - productId: UUID
+    - productName: String
+    - basePrice: Money
+    - size: SizeOption
+    - sizePrice: Money
+    - sugar: Int
+    - ice: Int
+    - quantity: Int
+    + getPreviewLineTotal(): Money
+  }
+  class ToppingOption <<value object>> {
+    - id: UUID
+    - name: String
+    - price: Money
+  }
+  enum SizeOption {
+    S
+    M
+    L
+  }
+  class AppliedPromotion <<preview snapshot>> {
+    - promoId: UUID
+    - code: String
+    - discountType: DiscountType
+    - discountValue: MoneyOrPercent
+    - minOrderValue: Money
+    - maxDiscountAmount: Money [0..1]
+    - discountAmount: Money
+  }
+  Cart "1" *-- "0..*" CartItemModel : items
+  Cart "1" *-- "0..1" AppliedPromotion : mã duy nhất
+  CartItemModel "0..*" --> "0..*" ToppingOption : toppings
+  CartItemModel --> SizeOption
+}
+
+package "Server Domain — NestJS & PostgreSQL" as ServerDomain {
+  class Promotion <<entity>> {
+    - id: UUID
+    - code: String {unique}
+    - discountType: DiscountType
+    - discountValue: Decimal
+    - minOrderValue: Decimal
+    - maxDiscountAmount: Decimal [0..1]
+    - usageLimit: Int
+    - usedCount: Int
+    - startDate: DateTime
+    - endDate: DateTime
+    - isActive: Boolean
+    + isValid(orderSubtotal: Decimal, currentTime: DateTime): Boolean
+    + calculateDiscount(orderSubtotal: Decimal): Decimal
+  }
+  enum DiscountType {
+    PERCENTAGE
+    FIXED_AMOUNT
+  }
+  class Product <<external entity>> {
+    - id: UUID
+    - basePrice: Decimal
+    - isAvailable: Boolean
+    / availableStock: Int
+  }
+  class Order <<external entity>> {
+    - id: UUID
+    - promotionId: UUID [0..1]
+  }
+  Promotion --> DiscountType
+  Order "0..*" --> "0..1" Promotion : áp dụng
+}
+
+CartItemModel ..> Product : tham chiếu productId (không phải FK Client)
+AppliedPromotion ..> Promotion : snapshot qua promoId
+AppliedPromotion --> DiscountType
+
+note bottom of CartItemModel
+  itemKey = hash(productId, size, sortedToppingIds, sugar, ice).
+  Trùng key: gộp quantity; khác key: dòng mới.
+  quantity nguyên dương; sugar, ice thuộc {0,30,50,70,100}.
+  Tổng quantity cùng productId trên mọi dòng <= availableStock.
+  Giá dòng = (basePrice + sizePrice + sum(topping.price)) * quantity.
+  S: +0đ; M: +6.000đ; L: +10.000đ.
+end note
+
+note bottom of Cart
+  Zustand persist đồng bộ Client state xuống localStorage.
+  Lỗi đọc / ghi: giữ state trong bộ nhớ nếu có; báo không lưu được.
+  cartVersion tăng khi items / mã đổi; bỏ phản hồi khác phiên bản.
+  Mở giỏ: cập nhật trạng thái sản phẩm từ API;
+  món ngừng bán / không tồn tại: cảnh báo, chặn checkout đến khi xóa.
+  Lỗi tải trạng thái: giữ giỏ, cho thử lại; chưa cho checkout.
+  Badge = sum(quantity); subtotal = sum(previewLineTotal).
+  Một mã mỗi giỏ; đổi mã lỗi giữ mã cũ nếu còn hợp lệ.
+  Giỏ rỗng / dưới minOrderValue: tự gỡ mã.
+  Subtotal đổi: tính lại discountAmount; total không âm.
+  AppliedPromotion chứa dữ liệu preview cần để tính lại,
+  không phải giá / điều kiện có thẩm quyền của Server.
+end note
+
+note bottom of Promotion
+  code chuẩn hóa để tra cứu không phân biệt hoa thường.
+  Hợp lệ: isActive và startDate <= currentTime <= endDate,
+  usedCount < usageLimit, orderSubtotal >= minOrderValue.
+  PERCENTAGE: discount = min(subtotal,
+  subtotal * discountValue / 100, maxDiscountAmount nếu có).
+  FIXED_AMOUNT: discount = min(discountValue, subtotal).
+  Tiền không âm; 0 <= usedCount <= usageLimit;
+  PERCENTAGE thuộc [0,100]; startDate <= endDate.
+  Validate chỉ đọc, không tăng usedCount.
+end note
+
+legend bottom
+  Money: số nguyên VND ở Client; Decimal chính xác ở Server.
+  MoneyOrPercent: số VND hoặc tỷ lệ phần trăm tùy discountType.
+  Product.availableStock suy ra từ Ingredient / RecipeItem.
+  Order.promotionId là FK tùy chọn; không cascade xóa lịch sử đơn.
+  UC-04 tính lại giá / voucher từ DB; cập nhật kho và usedCount trong transaction.
+  Các lớp external chỉ thể hiện điểm tích hợp với phân hệ khác.
+endlegend
+@enduml
