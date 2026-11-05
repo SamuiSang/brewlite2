@@ -1036,7 +1036,7 @@ $$\text{maxOrderableGlasses}(\text{Product}) = \min_{r \in \text{RecipeItems}} \
 
 ### 5.1 Thuộc tính Định danh (Identification)
 - **Mã Use Case:** `UC-05`
-- **Tên Use Case:** **Thanh toán Đơn hàng Mô phỏng và Chống Trừ tiền Hai lần (Idempotency)**
+- **Tên Use Case:** **Thanh toán Đơn hàng qua Cổng Sandbox, Nhận JSON Message qua Webhook Backend và Chống Trừ tiền Hai lần (Idempotency)**
 - **Phân hệ Trực thuộc:** Phân hệ Thanh toán & Chống Trừ tiền Trùng lặp (`PaymentsModule` - `FR-06`)
 - **Mức độ Ưu tiên:** **Must Have** (Bắt buộc trong MVP Sprint 2)
 - **Độ phức tạp Kỹ thuật:** Cao (Xử lý giao dịch phân tán 2 bước, Database Transaction, đối soát chữ ký số Webhook và cơ chế khóa bất biến Idempotency).
@@ -1047,8 +1047,8 @@ $$\text{maxOrderableGlasses}(\text{Product}) = \min_{r \in \text{RecipeItems}} \
 
 | Loại Tác nhân | Tên Tác nhân | Vai trò và Trách nhiệm đối với Use Case |
 | :--- | :--- | :--- |
-| **Tác nhân Chính<br>(Primary Actor)** | **Khách hàng đã đăng nhập<br>(Authenticated Customer)** | • Sở hữu đơn hàng hợp lệ đang ở trạng thái `PENDING`.<br>• Lựa chọn phương thức thanh toán phù hợp (Ví MoMo, VNPay, Thẻ ATM/Visa nội địa).<br>• Thực hiện thao tác bấm nút "Xác nhận thanh toán" tại giao diện `/checkout` và xác nhận giao dịch trên cổng thanh toán Sandbox. |
-| **Tác nhân Phụ / Đối tác<br>(Secondary / External Actor)** | **Cổng thanh toán Mô phỏng<br>(Mock Payment Gateway / Sandbox Service)** | • Đóng vai trò hệ thống đối tác tài chính bên ngoài (mô phỏng cổng MoMo, VNPay, VietQR Sandbox).<br>• Khởi tạo phiên thanh toán, cung cấp URL cổng hoặc mã QR giao dịch.<br>• Tiếp nhận yêu cầu thanh toán và phản hồi bản tin Webhook Callback (`POST /api/v1/payments/webhook`) có kèm chữ ký số xác thực để Backend đối soát. |
+| **Tác nhân Chính<br>(Primary Actor)** | **Khách hàng đã đăng nhập<br>(Authenticated Customer)** | • Sở hữu đơn hàng hợp lệ đang ở trạng thái `PENDING`.<br>• Lựa chọn phương thức thanh toán phù hợp (Ví MoMo, VNPay, VietQR Sandbox).<br>• Thực hiện thao tác bấm nút "Xác nhận thanh toán" tại giao diện `/checkout` và thực hiện giao dịch trên cổng thanh toán Sandbox. |
+| **Tác nhân Phụ / Đối tác<br>(Secondary / External Actor)** | **Cổng Thanh toán Sandbox<br>(Sandbox Payment Gateway)** | • Đóng vai trò hệ thống đối tác tài chính bên ngoài trong môi trường thử nghiệm (VNPay Sandbox, MoMo Sandbox, VietQR Sandbox).<br>• Khởi tạo phiên thanh toán, cung cấp URL cổng hoặc mã QR giao dịch.<br>• Sau khi khách thanh toán trên trang Sandbox, bắn bản tin JSON message đối soát về **Webhook của Backend (`POST /api/v1/payments/webhook`)** kèm chữ ký số xác thực để Backend chuyển trạng thái đơn hàng. |
 
 ---
 
@@ -1098,9 +1098,9 @@ Hệ thống cam kết đạt được các trạng thái sau khi Use Case kết
 | **5** | PaymentsService (Core) | Hệ thống xác định đây là một giao dịch thanh toán hoàn toàn mới (mã khóa `idempotencyKey` chưa từng tồn tại trong CSDL). |
 | **6** | PaymentsService (Core) | Hệ thống truy vấn thông tin đơn hàng theo `orderId`, xác thực đơn hàng thuộc quyền sở hữu của khách hàng đang đăng nhập và xác nhận đơn hàng đang ở đúng trạng thái `PENDING`. |
 | **7** | PaymentsService & DB | Hệ thống tạo một bản ghi `Payment` mới trong bảng `Payment` với trạng thái ban đầu là `PENDING`, lưu trữ `orderId`, `idempotencyKey`, `amount` (lấy từ `Order.finalAmount`), `paymentMethod` và thời điểm tạo `createdAt`. |
-| **8** | PaymentsService & Gateway | `PaymentsService` gọi sang Dịch vụ Thanh toán Mô phỏng (`MockPaymentGateway.charge(...)`) gửi thông tin đơn hàng và số tiền để khởi tạo phiên giao dịch bên thứ ba; Mock Gateway trả về đường dẫn thanh toán (`paymentUrl`) hoặc mã QR Sandbox. |
-| **9** | Mock Gateway & Webhook | Khách hàng thực hiện thao tác quét mã/xác nhận trên giao diện Sandbox. Sau khi xử lý hoàn tất, Cổng thanh toán bên thứ ba gửi bản tin đối soát Webhook Callback `POST /api/v1/payments/webhook` về máy chủ Backend kèm `orderId`, `transactionRef`, trạng thái `SUCCESS` và chữ ký số xác thực. |
-| **10** | PaymentsService & DB | `PaymentsService` tiếp nhận Webhook, xác thực tính toàn vẹn của chữ ký số đối soát và mở một PostgreSQL Transaction (`prisma.$transaction()`):<br>1. Cập nhật bản ghi `Payment`: `status = SUCCESS`, `transactionRef = txRef`, `paidAt = now()`.<br>2. Cập nhật bản ghi `Order`: `status = PAID`, `updatedAt = now()`.<br>3. Commit Transaction thành công vào CSDL. |
+| **8** | PaymentsService & Sandbox | `PaymentsService` gọi sang Cổng Thanh toán Sandbox (`SandboxPaymentGateway.createPaymentUrl(...)`) gửi thông tin đơn hàng và số tiền để khởi tạo phiên giao dịch bên thứ ba; Cổng Sandbox trả về đường dẫn thanh toán (`paymentUrl`) hoặc mã QR Sandbox. |
+| **9** | Sandbox Gateway & Webhook | Khách hàng thực hiện thao tác quét mã/nhập thẻ test trên giao diện Cổng Sandbox. Sau khi xử lý hoàn tất, Cổng Thanh toán Sandbox bắn bản tin JSON message về endpoint **Webhook của Backend (`POST /api/v1/payments/webhook`)** kèm `orderId`, `transactionRef`, trạng thái `SUCCESS` và chữ ký số xác thực HMAC. |
+| **10** | PaymentsService & DB | Webhook tại `PaymentsService` (Backend) tiếp nhận bản tin JSON từ Sandbox, xác thực tính toàn vẹn của chữ ký số đối soát và mở một PostgreSQL Transaction (`prisma.$transaction()`):<br>1. Cập nhật bản ghi `Payment`: `status = SUCCESS`, `transactionRef = txRef`, `paidAt = now()`.<br>2. Cập nhật bản ghi `Order`: `status = PAID`, `updatedAt = now()`.<br>3. Commit Transaction thành công vào CSDL. |
 | **11** | Backend & Next.js UI | Backend phản hồi mã trạng thái `HTTP 201 Created` kèm `PaymentSuccessDto`. Giao diện Frontend dọn sạch giỏ hàng trong Zustand Store và tự động điều hướng khách hàng sang trang Biên nhận đơn hàng thành công (`/checkout/success`). |
 
 ---
@@ -1112,7 +1112,7 @@ Hệ thống cam kết đạt được các trạng thái sau khi Use Case kết
 - **Quy trình xử lý của Hệ thống:**
   1. Ở request thứ nhất: Hệ thống tiếp nhận và đang tiến hành xử lý bình thường theo Luồng chính.
   2. Ở request thứ hai: Tại Bước 4, `PaymentsService` truy vấn CSDL và phát hiện `idempotencyKey` này **đã tồn tại** trong bảng `Payment`.
-  3. Hệ thống lập tức bỏ qua toàn bộ các Bước 6, 7, 8 (tuyệt đối KHÔNG gọi lại cổng thanh toán `MockPaymentGateway`, KHÔNG sinh thêm giao dịch mới và KHÔNG trừ tiền lần 2).
+  3. Hệ thống lập tức bỏ qua toàn bộ các Bước 6, 7, 8 (tuyệt đối KHÔNG gọi lại cổng thanh toán `SandboxPaymentGateway`, KHÔNG sinh thêm giao dịch mới và KHÔNG trừ tiền lần 2).
   4. Hệ thống trích xuất bản ghi `Payment` đã được tạo trước đó từ CSDL và lập tức hoàn trả kết quả về cho Client với mã trạng thái `HTTP 200 OK` (thay vì 201 Created).
   5. Giao diện người dùng nhận được phản hồi, tiếp tục quy trình hiển thị bình thường mà không gây ra bất kỳ xung đột tài chính nào.
 
@@ -1124,10 +1124,10 @@ Hệ thống cam kết đạt được các trạng thái sau khi Use Case kết
 
 ### 5.8 Các Luồng Ngoại lệ (Exception Flows)
 
-#### Luồng Ngoại lệ 5a: Thanh toán Thất bại từ Cổng Thanh toán (Kích hoạt Restock Rollback)
-- **Hoàn cảnh xảy ra:** Khách hàng mô phỏng kịch bản thanh toán thất bại (chọn thẻ không đủ số dư, thẻ hết hạn, nhập sai mã xác thực OTP) hoặc Cổng thanh toán Sandbox phản hồi giao dịch bị từ chối (`{ success: false, errorCode: "INSUFFICIENT_FUNDS" }`).
+#### Luồng Ngoại lệ 5a: Thanh toán Thất bại từ Cổng Sandbox hoặc Hủy đơn / Quá hạn TTL (Kích hoạt Restock Rollback)
+- **Hoàn cảnh xảy ra:** Giao dịch trên Cổng Thanh toán Sandbox thất bại (thẻ test không đủ số dư, thẻ hết hạn, nhập sai OTP) và Cổng Sandbox bắn bản tin JSON message báo lỗi (`{ status: "FAILED", errorCode: "INSUFFICIENT_FUNDS" }`) về Webhook của Backend (`POST /api/v1/payments/webhook`), hoặc phiên thanh toán quá hạn TTL (5–15 phút giữ chỗ nguyên liệu `Hold Stock`), hoặc khách hàng chủ động hủy đơn khi đang `PENDING` (Tuyệt đối không dùng nút bấm giả lập Thành công/Thất bại trên UI hay hardcode trong code).
 - **Quy trình xử lý Hoàn kho Nguyên tử (Restock Rollback):**
-  1. Tại Bước 9, bản tin Webhook từ Cổng thanh toán gửi về thông báo giao dịch thất bại.
+  1. Tại Bước 9, Webhook của Backend nhận được bản tin JSON từ Cổng Sandbox thông báo giao dịch thất bại (hoặc hệ thống ghi nhận quá hạn TTL / hủy đơn).
   2. `PaymentsService` lập tức mở một PostgreSQL Database Transaction (`prisma.$transaction()`) để thực thi chuỗi hành động hoàn kho:
      - **Cập nhật Payment:** `UPDATE "Payment" SET "status" = 'FAILED', "failureReason" = $errorCode WHERE "id" = $paymentId;`
      - **Cập nhật Order:** `UPDATE "Order" SET "status" = 'CANCELLED' WHERE "id" = $orderId;`

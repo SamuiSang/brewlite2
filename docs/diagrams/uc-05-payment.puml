@@ -9,7 +9,7 @@ skinparam defaultFontName "Segoe UI", "Arial", sans-serif
 skinparam packageStyle rectangle
 
 actor "Khách hàng đã đăng nhập\n(Authenticated Customer)" as Customer
-actor "Cổng Thanh toán Sandbox\n(Mock Payment Gateway)" as MockGateway
+actor "Cổng Thanh toán Sandbox\n(VNPay / MoMo / VietQR)" as SandboxGateway
 
 rectangle "BrewLite - Phân hệ Thanh toán 2 Bước & Chống Trừ tiền Trùng lặp (FR-06)" as System {
     usecase "UC-05.1: Khởi tạo & Thực hiện thanh toán\n(POST /api/v1/payments -> Payment PENDING)" as UC_Pay
@@ -24,7 +24,7 @@ UC_Pay ..> UC_Idempotency : <<include>>
 UC_Pay ..> UC_GatewayAuth : <<include>>
 UC_Rollback .up.> UC_Pay : <<extend>>\n[Thanh toán thất bại / Quá hạn 15p]
 
-UC_GatewayAuth -- MockGateway
+UC_GatewayAuth -- SandboxGateway
 
 legend bottom
   Ghi chú nghiệp vụ Chức năng 5 - Use Case Trọng tâm Phần 2 (Quang - Dev Team | Chuẩn đơn sắc đen-trắng):

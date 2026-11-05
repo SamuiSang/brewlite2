@@ -505,23 +505,23 @@ Khi đặt hàng, hệ thống tổng hợp nhu cầu nguyên vật liệu cần
 
 ### 8.1 Thông tin Định danh & Mục tiêu Nghiệp vụ
 - **Mã chức năng:** `FR-06`
-- **Tên chức năng:** Thanh toán Mô phỏng (Mock Payment) & Chống Trừ tiền Trùng lặp (Idempotency-Key)
+- **Tên chức năng:** Thanh toán qua Cổng Sandbox & Webhook Backend (`POST /payments/webhook`) + Chống Trừ tiền Trùng lặp (`Idempotency-Key`)
 - **Phân hệ:** Phân hệ Thanh toán & Chống Trừ tiền Trùng lặp (`PaymentsModule`)
 - **Người phụ trách:** **Quang (Dev Team)**
 - **Mức độ ưu tiên:** **Must Have** (Chốt chặn tài chính cốt lõi của hệ thống)
 - **Actor tham gia:**
   - *Actor chính (Primary Actor):* Khách hàng đã đăng nhập (`Authenticated Customer`).
-  - *Actor phụ / Hệ thống ngoài (Secondary Actor / External Service):* Dịch vụ Thanh toán Mô phỏng (`Mock Payment Gateway` – Sandbox VNPay / MoMo / Thẻ ngân hàng nội địa).
+  - *Actor phụ / Hệ thống ngoài (Secondary Actor / External Service):* Cổng Thanh toán Sandbox bên thứ ba (`Sandbox Payment Gateway` – VNPay Sandbox / MoMo Sandbox / VietQR Sandbox).
 
 ### 8.2 Mô tả Chi tiết Chức năng (Functional Description)
-Chức năng `FR-06` chịu trách nhiệm xử lý toàn bộ các giao dịch thanh toán trực tuyến mô phỏng cho những đơn hàng đã được khởi tạo thành công ở trạng thái `PENDING` (do phân hệ `FR-05` chuyển giao).
+Chức năng `FR-06` chịu trách nhiệm xử lý toàn bộ các giao dịch thanh toán trực tuyến qua Cổng Sandbox và Webhook Backend cho những đơn hàng đã được khởi tạo thành công ở trạng thái `PENDING` (do phân hệ `FR-05` chuyển giao).
 
 Chức năng giải quyết triệt để 3 bài toán kỹ thuật trọng tâm:
 1. **Chống trừ tiền trùng lặp (Idempotency):** Triệt tiêu rủi ro khách hàng bị trừ tiền 2 lần khi mạng di động 4G chập chờn hoặc do khách hàng mất kiên nhẫn bấm liên tiếp nhiều lần vào nút "Thanh toán". Mọi request gửi lên bắt buộc mang theo Header `Idempotency-Key: <UUIDv4>`. Nếu gửi lặp key trong vòng 24 giờ, hệ thống lập tức hoàn trả kết quả giao dịch trước đó mà không gọi sang cổng thanh toán lần 2.
-2. **Tuân thủ quy trình 2 bước nghiêm ngặt (Chống tự ý gán `PAID` một chiều):** Tuyệt đối tuân thủ nguyên tắc thiết kế được Thầy Phiêu nhấn mạnh trong bài giảng: *Khi khách hàng bấm thanh toán, Backend tuyệt đối KHÔNG tự ý gán ngay trạng thái `Order = PAID`*. Hệ thống bắt buộc phải qua 2 giai đoạn:
-   - Giai đoạn 1: Tạo bản ghi thanh toán ở trạng thái `PENDING` và gọi cổng thanh toán Sandbox để lấy đường dẫn/mã QR.
-   - Giai đoạn 2: Chỉ khi nhận được bản tin đối soát Webhook Callback (`POST /api/v1/payments/webhook`) có chữ ký hợp lệ từ cổng thanh toán, hệ thống mới mở Database Transaction để chuyển `Payment.status = SUCCESS` và `Order.status = PAID`.
-3. **Hoàn trả tồn kho nguyên tử (Restock Rollback khi giao dịch lỗi):** Nếu cổng thanh toán phản hồi giao dịch thất bại (lỗi thẻ, không đủ số dư, timeout hoặc người dùng chủ động bấm Hủy), hệ thống tự động ghi nhận `Payment.status = FAILED`, chuyển `Order.status = CANCELLED`, đồng thời thực thi hoàn trả 100% số lượng tồn kho sản phẩm và nguyên liệu thô vào CSDL PostgreSQL trong cùng một Transaction duy nhất.
+2. **Tuân thủ quy trình 2 bước nghiêm ngặt (Chống tự ý gán `PAID` một chiều hoặc bấm nút giả lập):** Tuyệt đối tuân thủ nguyên tắc thiết kế được Thầy Phiêu nhấn mạnh trong bài giảng: *Khi khách hàng bấm thanh toán, Backend tuyệt đối KHÔNG tự ý gán ngay trạng thái `Order = PAID` hay dùng nút bấm giả lập Thành công/Thất bại trên giao diện*. Hệ thống bắt buộc phải qua 2 giai đoạn:
+   - Giai đoạn 1: Tạo bản ghi thanh toán ở trạng thái `PENDING` và gọi Cổng thanh toán Sandbox để lấy đường dẫn/mã QR thanh toán.
+   - Giai đoạn 2: Khi khách hàng hoàn tất giao dịch trên Cổng Sandbox, Cổng Sandbox bắn bản tin JSON đối soát về **Webhook của Backend (`POST /api/v1/payments/webhook`)** kèm chữ ký số HMAC. Chỉ khi Webhook Backend xác thực bản tin JSON hợp lệ từ Sandbox, hệ thống mới mở Database Transaction để chuyển `Payment.status = SUCCESS` và `Order.status = PAID`.
+3. **Hoàn trả tồn kho nguyên tử (Restock Rollback khi giao dịch lỗi hoặc hết hạn TTL):** Nếu bản tin JSON từ Cổng Sandbox gửi về Webhook báo giao dịch thất bại (lỗi thẻ, không đủ số dư), hoặc quá thời gian chờ thanh toán (TTL Timeout 5–15 phút giữ chỗ nguyên liệu `Hold Stock`), hoặc khách hàng chủ động hủy đơn khi đang `PENDING`, hệ thống tự động ghi nhận `Payment.status = FAILED`, chuyển `Order.status = CANCELLED`, đồng thời thực thi hoàn trả 100% số lượng nguyên liệu thô (`Ingredient.stockQuantity`) vào CSDL PostgreSQL trong cùng một Transaction duy nhất.
 
 ### 8.3 Phân rã Các Use Case Thành phần thuộc FR-06
 - **`UC-05.1` (Thực hiện thanh toán đơn hàng):** Khách hàng chọn phương thức thanh toán (MoMo, VNPay, Thẻ ATM) và bấm xác nhận tại `/checkout`. Gửi request `POST /api/v1/payments` kèm Header `Idempotency-Key`.
@@ -540,7 +540,7 @@ Các tiêu chí nghiệm thu được chuẩn hóa theo định dạng **Given -
 - **Then:**
   1. Ở request thứ nhất: Hệ thống tiếp nhận, tạo bản ghi thanh toán mới trong CSDL và phản hồi phiên thanh toán.
   2. Ở request thứ hai: `PaymentsService` phát hiện `idempotencyKey` đã tồn tại trong CSDL.
-  3. Hệ thống KHÔNG gọi lại cổng thanh toán `MockPaymentGateway`.
+  3. Hệ thống KHÔNG gọi lại cổng thanh toán `SandboxPaymentGateway`.
   4. Hệ thống KHÔNG tạo thêm bản ghi `Payment` mới (chỉ duy nhất 1 bản ghi tồn tại trong bảng `Payment`).
   5. Hệ thống lập tức trả về mã trạng thái `HTTP 200 OK` chứa nguyên vẹn dữ liệu của phiên thanh toán trước đó, không gây trừ tiền lần 2.
 
@@ -558,7 +558,7 @@ Các tiêu chí nghiệm thu được chuẩn hóa theo định dạng **Given -
 
 #### Tiêu chí AC-06.3: Hoàn trả Tồn kho Nguyên liệu Tự động (Atomic Restock Rollback) khi Thanh toán Thất bại
 - **Given:** Đơn hàng `#ORD-2026-002` gồm 2 ly Cà phê sữa đá size M đã tạm khóa số lượng tồn kho nguyên liệu pha chế (giảm 20g hạt cà phê, 40ml sữa đặc và 2 ly nhựa trong `Ingredient.stockQuantity` theo định mức `RecipeItem`).
-- **When:** Khách hàng mô phỏng kịch bản thanh toán thất bại (thẻ không đủ số dư, nhập sai mã OTP, thẻ hết hạn) hoặc Cổng thanh toán trả về mã lỗi `{ success: false, errorCode: "PAYMENT_FAILED" }`.
+- **When:** Giao dịch trên Cổng thanh toán Sandbox thất bại (thẻ test không đủ số dư, nhập sai mã OTP, thẻ hết hạn) và Cổng Sandbox bắn bản tin JSON báo lỗi `{ status: "FAILED", errorCode: "PAYMENT_FAILED" }` về Webhook của Backend (`POST /api/v1/payments/webhook`), hoặc phiên thanh toán quá hạn TTL.
 - **Then:**
   1. Trong cùng một Database Transaction duy nhất, hệ thống thực thi:
      - Cập nhật bản ghi `Payment`: `status = FAILED`, ghi nhận `failureReason`.
@@ -586,10 +586,10 @@ Dưới đây là sơ đồ Use Case chi tiết của **Phân hệ Thanh toán &
 #### 8.5.1 Giải thích Các Thành phần trong Sơ đồ
 1. **Ranh giới Phân hệ (System Boundary):** Khung chữ nhật bao quanh mang tên `BrewLite - Phân hệ Thanh toán & Chống Trừ tiền Trùng lặp (FR-06)`, bao bọc các tính năng nghiệp vụ của phân hệ.
 2. **Tác nhân chính (Primary Actor):** `Khách hàng đã đăng nhập (Authenticated Customer)` tương tác trực tiếp với tính năng thanh toán đơn hàng (`UC-05.1`) và tính năng hủy đơn hoàn kho (`UC-05.3`).
-3. **Tác nhân phụ bên ngoài (Secondary / External Actor):** `Cổng thanh toán Mô phỏng (Mock Payment Gateway)` tương tác trực tiếp với tính năng `Xác thực giao dịch qua Cổng thanh toán` để ủy quyền và đối soát giao dịch.
+3. **Tác nhân phụ bên ngoài (Secondary / External Actor):** `Cổng Thanh toán Sandbox (Sandbox Payment Gateway)` tương tác trực tiếp với tính năng `Xác thực giao dịch 2 bước & Đối soát Webhook` bằng cách bắn bản tin JSON message về endpoint Webhook của Backend (`POST /api/v1/payments/webhook`).
 4. **Quan hệ `<<include>>` (Bắt buộc thực thi):**
    - `UC-05.1: Thanh toán đơn hàng qua Ví / Thẻ` bắt buộc phải `<<include>>` tính năng `UC-05.2: Kiểm tra chống trừ tiền trùng lặp (Idempotency-Key Check)` để đảm bảo tính bất biến.
-   - `UC-05.1: Thanh toán đơn hàng qua Ví / Thẻ` bắt buộc phải `<<include>>` tính năng `Xác thực giao dịch qua Cổng thanh toán` để thực thi quy trình thanh toán mô phỏng 2 bước.
+   - `UC-05.1: Thanh toán đơn hàng qua Ví / Thẻ` bắt buộc phải `<<include>>` tính năng `Xác thực giao dịch 2 bước & Đối soát Webhook` để thực thi quy trình thanh toán 2 bước chuẩn công nghiệp.
 5. **Quan hệ `<<extend>>` (Kích hoạt khi có điều kiện phát sinh):**
    - `UC-05.3: Hủy đơn & Hoàn trả tồn kho (Restock Rollback)` mở rộng (`<<extend>>`) từ `UC-05.1` khi giao dịch thanh toán thất bại hoặc người dùng chủ động hủy thanh toán.
 6. **Bố cục Luồng Mũi tên (Zero Intersection):** Các đường tương tác giữa tác nhân và use case, cùng các mũi tên `<<include>>` và `<<extend>>` được thiết kế song song, phân tầng rõ ràng, tuyệt đối không chằn chéo hay đè lên nhau, đảm bảo tính thẩm mỹ và dễ đọc khi in ấn báo cáo.
