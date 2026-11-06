@@ -1,0 +1,164 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+title SƠ ĐỒ LỚP (CD-05): PHÂN HỆ THANH TOÁN, CỔNG SANDBOX & IDEMPOTENCY (FR-06)
+
+package "1. Service & Integration Layer" as ServiceLayer {
+  class PaymentsController <<controller>> {
+    + processPayment(idempotencyKey, dto)
+    + handleWebhook(signature, payload)
+  }
+
+  class PaymentsService <<service>> {
+    - prisma: PrismaService
+    - gateway: SandboxPaymentGateway
+    + initiatePayment(idempotencyKey, dto)
+    + handleWebhook(payload, signature)
+    + executeRestockRollback(orderId)
+  }
+
+  class SandboxPaymentGateway <<external service>> {
+    - merchantId: String
+    - secretKey: String
+    + createPaymentUrl(orderId, amount, method)
+    + verifyWebhookSignature(payload, signature)
+    + processRefund(transactionRef, amount)
+  }
+
+  class ProcessPaymentDto <<dto>> {
+    + orderId: UUID
+    + paymentMethod: PaymentMethod
+  }
+
+  class WebhookPayloadDto <<dto>> {
+    + orderId: UUID
+    + transactionRef: String
+    + amount: Decimal
+    + status: String
+    + signature: String
+  }
+
+  class SandboxSession <<value object>> {
+    + paymentUrl: String
+    + qrCodeData: String
+    + expiredAt: DateTime
+  }
+
+  PaymentsController -down-> PaymentsService : ủy quyền
+  PaymentsService -down-> SandboxPaymentGateway : tích hợp
+  PaymentsController ..> ProcessPaymentDto : DTO req
+  PaymentsController ..> WebhookPayloadDto : DTO hook
+  SandboxPaymentGateway ..> SandboxSession : sinh QR
+}
+
+package "2. Payment Domain Layer" as PaymentDomain {
+  class Payment <<aggregate root>> {
+    - id: UUID
+    - orderId: UUID {unique}
+    - idempotencyKey: String {unique}
+    - amount: Decimal
+    - method: PaymentMethod
+    - status: PaymentStatus
+    - transactionRef: String [0..1]
+    - failureReason: String [0..1]
+    - paidAt: DateTime [0..1]
+    + markAsSuccess(txRef: String): void
+    + markAsFailed(reason: String): void
+    + markAsRefunded(txRef: String): void
+    + isPending(): Boolean
+  }
+
+  enum PaymentStatus {
+    PENDING
+    SUCCESS
+    FAILED
+    REFUNDED
+  }
+
+  enum PaymentMethod {
+    MOMO
+    VNPAY
+    VIETQR
+    CREDIT_CARD
+  }
+
+  class IdempotencyRecord <<entity>> {
+    - id: UUID
+    - key: String {unique}
+    - endpoint: String
+    - responseStatus: Int
+    - expiresAt: DateTime
+    + isExpired(): Boolean
+  }
+
+  Payment --> PaymentStatus : status
+  Payment --> PaymentMethod : method
+  Payment ..> IdempotencyRecord : chống trừ tiền 2 lần
+}
+
+package "3. External Domains" as ExternalDomain {
+  class Order <<external entity>> {
+    - id: UUID
+    - orderCode: String {unique}
+    - userId: UUID
+    - status: String
+    - finalAmount: Decimal
+    + transitionTo(status: String)
+  }
+
+  class Ingredient <<external entity>> {
+    - id: UUID
+    - name: String
+    - stockQuantity: Decimal
+    - version: Int
+    + restock(amount: Decimal)
+  }
+
+  class LoyaltyTransaction <<external entity>> {
+    - id: UUID
+    - userId: UUID
+    - orderId: UUID [0..1]
+    - type: String
+    - points: Int
+  }
+
+  class User <<external entity>> {
+    - id: UUID
+    - email: String
+    - loyaltyPoints: Int
+  }
+
+  Order ..> User : sở hữu bởi
+}
+
+' Liên kết giữa các tầng
+ServiceLayer -right-> PaymentDomain : quản lý
+Payment "1" -right-> "1" Order : thanh toán cho
+
+PaymentsService ..> Order : cập nhật PAID / CANCELLED
+PaymentsService ..> Ingredient : hoàn kho khi FAILED
+PaymentsService ..> LoyaltyTransaction : tích / hoàn điểm
+
+note bottom of PaymentDomain
+  • **Cơ chế Idempotency-Key**: Chống trừ tiền 2 lần khi gửi trùng request.
+  • **Quy trình 2 bước Sandbox -> Webhook**:
+    1. Khởi tạo Payment ở trạng thái PENDING & sinh mã QR/URL Sandbox.
+    2. Cổng Sandbox bắn bản tin JSON ngầm về Webhook Backend có chữ ký số HMAC
+       mới chuyển trạng thái đơn hàng Order từ PENDING sang PAID.
+  • **Hoàn kho nguyên tử (Restock Rollback)**:
+    Khi thanh toán FAILED / Hủy / Quá hạn 15p:
+    Cập nhật Order = CANCELLED và cộng hoàn trả 100% nguyên liệu thô:
+    UPDATE "Ingredient" SET stockQuantity = stockQuantity + qty, version = version + 1.
+end note
+
+legend bottom
+  Chuẩn ký hiệu: (-) Private, (+) Public | (..) Phụ thuộc / DTO | (--) Liên kết 1-1 | Đơn sắc monochrome
+endlegend
+@enduml
