@@ -1,0 +1,122 @@
+@startuml sequence-05-payment
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+
+hide footbox
+skinparam sequenceMessageAlign left
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 300
+
+title SƠ ĐỒ TUẦN TỰ: UC-05 – THANH TOÁN QUA CỔNG SANDBOX, WEBHOOK BACKEND & CHỐNG TRỪ TIỀN TRÙNG LẶP (IDEMPOTENCY) (FR-06)
+
+actor "Khách hàng\n(Customer)" as Customer
+participant "«giao diện»\n:Giao diện thanh toán\n(CheckoutPage)" as CheckoutPage
+participant "«điều khiển»\n:Bộ điều khiển & Dịch vụ thanh toán\n(PaymentsController / Service)" as API
+participant "«thực thể»\n:Cơ sở dữ liệu\n(PostgreSQL)" as DB
+participant "«dịch vụ ngoài»\n:Cổng thanh toán Sandbox\n(SandboxPaymentGateway)" as Gateway
+
+Customer -> CheckoutPage: 1. Chọn phương thức & nhấn "Xác nhận thanh toán"(method)
+activate CheckoutPage
+
+CheckoutPage -> CheckoutPage: 2. Sinh khóa bất biến Idempotency-Key (UUID v4)\nvà khóa nút bấm (isSubmitting = true)
+
+CheckoutPage -> API: 3. POST /api/v1/payments\n[Header: Idempotency-Key: <uuid>, Bearer <JWT>]\nBody: ProcessPaymentDto { orderId, paymentMethod }
+activate API
+
+API -> DB: 4. SELECT * FROM "Payment" WHERE "idempotencyKey" = $1
+activate DB
+DB --> API: Trả về kết quả truy vấn bản ghi Payment
+deactivate DB
+
+alt [Idempotency-Key đã tồn tại trong CSDL (Gửi trùng request / Bấm đúp)]
+    API --> CheckoutPage: HTTP 200 OK (existingPaymentRecord)\n(Bỏ qua gọi cổng Sandbox, không trừ tiền lần 2)
+    CheckoutPage --> Customer: Hiển thị lại kết quả của giao dịch trước đó\n(Chống trừ tiền 2 lần thành công)
+else [Idempotency-Key hợp lệ & chưa tồn tại (Giao dịch mới)]
+    API -> DB: 5. SELECT * FROM "Order" WHERE "id" = $orderId
+    activate DB
+    DB --> API: Trả về thông tin đơn hàng
+    deactivate DB
+    
+    alt [Đơn hàng không tồn tại hoặc trạng thái khác PENDING]
+        API --> CheckoutPage: HTTP 409 Conflict ("Đơn hàng không ở trạng thái hợp lệ để thanh toán")
+        CheckoutPage --> Customer: Cảnh báo đơn không thể thanh toán (đã thanh toán hoặc đã hủy)
+    else [Đơn hàng PENDING hợp lệ]
+        API -> DB: 6. INSERT INTO "Payment"\n(orderId, amount, method, status='PENDING', idempotencyKey)
+        activate DB
+        DB --> API: Xác nhận tạo bản ghi Payment PENDING thành công
+        deactivate DB
+        
+        API -> Gateway: 7. createSandboxPaymentUrl(orderId, amount, method)
+        activate Gateway
+        Gateway --> API: SandboxSession { paymentUrl, qrCodeData, expiredAt }
+        deactivate Gateway
+        
+        API --> CheckoutPage: HTTP 201 Created { paymentUrl, qrCodeData }
+        deactivate API
+        
+        CheckoutPage --> Customer: 8. Hiển thị mã QR VietQR Sandbox\n(hoặc chuyển hướng sang Cổng Sandbox)
+        
+        Customer -> Gateway: 9. Quét mã QR / Nhập thẻ test và bấm "Xác nhận thanh toán"
+        activate Gateway
+        
+        Gateway -> Gateway: 10. Xử lý giao dịch nội bộ Sandbox\nvà tạo chữ ký số bảo mật (HMAC SHA256)
+        
+        Gateway -> API: 11. POST /api/v1/payments/webhook\n(JSON: { orderId, transactionRef, amount, status, signature })
+        activate API
+        
+        API -> API: 12. verifyWebhookSignature(payload, signature)
+        
+        alt [Bản tin Webhook báo SUCCESS (Thanh toán thành công)]
+            API -> DB: 13. BEGIN Database Transaction
+            activate DB
+            
+            API -> DB: 14. UPDATE "Payment" SET status='SUCCESS', transactionRef=$txRef, paidAt=NOW() WHERE id=$paymentId
+            API -> DB: 15. UPDATE "Order" SET status='PAID', updatedAt=NOW() WHERE id=$orderId
+            API -> DB: 16. INSERT INTO "LoyaltyTransaction" (userId, orderId, type='EARN', points=+$earnedPoints)\n& UPDATE "User" SET loyaltyPoints = loyaltyPoints + $earnedPoints
+            
+            API -> DB: 17. COMMIT Transaction
+            DB --> API: Giao dịch cập nhật hoàn tất thành công
+            deactivate DB
+            
+            API --> Gateway: HTTP 200 OK { received: true }
+            deactivate Gateway
+            
+            API --> CheckoutPage: 18. Server-Sent Events / Polling (Báo đơn hàng đã chuyển sang PAID)
+            deactivate API
+            
+            CheckoutPage -> CheckoutPage: 19. Xóa giỏ hàng Zustand (clearCart)
+            CheckoutPage --> Customer: 20. Điều hướng sang màn hình Biên nhận thành công (/checkout/success)
+            
+        else [Bản tin Webhook báo FAILED / Hết hạn TTL 15 phút / Khách hủy đơn]
+            API -> DB: 21. BEGIN Database Transaction
+            activate DB
+            
+            API -> DB: 22. UPDATE "Payment" SET status='FAILED', failureReason=$reason WHERE id=$paymentId
+            API -> DB: 23. UPDATE "Order" SET status='CANCELLED' WHERE id=$orderId
+            API -> DB: 24. Hoàn trả tồn kho nguyên liệu (Restock Rollback):\nUPDATE "Ingredient" SET stockQuantity = stockQuantity + $requiredQty, version = version + 1
+            
+            opt [Đơn hàng có quy đổi điểm thưởng Loyalty]
+                API -> DB: 25. INSERT INTO "LoyaltyTransaction" (type='REFUND', points=+$refundPoints)\n& UPDATE "User" SET loyaltyPoints = loyaltyPoints + $refundPoints
+            end
+            
+            API -> DB: 26. COMMIT Transaction
+            DB --> API: Xác nhận hoàn kho và hủy đơn thành công
+            deactivate DB
+            
+            API --> Gateway: HTTP 200 OK { received: true }
+            deactivate Gateway
+            
+            API --> CheckoutPage: 27. Thông báo thanh toán thất bại / hủy đơn
+            deactivate API
+            
+            CheckoutPage -> CheckoutPage: 28. Mở khóa nút thanh toán (isSubmitting = false)
+            CheckoutPage --> Customer: 29. Hiển thị Toast cảnh báo lỗi thanh toán & đã hoàn trả kho;\nCung cấp nút "Chọn phương thức khác" và "Thử lại"
+        end
+    end
+end
+
+deactivate CheckoutPage
+
+@enduml
