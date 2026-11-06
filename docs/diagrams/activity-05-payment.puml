@@ -1,0 +1,88 @@
+@startuml
+!pragma useVerticalIf on
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+
+skinparam ActivityBorderThickness 1
+skinparam ArrowThickness 1
+skinparam ActivityDiamondBorderThickness 1
+skinparam SwimlaneBorderThickness 1
+skinparam SwimlaneTitleFontSize 13
+skinparam SwimlaneTitleFontWeight bold
+skinparam ActivityFontSize 11
+skinparam ActivityDiamondFontSize 10
+skinparam ArrowFontSize 10
+skinparam ActivityMaxWidth 170
+
+title SƠ ĐỒ HOẠT ĐỘNG (AD-05): THANH TOÁN QUA CỔNG SANDBOX & WEBHOOK BACKEND (FR-06)
+
+|Khách hàng|
+|Next.js UI (Checkout)|
+|NestJS Backend & DB|
+|Cổng Sandbox (Bên thứ 3)|
+
+|Khách hàng|
+start
+:Đơn hàng ở trạng thái **PENDING**;\nChọn phương thức thanh toán\nvà nhấn "Xác nhận thanh toán";
+
+|Next.js UI (Checkout)|
+:Sinh mã **Idempotency-Key** (UUID);\nKhóa nút bấm (isSubmitting = true);
+:Gửi yêu cầu khởi tạo thanh toán:\nPOST /api/v1/payments;
+
+|NestJS Backend & DB|
+:Kiểm tra Idempotency-Key trong CSDL;
+
+if (Idempotency-Key đã tồn tại?) then ([Đã có])
+  :Lấy bản ghi Payment cũ;\nTrả kết quả cũ (HTTP 200 OK)\nchống trừ tiền lần 2;
+  |Next.js UI (Checkout)|
+  :Hiển thị lại trạng thái cũ;
+  stop
+else ([Chưa có])
+  |NestJS Backend & DB|
+  :Tạo Payment (status = PENDING);\nGọi API Cổng Sandbox lấy URL/QR;
+  
+  |Cổng Sandbox (Bên thứ 3)|
+  :Khởi tạo phiên thanh toán;\nSinh URL & mã QR VietQR;
+  :Trả về URL/QR cho Backend;
+  
+  |NestJS Backend & DB|
+  :Nhận URL/QR và trả về HTTP 201;
+  
+  |Next.js UI (Checkout)|
+  :Hiển thị mã QR VietQR / URL;\nLắng nghe Webhook từ Backend;
+  
+  |Khách hàng|
+  :Quét mã QR / Nhập thẻ test\ntrên Cổng Sandbox bên thứ 3;
+  
+  |Cổng Sandbox (Bên thứ 3)|
+  :Xử lý thanh toán & Ký số HMAC;\n**Bắn bản tin JSON ngầm (Webhook):**\nPOST /api/v1/payments/webhook\n{ orderId, status, txRef, signature };
+  
+  |NestJS Backend & DB|
+  :Webhook tiếp nhận bản tin JSON\nvà đối soát chữ ký số HMAC;
+  
+  if (Trạng thái Webhook từ Sandbox?) then ([Báo SUCCESS])
+    :Mở Database Transaction:\n• **Payment: status = SUCCESS**\n• **Chuyển Order: PENDING -> PAID**\n• Tích lũy điểm Loyalty (type=EARN);\nCOMMIT Transaction;
+    :Phản hồi HTTP 200 OK cho Sandbox;\nBắn tín hiệu thành công sang UI;
+    
+    |Next.js UI (Checkout)|
+    :Xóa giỏ hàng (clearCart);\nChuyển sang /checkout/success;
+    
+    |Khách hàng|
+    :Nhận biên nhận đơn hàng (PAID);\nĐơn chuyển sang pha chế;
+    stop
+  else ([Báo FAILED / Hủy / Quá hạn])
+    |NestJS Backend & DB|
+    :Mở Database Transaction:\n• **Payment: status = FAILED**\n• **Chuyển Order = CANCELLED**\n• **Hoàn kho (Restock Rollback):**\n  stockQuantity += qty, version += 1;\nCOMMIT Transaction;
+    :Phản hồi HTTP 200 OK cho Sandbox;\nBáo lỗi sang Next.js UI;
+    
+    |Next.js UI (Checkout)|
+    :Mở khóa nút bấm thanh toán;\nHiển thị thông báo lỗi & hoàn kho;
+    
+    |Khách hàng|
+    :Nhận cảnh báo lỗi / chọn thử lại;
+    stop
+  endif
+endif
+@enduml
