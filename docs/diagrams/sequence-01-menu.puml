@@ -1,0 +1,136 @@
+@startuml sequence-01-menu
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+skinparam backgroundColor white
+skinparam defaultFontSize 12
+skinparam roundcorner 6
+skinparam maxMessageSize 250
+hide footbox
+autonumber
+
+title Sequence-01: Sơ đồ Tuần tự Duyệt Thực đơn & Xem Chi tiết Món
+
+actor "Khách hàng\n(Customer)" as C
+boundary "Next.js UI\n(Presentation)" as UI
+control "ProductsController\n(NestJS API)" as API
+control "ProductsService\n(Business Layer)" as Service
+entity "PrismaService\n(DAL)" as DAL
+database "PostgreSQL\n(Database)" as DB
+
+note over C, DB
+  Khách hàng (Guest / Customer) duyệt thực đơn đồ uống.
+  Tồn kho khả dụng (availableStock) tính toán động từ nguyên liệu thô theo định mức BOM.
+end note
+
+== 1. Tải thực đơn & Tính toán tồn kho động ==
+C -> UI: Mở trang Menu (/menu)
+activate UI
+UI -> UI: Hiển thị Skeleton Shimmer (giữ ổn định bố cục)
+UI -> API: GET /api/v1/products (?category, ?search)
+activate API
+API -> API: ValidationPipe kiểm tra QueryProductDto
+API -> Service: findAll(queryDto)
+activate Service
+Service -> DAL: product.findMany({ where: { isActive: true },\ninclude: { recipes, ingredient } })
+activate DAL
+DAL -> DB: SELECT Product, RecipeItem, Ingredient\nWHERE isActive = true
+activate DB
+
+alt Lỗi truy vấn CSDL hoặc mất kết nối mạng
+  DB --> DAL: Database connection exception
+  DAL --> Service: Query failed exception
+  Service --> API: InternalServerErrorException
+  API --> UI: HTTP 500 Internal Server Error
+  UI -> UI: Tắt Skeleton Loading
+  UI --> C: Hiển thị ErrorState kèm nút "Thử lại (Retry)"
+else Truy vấn thành công
+  DB --> DAL: productRows[] kèm nguyên liệu
+  deactivate DB
+  DAL --> Service: ProductWithRecipes[]
+  deactivate DAL
+
+  loop Cho từng sản phẩm trong danh sách
+    Service -> Service: calculateAvailableStock():\nmin(floor(stockQuantity / qtyRequired))
+    Service -> Service: isAvailable = (availableStock > 0)
+  end
+
+  Service --> API: ProductResponseDto[] (kèm availableStock tính động)
+  deactivate Service
+  API --> UI: HTTP 200 OK (ProductResponseDto[])
+  deactivate API
+  UI -> UI: Tắt Skeleton Loading
+
+  alt Mảng sản phẩm rỗng (length == 0)
+    UI --> C: Hiển thị EmptyState ("Không tìm thấy đồ uống phù hợp")
+  else Có danh sách sản phẩm
+    UI --> C: Render CategoryFilter và danh sách thẻ ProductCard
+    note right of UI
+      Chốt chặn tồn kho (Task 10.3):
+      - availableStock == 0: Thẻ mờ 50%,
+        gắn badge "Hết hàng", khóa nút chọn.
+      - availableStock > 0: Mở nút chọn món
+        hoạt động bình thường.
+    end note
+  end
+end
+deactivate UI
+
+== 2. Lọc danh mục & Tìm kiếm (Debounce 300ms) ==
+opt Khách hàng lọc theo danh mục hoặc tìm kiếm
+  C -> UI: Chọn tab danh mục hoặc nhập từ khóa tìm kiếm
+  activate UI
+  UI -> UI: Kích hoạt Debounce 300ms khi gõ từ khóa
+  UI -> API: GET /api/v1/products (?category=..., ?search=...)
+  activate API
+  API -> Service: findAll(filterDto)
+  activate Service
+  Service -> DAL: product.findMany({ where: { category, search } })
+  activate DAL
+  DAL -> DB: SELECT Product WHERE category = :cat AND name ILIKE :search
+  activate DB
+  DB --> DAL: filteredRows[]
+  deactivate DB
+  DAL --> Service: ProductWithRecipes[]
+  deactivate DAL
+  Service -> Service: Tính lại availableStock cho danh sách lọc
+  Service --> API: ProductResponseDto[] (kết quả sau lọc)
+  deactivate Service
+  API --> UI: HTTP 200 OK
+  deactivate API
+  UI --> C: Cập nhật lại lưới ProductCard (hoặc EmptyState nếu rỗng)
+  deactivate UI
+end
+
+== 3. Xem chi tiết món & Bàn giao sang Chức năng 2 ==
+C -> UI: Bấm vào thẻ món đồ uống
+activate UI
+alt Món hết hàng (availableStock == 0)
+  UI -> UI: Khóa tương tác (pointer-events: none / disabled)
+  UI --> C: Không mở Modal tùy biến
+else Món còn hàng (availableStock > 0)
+  UI -> API: GET /api/v1/products/:id
+  activate API
+  API -> Service: findOne(id)
+  activate Service
+  Service -> DAL: product.findUnique({ where: { id },\ninclude: { recipes, ingredient } })
+  activate DAL
+  DAL -> DB: SELECT Product, RecipeItem, Ingredient WHERE id = :id
+  activate DB
+  DB --> DAL: productDetailRecord
+  deactivate DB
+  DAL --> Service: ProductDetail
+  deactivate DAL
+  Service --> API: ProductDetailResponseDto
+  deactivate Service
+  API --> UI: HTTP 200 OK (ProductDetail)
+  deactivate API
+  UI --> C: Mở ProductCustomizationModal (Hiển thị chi tiết món, bàn giao sang UC-02)
+  note over UI, C
+    Chức năng 1 (Duy) hoàn tất nhiệm vụ: hiển thị chi tiết và chuyển tiếp.
+    Quy trình chọn Size, Topping và thêm Giỏ hàng do Chức năng 2 (Quỳnh - UC-02) phụ trách.
+  end note
+end
+deactivate UI
+
+@enduml
