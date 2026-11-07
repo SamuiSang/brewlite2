@@ -2,6 +2,9 @@
 !pragma useVerticalIf on
 skinparam monochrome true
 skinparam shadowing false
+skinparam conditionStyle diamond
+skinparam activityDiamondFontSize 12
+skinparam padding 12
 skinparam defaultFontName SansSerif
 skinparam backgroundColor white
 title Activity-02: Tùy biến món, quản lý giỏ hàng và khuyến mãi
@@ -32,7 +35,8 @@ end note
 
 |Khách hàng|
 while (Tiếp tục quản lý giỏ hàng?) is (Có)
-  :Chọn thao tác;
+  :Chọn duy nhất một thao tác cho lượt này:
+  thêm món / đổi số lượng, xóa / áp mã / hủy mã;
   |Next.js UI & Zustand Store|
   if (Tùy biến / thêm món?) then (Có)
     if (Món đang bán và availableStock > 0?) then (Có)
@@ -59,7 +63,9 @@ while (Tiếp tục quản lý giỏ hàng?) is (Có)
     else (Không)
       :Báo hết hàng / ngừng phục vụ; khóa thêm món;
     endif
-  elseif (Đổi số lượng / xóa?) then (Có)
+  else (Không)
+  endif
+  if (Đổi số lượng / xóa?) then (Có)
     if (Xóa dòng, xóa tất cả hoặc giảm về 0?) then (Có)
       :Hiển thị xác nhận xóa;
       |Khách hàng|
@@ -77,7 +83,9 @@ while (Tiếp tục quản lý giỏ hàng?) is (Có)
         :Chặn cập nhật; báo chỉ còn X sản phẩm;
       endif
     endif
-  elseif (Áp / đổi mã?) then (Có)
+  else (Không)
+  endif
+  if (Áp / đổi mã?) then (Có)
     if (Giỏ có món?) then (Có)
       |Khách hàng|
       :Nhập code và bấm Áp dụng;
@@ -91,36 +99,37 @@ while (Tiếp tục quản lý giỏ hàng?) is (Có)
           if (Tồn tại, isActive, startDate <= now <= endDate,\nusedCount < usageLimit, subtotal >= minOrderValue?) then (Có)
             :PERCENTAGE: min(subtotal, subtotal * value / 100,\nmaxDiscountAmount nếu có);\nFIXED_AMOUNT: min(value, subtotal);
             :HTTP 200 { valid, promoId, code, discountAmount,\ndiscountType, discountValue, minOrderValue, maxDiscountAmount };
-            |Next.js UI & Zustand Store|
-            if (requestCartVersion == cartVersion?) then (Có)
-              :Thay mã cũ bằng mã mới; không cộng dồn;
-            else (Không)
-              :Bỏ kết quả cũ; yêu cầu áp lại mã\nvới giỏ hiện tại;
-            endif
           else (Không)
             |NestJS Promotions API & Database|
             :HTTP 400 kèm lý do;
-            |Next.js UI & Zustand Store|
-            :Báo lỗi; giữ mã cũ nếu còn hợp lệ;
           endif
         else (Không)
           |NestJS Promotions API & Database|
           :HTTP 500;
-          |Next.js UI & Zustand Store|
-          :Báo lỗi máy chủ; giữ giỏ và mã cũ;
         endif
       else (Không)
         |NestJS Promotions API & Database|
         :HTTP 400 lỗi DTO;
-        |Next.js UI & Zustand Store|
-        :Báo lỗi đầu vào; giữ nguyên giỏ;
+      endif
+      |Next.js UI & Zustand Store|
+      if (Nhận HTTP 200?) then (Có)
+        if (requestCartVersion == cartVersion?) then (Có)
+          :Thay mã cũ bằng mã mới; không cộng dồn;
+        else (Không)
+          :Bỏ kết quả cũ; yêu cầu áp lại mã\nvới giỏ hiện tại;
+        endif
+      else (Không)
+        :Báo lỗi đầu vào / mã không hợp lệ / máy chủ;\ngiữ giỏ và mã cũ nếu còn hợp lệ;
       endif
       :Kết thúc loading; lỗi mạng / timeout\nđược báo và giữ nguyên giỏ;
     else (Không)
       :Hiển thị giỏ rỗng; không gọi API;
     endif
-  else (Hủy mã)
+  else (Không)
+  endif
+  if (Hủy mã?) then (Có)
     :appliedPromotion = null; discountAmount = 0;
+  else (Không)
   endif
   :Nếu items hoặc mã áp dụng thực sự đổi:\ntăng cartVersion (kể cả subtotal không đổi);\ntính lại subtotal và Cart Badge;
   if (Giỏ rỗng hoặc không đạt minOrderValue?) then (Có)
@@ -128,6 +137,7 @@ while (Tiếp tục quản lý giỏ hàng?) is (Có)
   else (Không)
     if (Subtotal đổi và có mã?) then (Có)
       :Tính lại giảm dự kiến theo mã hiện tại;\nkhông giữ discountAmount của subtotal cũ;
+    else (Không)
     endif
   endif
   :Thử đồng bộ Zustand xuống localStorage;
