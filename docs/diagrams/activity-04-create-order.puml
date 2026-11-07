@@ -23,8 +23,9 @@ start
 
 |Next.js UI|
 :Kiểm tra trạng thái đăng nhập\n(AccessToken trong LocalStorage / Zustand State);
+-> Định danh tài khoản khách hàng?;
 
-if (Định danh tài khoản khách hàng?) then ([Đã đăng nhập])
+if () then ([Đã đăng nhập])
   :Khóa nút Đặt hàng (isSubmitting = true);\nHiển thị trạng thái đang xử lý đơn hàng;
 else ([Chưa đăng nhập])
   :Chuyển hướng sang màn hình Đăng nhập (/login);\nKhách đăng nhập thành công & nhận JWT Token;\nQuay trở lại tiếp tục quy trình đặt đơn;
@@ -34,22 +35,26 @@ endif
 
 |NestJS OrdersService (Business Layer)|
 :Xác thực JWT Token (JwtAuthGuard)\nvà kiểm tra cấu trúc dữ liệu đầu vào (ValidationPipe);
+-> Kiểm tra Token và DTO đầu vào?;
 
-if (Kiểm tra Token và DTO đầu vào?) then ([Hợp lệ])
+if () then ([Hợp lệ])
   :Trích xuất thông tin khách hàng từ JWT Token;\nKhởi tạo Database Transaction (prisma.$transaction);
   
   |PostgreSQL (DAL Transaction)|
   :Truy vấn đơn giá gốc và trạng thái kinh doanh của các món;
   
   |NestJS OrdersService (Business Layer)|
-  if (Kiểm tra trạng thái mở bán sản phẩm?) then ([Tất cả món đang mở bán])
+  -> Kiểm tra trạng thái mở bán sản phẩm?;
+  if () then ([Tất cả món đang mở bán])
     :Tính toán lại 100% tổng tiền đơn hàng tại Business Layer\n(theo giá gốc và phụ thu từ CSDL, bỏ qua giá Client);
     
-    if (Khách hàng có áp dụng mã khuyến mãi?) then ([Có gửi promoCode])
+    -> Khách hàng có áp dụng mã khuyến mãi?;
+    if () then ([Có gửi promoCode])
       |PostgreSQL (DAL Transaction)|
       :Truy vấn thông tin Promotion từ CSDL;
       |NestJS OrdersService (Business Layer)|
-      if (Điều kiện hiệu lực của mã khuyến mãi?) then ([Mã hợp lệ])
+      -> Điều kiện hiệu lực của mã khuyến mãi?;
+      if () then ([Mã hợp lệ])
         :Áp dụng giảm giá và tính tổng thanh toán;\nCập nhật lượt dùng mã khuyến mãi;
       else ([Hết hạn hoặc không hợp lệ])
         :Bỏ qua mã, áp dụng tổng tiền gốc;\nHiển thị cảnh báo mã voucher không hợp lệ;
@@ -64,7 +69,8 @@ if (Kiểm tra Token và DTO đầu vào?) then ([Hợp lệ])
     |PostgreSQL (DAL Transaction)|
     :Cập nhật trừ tồn kho nguyên liệu bằng Optimistic Locking\n(kiểm tra đủ định lượng tồn kho và đúng version hiện tại);
     
-    if (Kết quả trừ kho nguyên liệu?) then ([Thành công - Đủ tồn kho & Đúng version])
+    -> Kết quả trừ kho nguyên liệu?;
+    if () then ([Thành công - Đủ tồn kho & Đúng version])
       :Tạo bản ghi Order (trạng thái PENDING, hạn 15 phút)\nvà lưu chi tiết các dòng OrderItem;\nCOMMIT Database Transaction;
       |NestJS OrdersService (Business Layer)|
       :Trả về HTTP 201 Created kèm dữ liệu đơn hàng;
