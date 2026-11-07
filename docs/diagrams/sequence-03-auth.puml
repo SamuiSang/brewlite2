@@ -1,0 +1,91 @@
+@startuml sequence-03-auth
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+
+hide footbox
+skinparam sequenceMessageAlign left
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 300
+
+title SƠ ĐỒ TUẦN TỰ: UC-03 – ĐĂNG NHẬP, XÁC THỰC NGƯỜI DÙNG & PHÂN QUYỀN TRUY CẬP JWT (FR-04)
+
+actor "Khách hàng\n(Customer)" as Customer
+participant "«giao diện»\n:Giao diện Đăng nhập\n(LoginPage)" as UI
+participant "«điều khiển»\n:Bộ điều khiển xác thực\n(AuthController)" as Controller
+participant "«điều khiển»\n:Dịch vụ xác thực\n(AuthService)" as Service
+participant "«dịch vụ token»\n:Dịch vụ JWT Token\n(JwtService)" as JWT
+participant "«truy xuất CSDL»\n:Tầng truy xuất CSDL\n(PrismaService)" as DAL
+participant "«thực thể CSDL»\n:Cơ sở dữ liệu\n(PostgreSQL)" as DB
+
+Customer -> UI: 1. Nhập email, mật khẩu & bấm "Đăng nhập"()
+activate UI
+
+UI -> UI: 2. Kiểm tra dữ liệu form đầu vào (Client Validation)
+
+alt [Dữ liệu form không hợp lệ (sai định dạng email / trống)]
+    UI --> Customer: Hiển thị lỗi định dạng inline trên form
+else [Dữ liệu form hợp lệ]
+    UI -> Controller: 3. POST /api/v1/auth/login\n(body: LoginDto {email, password})
+    activate Controller
+
+    Controller -> Service: 4. login(loginDto: LoginDto)
+    activate Service
+
+    Service -> DAL: 5. user.findUnique({ where: { email } })
+    activate DAL
+
+    DAL -> DB: 6. SELECT * FROM "User" WHERE "email" = $1 LIMIT 1;
+    activate DB
+    DB --> DAL: Trả về bản ghi userRecord (hoặc null)
+    deactivate DB
+
+    DAL --> Service: Trả về đối tượng User entity (hoặc null)
+    deactivate DAL
+
+    alt [Tài khoản không tồn tại trong CSDL]
+        Service -> Service: Thực hiện dummy Bcrypt compare (chống Timing Attack)
+        Service --> Controller: Ném ngoại lệ UnauthorizedException("Email hoặc mật khẩu không chính xác")
+        Controller --> UI: HTTP 401 Unauthorized
+        UI --> Customer: Hiển thị Toast cảnh báo "Email hoặc mật khẩu không chính xác"
+    else [Tài khoản tồn tại trong CSDL]
+        Service -> Service: 7. So sánh mật khẩu Bcrypt:\nbcrypt.compare(loginDto.password, user.passwordHash)
+
+        alt [Mật khẩu không trùng khớp]
+            Service --> Controller: Ném ngoại lệ UnauthorizedException("Email hoặc mật khẩu không chính xác")
+            Controller --> UI: HTTP 401 Unauthorized
+            UI --> Customer: Hiển thị Toast cảnh báo "Email hoặc mật khẩu không chính xác"
+        else [Mật khẩu hợp lệ]
+            Service -> JWT: 8. signAsync({ sub: user.id, email: user.email, role: user.role })
+            activate JWT
+            JWT --> Service: Trả về accessToken (JWT thời hạn 24h)
+            deactivate JWT
+
+            Service --> Controller: 9. Trả về { accessToken, user: { id, email, fullName, role } }
+            deactivate Service
+
+            Controller --> UI: 10. HTTP 200 OK { accessToken, user }
+            deactivate Controller
+
+            UI -> UI: 11. Lưu accessToken vào Storage (LocalStorage / State)
+            UI -> UI: 12. Gán Header 'Authorization: Bearer <token>'
+
+            alt [Có tham số chuyển hướng ?redirect=/checkout]
+                UI --> Customer: 13. Chuyển hướng sang /checkout (Bảo toàn giỏ hàng)
+            else [Không có tham số chuyển hướng]
+                UI --> Customer: 13. Chuyển hướng sang /menu (Đăng nhập thành công)
+            end
+        end
+    end
+end
+
+deactivate UI
+
+legend bottom
+  Ghi chú Chuẩn Sơ đồ Tuần tự Chức năng 3 (Hiếu - PO | Chuẩn UML & Monochrome):
+  • hide footbox: Chỉ hiển thị duy nhất 1 hàng Actor / Đối tượng ở đầu sơ đồ theo đúng chuẩn kỹ thuật.
+  • Đầy đủ 6 Lifelines theo Kiến trúc 3 lớp: Customer -> Next.js UI -> Controller -> Service -> DAL -> Database.
+  • Băm mật khẩu Bcrypt với saltRounds >= 10; cấp JWT AccessToken có thời hạn 24h và bảo toàn giỏ hàng khi redirect.
+endlegend
+@enduml
