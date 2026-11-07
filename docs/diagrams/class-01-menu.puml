@@ -1,0 +1,171 @@
+@startuml class-01-menu
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+skinparam backgroundColor white
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam defaultFontSize 12
+skinparam roundcorner 6
+hide empty members
+
+title Class-01: Tầng Dữ liệu, Domain thực đơn và Định mức nguyên liệu tồn kho (BOM)
+
+package "Client Domain — Next.js UI (Presentation Layer)" as ClientDomain {
+  class MenuPage <<page component>> {
+    - currentCategory: CategoryTab
+    - searchKeyword: String
+    - uiState: UIState
+    - products: ProductCardModel[]
+    + handleCategoryChange(tab: CategoryTab): void
+    + handleSearchChange(keyword: String): void
+    + handleClearFilter(): void
+    + handleRetry(): void
+  }
+
+  class ProductCardModel <<view model>> {
+    - id: UUID
+    - name: String
+    - description: String
+    - basePrice: Money
+    - imageUrl: String
+    - category: CategoryTab
+    - availableStock: Int
+    - isAvailable: Boolean
+    + isSoldOut(): Boolean
+    + canAddToCart(): Boolean
+  }
+
+  enum CategoryTab {
+    ALL
+    COFFEE
+    TEA
+    FREEZE
+    PASTRY
+  }
+
+  enum UIState {
+    LOADING
+    SUCCESS
+    EMPTY
+    ERROR
+  }
+
+  MenuPage "1" *-- "0..*" ProductCardModel : hiển thị
+  MenuPage --> UIState : quản lý trạng thái
+  MenuPage --> CategoryTab : lọc danh mục
+  ProductCardModel --> CategoryTab : thuộc nhóm
+}
+
+ClientDomain -[hidden]down-> ServerDomain
+
+package "Server Domain — NestJS & PostgreSQL (Business Layer & DAL)" as ServerDomain {
+  class Product <<entity>> {
+    - id: UUID {PK}
+    - name: String
+    - description: String
+    - basePrice: Decimal
+    - imageUrl: String
+    - category: ProductCategory
+    - isActive: Boolean
+    - version: Int {Optimistic Lock}
+    - createdAt: DateTime
+    + isOrderable(): Boolean
+  }
+
+  class Ingredient <<raw material entity>> {
+    - id: UUID {PK}
+    - name: String
+    - unit: String
+    - stockQuantity: Decimal
+    - minAlertThreshold: Decimal
+    - version: Int {Optimistic Lock}
+    + hasSufficientStock(qty: Decimal): Boolean
+  }
+
+  class RecipeItem <<BOM recipe entity>> {
+    - id: UUID {PK}
+    - productId: UUID {FK}
+    - ingredientId: UUID {FK}
+    - quantityRequired: Decimal
+  }
+
+  enum ProductCategory {
+    COFFEE
+    TEA
+    FREEZE
+    PASTRY
+  }
+
+  class ProductsController <<controller>> {
+    - productsService: ProductsService
+    + getProducts(query: QueryProductDto): Promise<ProductResponseDto[]>
+    + getProductById(id: UUID): Promise<ProductDetailResponseDto>
+  }
+
+  class ProductsService <<business service>> {
+    - prisma: PrismaService
+    + findAll(query: QueryProductDto): Promise<ProductResponseDto[]>
+    + findOne(id: UUID): Promise<ProductDetailResponseDto>
+    + calculateAvailableStock(recipes: RecipeItem[]): Int
+  }
+
+  class QueryProductDto <<dto>> {
+    - category: ProductCategory [0..1]
+    - search: String [0..1]
+  }
+
+  class ProductResponseDto <<dto>> {
+    - id: UUID
+    - name: String
+    - basePrice: Decimal
+    - category: ProductCategory
+    - availableStock: Int
+    - isAvailable: Boolean
+  }
+
+  class ProductDetailResponseDto <<dto>> {
+    - description: String
+    - recipeSummary: String[]
+  }
+
+  Product "1" *-- "1..*" RecipeItem : recipes (BOM)
+  Ingredient "1" *-- "0..*" RecipeItem : dùng trong
+  Product --> ProductCategory
+
+  Product -[hidden]down-> ProductsController
+  Ingredient -[hidden]down-> ProductsService
+  ProductsController -[hidden]down-> QueryProductDto
+  ProductResponseDto -[hidden]down-> ProductDetailResponseDto
+
+  ProductsController --> ProductsService
+  ProductsController ..> QueryProductDto
+  ProductsController ..> ProductResponseDto
+  ProductDetailResponseDto --|> ProductResponseDto
+  ProductsService ..> Product
+  ProductsService ..> Ingredient
+  ProductsService ..> RecipeItem
+}
+
+ProductCardModel ..> ProductResponseDto : ánh xạ hiển thị từ API
+
+note bottom of ProductCardModel
+  Chốt chặn tồn kho phía Client (Task 10.3):
+  - availableStock == 0: Thẻ mờ 50%,
+    gắn badge "Hết hàng", khóa nút chọn món.
+  - availableStock > 0: Mở nút chọn món,
+    kích hoạt Modal chuyển sang UC-02.
+end note
+
+legend bottom
+  Ghi chú nghiệp vụ Kiến trúc & Tồn kho thực tế (Task 10):
+  - CSDL tuyệt đối không lưu số ly pha sẵn.
+  - Số lượng thành phẩm tính động theo công thức:
+    availableStock = min (floor(kho / định mức)).
+  - Ingredient: Kho nguyên liệu thô (cà phê, sữa, đường, ly).
+  - RecipeItem: Định mức công thức BOM cho từng ly.
+  - version: Khóa lạc quan (Optimistic Locking) chống xung đột kho.
+  - Tách bạch Client Domain (Next.js) và Server Domain (NestJS/PostgreSQL).
+endlegend
+
+@enduml
