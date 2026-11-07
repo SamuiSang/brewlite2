@@ -1,0 +1,77 @@
+@startuml activity-01-menu
+!pragma useVerticalIf on
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+skinparam backgroundColor white
+skinparam defaultFontSize 12
+skinparam roundcorner 6
+skinparam wrapWidth 180
+
+title Activity-01: Sơ đồ Hoạt động Duyệt Thực đơn, Tìm kiếm & Lọc Danh mục
+
+|Khách hàng|
+start
+:Mở ứng dụng web BrewLite\n(Trang chủ hoặc /menu);
+
+|Next.js UI|
+:Hiển thị Skeleton Shimmer\n(giữ ổn định khung layout);
+:Gửi yêu cầu HTTP GET\n/api/v1/products;
+
+|NestJS API & Database|
+:ProductsController nhận request;\nValidationPipe kiểm tra DTO;
+:ProductsService gọi Prisma ORM;\nTruy vấn Product (isActive = true)\nvà bảng RecipeItem, Ingredient;
+
+if () then ([Lỗi Server / DB 500])
+  :Ném lỗi InternalServerError;\nTrả về HTTP 500;
+  |Next.js UI|
+  :Tắt hiệu ứng Skeleton;
+  :Hiển thị ErrorState báo lỗi mạng;\nHiển thị nút "Thử lại (Retry)";
+  |Khách hàng|
+  stop
+
+else ([Thành công HTTP 200])
+  |NestJS API & Database|
+  :Tính availableStock theo BOM:\nmin(floor(kho / định mức));
+  :Trả về mã HTTP 200 OK\nkèm ProductResponseDto[];
+
+  |Next.js UI|
+  :Tắt hiệu ứng Skeleton;
+  if () then ([Mảng rỗng (length == 0)])
+    :Hiển thị component EmptyState\n("Không tìm thấy đồ uống");
+    :Hiển thị nút "Xóa bộ lọc";
+    |Khách hàng|
+    stop
+  else ([Có danh sách món])
+    |Next.js UI|
+    :Render thanh tab CategoryFilter\nvà danh sách thẻ ProductCard;
+  endif
+
+endif
+
+|Khách hàng|
+:Xem danh sách thực đơn đồ uống;
+
+if () then ([Lọc hoặc tìm kiếm])
+  :Chọn tab danh mục hoặc\nnhập từ khóa tìm kiếm;
+  |Next.js UI|
+  :Lọc và cập nhật lại\ndanh sách ProductCard hiển thị;
+  |Khách hàng|
+else ([Xem danh sách hiện tại])
+endif
+
+:Bấm chọn một thẻ món đồ uống;
+
+|Next.js UI|
+if () then ([Hết hàng (availableStock == 0)])
+  :Thẻ món mờ 50%, gắn badge "Hết hàng";\nKhóa nút chọn món (disabled);
+  |Khách hàng|
+  stop
+else ([Còn hàng (availableStock > 0)])
+  |Next.js UI|
+  :Hiển thị thông tin chi tiết món;\nMở ProductCustomizationModal\n(Bàn giao dữ liệu sang Chức năng 2);
+  |Khách hàng|
+  stop
+endif
+
+@enduml
