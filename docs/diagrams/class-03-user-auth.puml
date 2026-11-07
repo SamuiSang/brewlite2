@@ -1,0 +1,165 @@
+@startuml class-03-user-auth
+scale 0.85
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam defaultFontSize 11
+hide empty members
+
+title SƠ ĐỒ LỚP (CD-03): PHÂN HỆ XÁC THỰC NGƯỜI DÙNG, PHÂN QUYỀN JWT & HEALTH CHECK (FR-04)
+
+package "1. Service & Controller Layer" as ServiceLayer {
+  class AuthController <<controller>> {
+    + register(dto: RegisterDto): Promise<AuthResponseDto>
+    + login(dto: LoginDto): Promise<AuthResponseDto>
+    + getProfile(req): Promise<UserProfileDto>
+  }
+
+  class HealthController <<controller>> {
+    - prisma: PrismaService
+    + check(res): Promise<Response>
+  }
+
+  class AuthService <<service>> {
+    - prisma: PrismaService
+    - jwtService: JwtService
+    + register(dto: RegisterDto): Promise<AuthResponseDto>
+    + login(dto: LoginDto): Promise<AuthResponseDto>
+    + validateUser(payload): Promise<User>
+    + hashPassword(password: String): Promise<String>
+    + comparePassword(plain: String, hash: String): Promise<Boolean>
+  }
+
+  class JwtAuthGuard <<security guard>> {
+    - jwtService: JwtService
+    + canActivate(context): Boolean
+    - extractToken(request): String
+  }
+
+  class LoginDto <<dto>> {
+    + email: String
+    + password: String
+  }
+
+  class RegisterDto <<dto>> {
+    + email: String
+    + password: String
+    + fullName: String
+    + phone: String [0..1]
+  }
+
+  class AuthResponseDto <<dto>> {
+    + accessToken: String
+    + user: UserProfileDto
+  }
+
+  class UserProfileDto <<dto>> {
+    + id: UUID
+    + email: String
+    + fullName: String
+    + role: UserRole
+    + loyaltyPoints: Int
+  }
+
+  AuthController -down-> AuthService : ủy quyền
+  AuthController ..> LoginDto : DTO req
+  AuthController ..> RegisterDto : DTO req
+  AuthController ..> AuthResponseDto : DTO res
+  AuthResponseDto *-- UserProfileDto : chứa
+  JwtAuthGuard ..> AuthService : xác thực
+  HealthController -[hidden]down-> JwtAuthGuard
+}
+
+package "2. User Domain Layer" as UserDomain {
+  class User <<aggregate root>> {
+    - id: UUID {PK}
+    - email: String {unique}
+    - passwordHash: String
+    - fullName: String
+    - phone: String [0..1]
+    - role: UserRole
+    - loyaltyPoints: Int = 0
+    - isActive: Boolean = true
+    - createdAt: DateTime
+    - updatedAt: DateTime
+    + verifyPassword(plainText: String): Boolean
+    + updateProfile(fullName, phone): void
+    + addLoyaltyPoints(points: Int): void
+    + deductLoyaltyPoints(points: Int): Boolean
+    + hasPermission(requiredRole: UserRole): Boolean
+  }
+
+  class UserSession <<entity>> {
+    - sessionId: UUID {PK}
+    - userId: UUID {FK}
+    - accessToken: String
+    - tokenExpiresAt: DateTime
+    - isValid: Boolean
+    + isExpired(currentTime): Boolean
+    + revokeSession(): void
+  }
+
+  enum UserRole {
+    CUSTOMER
+    STAFF
+    ADMIN
+  }
+
+  User "1" *-- "1" UserRole : role
+  User "1" *-- "0..*" UserSession : sessions
+}
+
+package "3. External Domains" as ExternalDomain {
+  class Order <<external entity>> {
+    - id: UUID
+    - orderCode: String {unique}
+    - userId: UUID
+    - status: String
+    - finalAmount: Decimal
+  }
+
+  class LoyaltyTransaction <<external entity>> {
+    - id: UUID
+    - userId: UUID
+    - pointsChange: Int
+    - balanceAfter: Int
+  }
+
+  class PaymentTransaction <<external entity>> {
+    - id: UUID
+    - orderId: UUID
+    - paymentMethod: String
+    - transactionStatus: String
+  }
+}
+
+' Liên kết giữa các tầng
+ServiceLayer -down-> UserDomain : quản lý
+AuthService ..> User : truy vấn & khởi tạo
+HealthController ..> User : kiểm tra CSDL (SELECT 1)
+
+UserDomain -right-> ExternalDomain : tương tác
+User "1" <-- "0..*" Order : sở hữu (userId)
+User "1" <-- "0..*" LoyaltyTransaction : tích / đổi điểm
+Order "1" <-- "0..1" PaymentTransaction : thanh toán
+
+note bottom of UserDomain
+  • **Mã hóa Bcrypt**: Băm an toàn với saltRounds >= 10; verifyPassword chống Timing Attack.
+  • **JWT AccessToken**: Thời hạn sống 24h, chứa payload mã hóa { sub, email, role }.
+  • **Điểm thưởng Loyalty**: Cộng +1 điểm mỗi 10.000đ khi thanh toán thành công; không cho phép số dư âm.
+end note
+
+note bottom of ServiceLayer
+  • **Bảo mật phân quyền**: JwtAuthGuard bảo vệ các route nhạy cảm (đặt đơn, thanh toán).
+  • **Health Check**: GET /api/v1/health thực thi SELECT 1 kiểm tra PostgreSQL phục vụ Smoke Test & Rollback.
+end note
+
+legend bottom
+  Chuẩn ký hiệu: (-) Private, (+) Public | (..) Phụ thuộc / DTO | (*--) Composition | (--) Liên kết 1-n | Đơn sắc monochrome
+endlegend
+@enduml
