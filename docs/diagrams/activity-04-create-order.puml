@@ -1,5 +1,4 @@
 @startuml activity-04-create-order
-!pragma useVerticalIf on
 skinparam monochrome true
 skinparam shadowing false
 skinparam backgroundColor white
@@ -12,101 +11,60 @@ skinparam SwimlaneBorderThickness 1
 skinparam SwimlaneTitleFontSize 13
 skinparam SwimlaneTitleFontWeight bold
 skinparam ActivityFontSize 11
-skinparam ActivityDiamondFontSize 11
+skinparam ActivityDiamondFontSize 10
 skinparam ArrowFontSize 10
 
-title ACTIVITY DIAGRAM: AD-04 – KHỞI TẠO ĐƠN HÀNG, TÍNH TIỀN TẠI BUSINESS LAYER & KHÓA TỒN KHO NGUYÊN LIỆU (FR-05)
+title SƠ ĐỒ HOẠT ĐỘNG (ACTIVITY DIAGRAM): AD-04 - KHỞI TẠO ĐƠN HÀNG, TÍNH TIỀN TẠI BUSINESS LAYER & KHÓA TỒN KHO NGUYÊN LIỆU (FR-05)
+
+|Khách hàng|
+|Hệ thống BrewLite (Next.js UI & NestJS API)|
 
 |Khách hàng|
 start
-:Nhấn nút "Đặt hàng / Tiến hành thanh toán"\ntrên màn hình Giỏ hàng (/cart);
+:1. Nhấn nút "Đặt hàng / Tiến hành thanh toán"\ntrên màn hình Giỏ hàng (/cart);
 
-|Next.js UI|
-:Kiểm tra trạng thái đăng nhập\n(AccessToken trong LocalStorage / Zustand State);
--> Định danh tài khoản khách hàng?;
+|Hệ thống BrewLite (Next.js UI & NestJS API)|
+:2. Kiểm tra trạng thái đăng nhập tài khoản\ncủa khách hàng;
 
-if () then ([Đã đăng nhập])
-  :Khóa nút Đặt hàng (isSubmitting = true);\nHiển thị trạng thái đang xử lý đơn hàng;
-else ([Chưa đăng nhập])
-  :Chuyển hướng sang màn hình Đăng nhập (/login);\nKhách đăng nhập thành công & nhận JWT Token;\nQuay trở lại tiếp tục quy trình đặt đơn;
-endif
-
-:Gửi yêu cầu tạo đơn hàng (POST /api/v1/orders)\nkèm JWT Token và danh sách món ăn, mã giảm giá;
-
-|NestJS OrdersService (Business Layer)|
-:Xác thực JWT Token (JwtAuthGuard)\nvà kiểm tra cấu trúc dữ liệu đầu vào (ValidationPipe);
--> Kiểm tra Token và DTO đầu vào?;
-
-if () then ([Hợp lệ])
-  :Trích xuất thông tin khách hàng từ JWT Token;\nKhởi tạo Database Transaction (prisma.$transaction);
-  
-  |PostgreSQL (DAL Transaction)|
-  :Truy vấn đơn giá gốc và trạng thái kinh doanh của các món;
-  
-  |NestJS OrdersService (Business Layer)|
-  -> Kiểm tra trạng thái mở bán sản phẩm?;
-  if () then ([Tất cả món đang mở bán])
-    :Tính toán lại 100% tổng tiền đơn hàng tại Business Layer\n(theo giá gốc và phụ thu từ CSDL, bỏ qua giá Client);
-    
-    -> Khách hàng có áp dụng mã khuyến mãi?;
-    if () then ([Có gửi promoCode])
-      |PostgreSQL (DAL Transaction)|
-      :Truy vấn thông tin Promotion từ CSDL;
-      |NestJS OrdersService (Business Layer)|
-      -> Điều kiện hiệu lực của mã khuyến mãi?;
-      if () then ([Mã hợp lệ])
-        :Áp dụng giảm giá và tính tổng thanh toán;\nCập nhật lượt dùng mã khuyến mãi;
-      else ([Hết hạn hoặc không hợp lệ])
-        :Bỏ qua mã, áp dụng tổng tiền gốc;\nHiển thị cảnh báo mã voucher không hợp lệ;
-      endif
-    else ([Không áp dụng mã])
-      :Giữ nguyên tổng tiền gốc;
-    endif
-    
-    |NestJS OrdersService (Business Layer)|
-    :Tra cứu định mức công thức (RecipeItem);\nTổng hợp lượng nguyên liệu thô cần tiêu hao;
-    
-    |PostgreSQL (DAL Transaction)|
-    :Cập nhật trừ tồn kho nguyên liệu bằng Optimistic Locking\n(kiểm tra đủ định lượng tồn kho và đúng version hiện tại);
-    
-    -> Kết quả trừ kho nguyên liệu?;
-    if () then ([Thành công - Đủ tồn kho & Đúng version])
-      :Tạo bản ghi Order (trạng thái PENDING, hạn 15 phút)\nvà lưu chi tiết các dòng OrderItem;\nCOMMIT Database Transaction;
-      |NestJS OrdersService (Business Layer)|
-      :Trả về HTTP 201 Created kèm dữ liệu đơn hàng;
-      |Next.js UI|
-      :Làm rỗng giỏ hàng (clearCart);\nĐiều hướng khách hàng sang màn hình Thanh toán (/checkout);
-      |Khách hàng|
-      :Xem thông tin đơn hàng PENDING sẵn sàng thanh toán;
-    else ([Thất bại - Hết nguyên liệu hoặc Xung đột version])
-      |PostgreSQL (DAL Transaction)|
-      :ROLLBACK 100% Database Transaction;\n(giữ nguyên tồn kho nguyên liệu);
-      |NestJS OrdersService (Business Layer)|
-      :Ném ngoại lệ HTTP 409 Conflict (hết hàng / xung đột);
-      |Next.js UI|
-      :Mở khóa nút Đặt hàng (isSubmitting = false);\nHiển thị thông báo Toast cảnh báo hết hàng / xung đột đồng thời;\nĐánh dấu dòng sản phẩm không đủ nguyên liệu;
-      |Khách hàng|
-      :Nhận thông báo lỗi và kiểm tra/điều chỉnh lại giỏ hàng;
-    endif
-    
-  else ([Có món ngừng phục vụ])
-    |PostgreSQL (DAL Transaction)|
-    :ROLLBACK Database Transaction;
-    |NestJS OrdersService (Business Layer)|
-    :Ném ngoại lệ HTTP 409 Conflict (món ngừng bán);
-    |Next.js UI|
-    :Mở khóa nút Đặt hàng; Đánh dấu món ngừng bán;
-    |Khách hàng|
-    :Nhận thông báo và xóa món khỏi giỏ hàng;
-  endif
-  
-else ([Dữ liệu không hợp lệ hoặc thiếu Token])
-  :Trả về mã lỗi HTTP 400 Bad Request / 401 Unauthorized;
-  |Next.js UI|
-  :Mở khóa nút Đặt hàng (isSubmitting = false);\nHiển thị thông báo lỗi dữ liệu / phiên đăng nhập;
+if () then ([Chưa đăng nhập])
+  :3. Thông báo yêu cầu đăng nhập\n& Chuyển hướng sang màn hình /login;
   |Khách hàng|
-  :Nhận cảnh báo lỗi và thực hiện đăng nhập lại / sửa giỏ;
+  :Đăng nhập tài khoản & nhận JWT Token;
+  |Hệ thống BrewLite (Next.js UI & NestJS API)|
+  :Lưu token & chuyển lại Giỏ hàng;
+else ([Đã đăng nhập])
 endif
+
+:4. Khóa nút Đặt hàng (chống bấm trùng)\n& Gửi yêu cầu khởi tạo đơn hàng;
+
+:5. Xác thực phiên đăng nhập tài khoản\n& Khởi tạo phiên giao dịch an toàn;
+
+:6. Đối soát đơn giá gốc & kiểm tra\ntrạng thái mở bán của các món;
+
+if () then ([Có món ngừng kinh doanh])
+  :7. Hủy phiên giao dịch (Rollback)\n& Cảnh báo món đã ngừng phục vụ;
+  |Khách hàng|
+  :Xóa món ngừng bán khỏi giỏ hàng;
+  stop
+else ([Tất cả món đang mở bán])
+  |Hệ thống BrewLite (Next.js UI & NestJS API)|
+  :8. Tính toán lại 100% tổng tiền đơn hàng\n(theo giá gốc CSDL & khấu trừ voucher nếu có);
+endif
+
+:9. Tra cứu công thức pha chế (RecipeItem)\n& Tổng hợp lượng nguyên liệu thô cần tiêu hao;
+
+:10. Thực thi trừ tồn kho nguyên liệu bằng\nKhóa kiểm soát đồng thời (Optimistic Locking);
+
+if () then ([Hết nguyên liệu / Xung đột tồn kho])
+  :11. Hủy phiên giao dịch, giữ nguyên kho\n& Báo lỗi không đủ nguyên liệu phục vụ;
+else ([Đủ kho & Cập nhật thành công])
+  :12. Khởi tạo đơn hàng mới (chờ thanh toán 15p),\nlưu chi tiết món & Xác nhận giao dịch hoàn tất;
+endif
+
+:13. Phản hồi kết quả xử lý giao dịch\n& Cập nhật trạng thái hiển thị trên Giỏ hàng;
+
+|Khách hàng|
+:14. Quan sát kết quả: Chuyển sang /checkout\nhoặc nhận cảnh báo để điều chỉnh lại giỏ hàng;
 
 stop
 @enduml
