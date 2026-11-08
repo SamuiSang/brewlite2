@@ -1,6 +1,6 @@
 @startuml activity-03-auth
-scale 0.85
 !pragma useVerticalIf on
+scale 0.75
 skinparam monochrome true
 skinparam shadowing false
 skinparam backgroundColor white
@@ -12,81 +12,70 @@ skinparam ActivityDiamondBorderThickness 1
 skinparam SwimlaneBorderThickness 1
 skinparam SwimlaneTitleFontSize 12
 skinparam SwimlaneTitleFontWeight bold
-skinparam ActivityFontSize 10
+skinparam ActivityFontSize 11
 skinparam ActivityDiamondFontSize 10
 skinparam ArrowFontSize 9
-skinparam ActivityMaxWidth 175
+skinparam ActivityMaxWidth 190
 
-title SƠ ĐỒ HOẠT ĐỘNG: AD-03 – ĐĂNG NHẬP, XÁC THỰC NGƯỜI DÙNG & PHÂN QUYỀN JWT (FR-04)
+title SƠ ĐỒ HOẠT ĐỘNG: AD-03 – ĐĂNG NHẬP, XÁC THỰC NGƯỜI DÙNG & CẤP MÃ PHIÊN JWT (FR-04)
 
 |Khách hàng|
-|Next.js UI|
-|NestJS API & Database|
+|Hệ thống BrewLite (Next.js UI & NestJS API)|
 
 |Khách hàng|
 start
-:Mở trang Đăng nhập (/login);\nNhập Email và Mật khẩu;\nBấm nút "Đăng nhập";
+:1. Truy cập trang Đăng nhập\nvà điền Email, Mật khẩu;
+:2. Bấm nút "Đăng nhập";
 
-|Next.js UI|
-:Kiểm tra tính hợp lệ dữ liệu form\n(Client Validation: regex, mật khẩu);
--> Dữ liệu form hợp lệ?;
+|Hệ thống BrewLite (Next.js UI & NestJS API)|
+:3. Kiểm tra tính hợp lệ\ncủa thông tin form đã nhập;
 
-if () then ([Hợp lệ])
-  :Khóa nút Đăng nhập (isSubmitting = true);\nGửi request POST /api/v1/auth/login;
-
-  |NestJS API & Database|
-  :AuthController nhận request;\nAuthService gọi Prisma truy vấn User;\nSELECT * FROM "User" WHERE email = $1;
+if () then ([Thông tin hợp lệ])
+  :4. Tìm kiếm tài khoản\nngười dùng theo Email;
   
-  -> Tìm thấy tài khoản?;
-  if () then ([Tìm thấy User])
-    :So sánh mật khẩu với chuỗi băm Bcrypt:\nbcrypt.compare(password, user.passwordHash);
+  if () then ([Tìm thấy tài khoản])
+    :5. Kiểm tra tính chính xác\ncủa mật khẩu đã cung cấp;
     
-    -> Kết quả kiểm tra mật khẩu?;
     if () then ([Mật khẩu chính xác])
-      :Ký phát JWT AccessToken (thời hạn 24h);\nTrả về HTTP 200 OK {accessToken, user};
-
-      |Next.js UI|
-      :Lưu accessToken vào LocalStorage/State;\nGán Header Bearer Token cho API Client;
+      :6. Cấp mã phiên JWT (24h)\nvà trả về thông tin đăng nhập;
+      :7. Lưu phiên đăng nhập\nvào bộ nhớ trình duyệt;
       
-      -> Kiểm tra tham số điều hướng?;
-      if () then ([Có ?redirect=/checkout])
-        :Điều hướng sang trang /checkout\n(Bảo toàn giỏ hàng);
-      else ([Không có redirect])
-        :Điều hướng sang trang Thực đơn /menu;
+      if () then ([Có chuyển hướng ?redirect=/checkout])
+        :8. Chuyển hướng sang trang Thanh toán\n(Bảo toàn toàn bộ giỏ hàng);
+      else ([Đăng nhập thông thường])
+        :8. Chuyển hướng sang trang Thực đơn\nđể tiếp tục chọn món;
       endif
-
+      
       |Khách hàng|
-      :Tiếp tục phiên làm việc thành viên;
+      :9. Tiếp tục sử dụng hệ thống\nvới tư cách Thành viên;
 
-    else ([Mật khẩu sai])
-      :Ghi log cảnh báo đăng nhập thất bại;\nNém ngoại lệ HTTP 401 Unauthorized;
-      |Next.js UI|
-      :Mở khóa nút bấm (isSubmitting = false);\nHiển thị thông báo Toast lỗi mật khẩu;
+    else ([Mật khẩu không đúng])
+      |Hệ thống BrewLite (Next.js UI & NestJS API)|
+      :Hiển thị thông báo:\n"Email hoặc mật khẩu không chính xác";
       |Khách hàng|
-      :Nhận thông báo lỗi đăng nhập;
+      :Nhận thông báo và nhập lại mật khẩu;
     endif
 
-  else ([Không tìm thấy User])
-    :Thực hiện dummy Bcrypt compare;\nNém ngoại lệ HTTP 401 Unauthorized;
-    |Next.js UI|
-    :Mở khóa nút bấm (isSubmitting = false);\nHiển thị Toast lỗi tài khoản không tồn tại;
+  else ([Tài khoản không tồn tại])
+    |Hệ thống BrewLite (Next.js UI & NestJS API)|
+    :Hiển thị thông báo:\n"Email hoặc mật khẩu không chính xác";
     |Khách hàng|
     :Nhận cảnh báo lỗi tài khoản;
   endif
 
-else ([Không hợp lệ])
-  :Hiển thị lỗi định dạng inline trên form;\nGiữ nguyên thông tin hợp lệ đã nhập;
+else ([Sai định dạng hoặc để trống])
+  :Hiển thị cảnh báo lỗi định dạng\ntrực tiếp trên form đăng nhập;
   |Khách hàng|
-  :Kiểm tra và sửa lại dữ liệu form;
+  :Kiểm tra và sửa lại thông tin;
 endif
 
 |Khách hàng|
 stop
 
 legend bottom
-  Ghi chú Sơ đồ Hoạt động Chức năng 3 (Hiếu - PO | Chuẩn UML Monochrome):
-  • Gom toàn bộ các nhánh rẽ lỗi và thành công về DUY NHẤT 1 điểm kết thúc (End node / Bullseye).
-  • Điểm rẽ nhánh (Decision node): Hình thoi rỗng, câu hỏi đặt trên luồng vào và nhãn rẽ nhánh trong [Guard].
-  • Mã hóa Bcrypt tại Business Layer và cấp JWT AccessToken thời hạn 24h.
+  Ghi chú Sơ đồ Hoạt động Chức năng 3 (Hiếu - PO | Chuẩn UML Monochrome & Ngôn ngữ tự nhiên):
+  • Sử dụng ngôn ngữ tự nhiên, các bước đánh số thứ tự rõ ràng, dễ hiểu cho người dùng và hội đồng nghiệm thu.
+  • Bố cục 2 làn bơi (Khách hàng & Hệ thống) nhỏ gọn, trực quan, không bị kéo giãn theo chiều ngang.
+  • Điểm rẽ nhánh sử dụng hình thoi rỗng chuẩn UML, tất cả nhánh rẽ hội tụ về DUY NHẤT 1 điểm kết thúc (Bullseye).
 endlegend
 @enduml
