@@ -1,0 +1,208 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 1080" width="980" height="1080" style="background-color:#ffffff;font-family:'Segoe UI',Arial,sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#000000"/>
+    </marker>
+    <style>
+      .title { font-size: 14.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .lane-header { font-size: 13px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .step-box { fill: #ffffff; stroke: #000000; stroke-width: 1.3; rx: 12; ry: 12; }
+      .step-text { font-size: 11px; fill: #000000; text-anchor: middle; }
+      .diamond { fill: #ffffff; stroke: #000000; stroke-width: 1.3; }
+      .guard { font-size: 10px; fill: #000000; }
+      .flow { fill: none; stroke: #000000; stroke-width: 1.25; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <text x="490" y="30" class="title">SƠ ĐỒ HOẠT ĐỘNG (TASK 2.1): AD-03 - XÁC THỰC NGƯỜI DÙNG &amp; ĐĂNG NHẬP HỆ THỐNG</text>
+
+  <!-- Swimlane Outer Frame & Header -->
+  <rect x="25" y="52" width="930" height="1004" fill="none" stroke="#000000" stroke-width="1.5"/>
+  <line x1="25" y1="90" x2="955" y2="90" stroke="#000000" stroke-width="1.4"/>
+  <text x="192.5" y="76" class="lane-header">Khách hàng</text>
+  <line x1="360" y1="52" x2="360" y2="1056" stroke="#000000" stroke-width="1.4"/>
+  <text x="657.5" y="76" class="lane-header">Hệ thống BrewLite (Next.js UI &amp; NestJS API)</text>
+
+  <!-- Start & Final Nodes -->
+  <circle cx="60" cy="130" r="11" fill="#000000"/>
+  <circle cx="217.5" cy="1025" r="12" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <circle cx="217.5" cy="1025" r="7.5" fill="#000000"/>
+
+  <!-- Step 1 (Khách hàng) -->
+  <rect x="85" y="108" width="250" height="44" class="step-box"/>
+  <text x="210" y="126" class="step-text">1. Truy cập trang Đăng nhập</text>
+  <text x="210" y="142" class="step-text">và điền thông tin Email, Mật khẩu</text>
+
+  <!-- Step 2 (Khách hàng) -->
+  <rect x="105" y="180" width="210" height="42" class="step-box"/>
+  <text x="210" y="206" class="step-text">2. Nhấn nút "Đăng nhập"</text>
+
+  <!-- Step 3 (Hệ thống) -->
+  <rect x="490" y="179" width="335" height="44" class="step-box"/>
+  <text x="657.5" y="197" class="step-text">3. Tiếp nhận thông tin, kiểm tra tính hợp lệ</text>
+  <text x="657.5" y="213" class="step-text">(định dạng email &amp; mật khẩu tối thiểu 6 ký tự)</text>
+
+  <!-- Diamond 1: Kiểm tra form -->
+  <polygon points="657.5,255 674.5,272 657.5,289 640.5,272" class="diamond"/>
+
+  <!-- Step 14: Lỗi form (Hệ thống) -->
+  <rect x="375" y="315" width="210" height="44" class="step-box"/>
+  <text x="480" y="333" class="step-text">14. Hiển thị cảnh báo lỗi định dạng</text>
+  <text x="480" y="349" class="step-text">ngay dưới các ô nhập liệu trên form</text>
+
+  <!-- Step 15: Sửa form (Khách hàng) -->
+  <rect x="85" y="315" width="250" height="44" class="step-box"/>
+  <text x="210" y="333" class="step-text">15. Chỉnh sửa lại thông tin đăng nhập</text>
+  <text x="210" y="349" class="step-text">&amp; thực hiện gửi lại biểu mẫu</text>
+
+  <!-- Step 4: Tra cứu User (Hệ thống) -->
+  <rect x="530" y="315" width="255" height="44" class="step-box"/>
+  <text x="657.5" y="333" class="step-text">4. Tra cứu tài khoản người dùng</text>
+  <text x="657.5" y="349" class="step-text">theo địa chỉ Email trong CSDL</text>
+
+  <!-- Diamond 2: Kiểm tra tồn tại User -->
+  <polygon points="657.5,390 674.5,407 657.5,424 640.5,407" class="diamond"/>
+
+  <!-- Step 12: Không thấy User (Hệ thống) -->
+  <rect x="375" y="450" width="210" height="44" class="step-box"/>
+  <text x="480" y="468" class="step-text">12. Hiển thị thông báo lỗi:</text>
+  <text x="480" y="484" class="step-text">"Email hoặc mật khẩu không chính xác"</text>
+
+  <!-- Step 13: Báo lỗi tài khoản (Khách hàng) -->
+  <rect x="85" y="450" width="250" height="44" class="step-box"/>
+  <text x="210" y="468" class="step-text">13. Nhận thông báo lỗi</text>
+  <text x="210" y="484" class="step-text">&amp; kiểm tra lại thông tin tài khoản</text>
+
+  <!-- Step 5: Kiểm tra mật khẩu (Hệ thống) -->
+  <rect x="530" y="450" width="255" height="44" class="step-box"/>
+  <text x="657.5" y="468" class="step-text">5. Kiểm tra mật khẩu mã hóa</text>
+  <text x="657.5" y="484" class="step-text">với dữ liệu tài khoản lưu trữ</text>
+
+  <!-- Diamond 3: Mật khẩu chính xác -->
+  <polygon points="657.5,525 674.5,542 657.5,559 640.5,542" class="diamond"/>
+
+  <!-- Step 10: Sai mật khẩu (Hệ thống) -->
+  <rect x="375" y="585" width="210" height="44" class="step-box"/>
+  <text x="480" y="603" class="step-text">10. Hiển thị thông báo lỗi:</text>
+  <text x="480" y="619" class="step-text">"Email hoặc mật khẩu không chính xác"</text>
+
+  <!-- Step 11: Nhập lại mật khẩu (Khách hàng) -->
+  <rect x="85" y="585" width="250" height="44" class="step-box"/>
+  <text x="210" y="603" class="step-text">11. Nhận thông báo lỗi</text>
+  <text x="210" y="619" class="step-text">&amp; nhập lại mật khẩu chính xác</text>
+
+  <!-- Step 6: Cấp mã JWT (Hệ thống) -->
+  <rect x="520" y="585" width="275" height="44" class="step-box"/>
+  <text x="657.5" y="603" class="step-text">6. Cấp mã phiên JWT (thời hạn 24h)</text>
+  <text x="657.5" y="619" class="step-text">&amp; trả về thông tin đăng nhập thành công</text>
+
+  <!-- Step 7: Lưu phiên (Hệ thống) -->
+  <rect x="520" y="660" width="275" height="44" class="step-box"/>
+  <text x="657.5" y="678" class="step-text">7. Lưu phiên làm việc trên trình duyệt</text>
+  <text x="657.5" y="694" class="step-text">&amp; gán mã xác thực cho các yêu cầu sau</text>
+
+  <!-- Diamond 4: Redirect param -->
+  <polygon points="657.5,735 674.5,752 657.5,769 640.5,752" class="diamond"/>
+
+  <!-- Step 8a: Redirect Checkout (Hệ thống) -->
+  <rect x="405" y="795" width="235" height="44" class="step-box"/>
+  <text x="522.5" y="813" class="step-text">8. Chuyển hướng sang trang Thanh toán</text>
+  <text x="522.5" y="829" class="step-text">(Bảo toàn toàn bộ giỏ hàng đang chọn)</text>
+
+  <!-- Step 8b: Redirect Menu (Hệ thống) -->
+  <rect x="670" y="795" width="235" height="44" class="step-box"/>
+  <text x="787.5" y="813" class="step-text">8. Chuyển hướng sang trang Thực đơn</text>
+  <text x="787.5" y="829" class="step-text">để tiếp tục trải nghiệm chọn món</text>
+
+  <!-- Step 9: Phiên thành viên (Khách hàng) -->
+  <rect x="85" y="885" width="250" height="44" class="step-box"/>
+  <text x="210" y="903" class="step-text">9. Bắt đầu phiên làm việc</text>
+  <text x="210" y="919" class="step-text">với tư cách Khách hàng thành viên</text>
+
+  <!-- Directed Flows -->
+  <!-- Start -> Step 1 -->
+  <path d="M 71 130 L 85 130" class="flow"/>
+
+  <!-- Step 1 -> Step 2 -->
+  <path d="M 210 152 L 210 180" class="flow"/>
+
+  <!-- Step 2 -> Step 3 -->
+  <path d="M 315 201 L 490 201" class="flow"/>
+
+  <!-- Step 3 -> Diamond 1 -->
+  <path d="M 657.5 223 L 657.5 255" class="flow"/>
+
+  <!-- Diamond 1 -> Step 14 [Sai định dạng] -->
+  <path d="M 640.5 272 L 480 272 L 480 315" class="flow"/>
+  <text x="545" y="265" class="guard" text-anchor="middle">[Sai định dạng / Để trống]</text>
+
+  <!-- Step 14 -> Step 15 -->
+  <path d="M 375 337 L 335 337" class="flow"/>
+
+  <!-- Step 15 -> Final Node along margin -->
+  <path d="M 85 337 L 45 337 L 45 1025 L 205.5 1025" class="flow"/>
+
+  <!-- Diamond 1 -> Step 4 [Thông tin hợp lệ] -->
+  <path d="M 657.5 289 L 657.5 315" class="flow"/>
+  <text x="735" y="304" class="guard" text-anchor="middle">[Thông tin hợp lệ]</text>
+
+  <!-- Step 4 -> Diamond 2 -->
+  <path d="M 657.5 359 L 657.5 390" class="flow"/>
+
+  <!-- Diamond 2 -> Step 12 [Tài khoản không tồn tại] -->
+  <path d="M 640.5 407 L 480 407 L 480 450" class="flow"/>
+  <text x="545" y="400" class="guard" text-anchor="middle">[Tài khoản không tồn tại]</text>
+
+  <!-- Step 12 -> Step 13 -->
+  <path d="M 375 472 L 335 472" class="flow"/>
+
+  <!-- Step 13 -> margin flow -->
+  <path d="M 85 472 L 45 472" class="flow"/>
+
+  <!-- Diamond 2 -> Step 5 [Tìm thấy tài khoản] -->
+  <path d="M 657.5 424 L 657.5 450" class="flow"/>
+  <text x="735" y="439" class="guard" text-anchor="middle">[Tìm thấy tài khoản]</text>
+
+  <!-- Step 5 -> Diamond 3 -->
+  <path d="M 657.5 494 L 657.5 525" class="flow"/>
+
+  <!-- Diamond 3 -> Step 10 [Mật khẩu không đúng] -->
+  <path d="M 640.5 542 L 480 542 L 480 585" class="flow"/>
+  <text x="545" y="535" class="guard" text-anchor="middle">[Mật khẩu không đúng]</text>
+
+  <!-- Step 10 -> Step 11 -->
+  <path d="M 375 607 L 335 607" class="flow"/>
+
+  <!-- Step 11 -> margin flow -->
+  <path d="M 85 607 L 45 607" class="flow"/>
+
+  <!-- Diamond 3 -> Step 6 [Mật khẩu chính xác] -->
+  <path d="M 657.5 559 L 657.5 585" class="flow"/>
+  <text x="735" y="574" class="guard" text-anchor="middle">[Mật khẩu chính xác]</text>
+
+  <!-- Step 6 -> Step 7 -->
+  <path d="M 657.5 629 L 657.5 660" class="flow"/>
+
+  <!-- Step 7 -> Diamond 4 -->
+  <path d="M 657.5 704 L 657.5 735" class="flow"/>
+
+  <!-- Diamond 4 -> Step 8a [Có ?redirect=/checkout] -->
+  <path d="M 640.5 752 L 522.5 752 L 522.5 795" class="flow"/>
+  <text x="535" y="745" class="guard" text-anchor="middle">[Có redirect /checkout]</text>
+
+  <!-- Diamond 4 -> Step 8b [Đăng nhập thông thường] -->
+  <path d="M 674.5 752 L 787.5 752 L 787.5 795" class="flow"/>
+  <text x="775" y="745" class="guard" text-anchor="middle">[Đăng nhập thường]</text>
+
+  <!-- Step 8a -> merge line -->
+  <path d="M 522.5 839 L 522.5 862 L 657.5 862" class="flow"/>
+
+  <!-- Step 8b -> merge line -->
+  <path d="M 787.5 839 L 787.5 862 L 657.5 862" class="flow"/>
+
+  <!-- Merge line -> Step 9 -->
+  <path d="M 657.5 862 L 657.5 907 L 335 907" class="flow"/>
+
+  <!-- Step 9 -> Final Node -->
+  <path d="M 210 929 L 210 970 L 217.5 970 L 217.5 1013" class="flow"/>
+</svg>
