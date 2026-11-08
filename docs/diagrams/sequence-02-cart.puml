@@ -1,0 +1,65 @@
+@startuml sequence-02-cart
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam backgroundColor white
+skinparam sequenceParticipantBackgroundColor white
+skinparam actorBackgroundColor white
+skinparam ParticipantPadding 20
+hide footbox
+title SƠ ĐỒ TUẦN TỰ (TASK 2.2): UC-02 - GIỎ HÀNG & KHUYẾN MÃI
+actor "Khách hàng" as C
+participant "«giao diện»\n:Màn hình giỏ hàng" as UI
+participant "«điều khiển»\n:Quản lý giỏ" as Cart
+participant "«điều khiển»\n:Khuyến mãi" as Promo
+participant "«thực thể»\n:Cơ sở dữ liệu" as DB
+
+C -> UI: 1. Mở giỏ hàng
+UI -> Cart: Lấy giỏ hàng
+Cart --> UI: Danh sách món & tổng tiền
+UI --> C: Hiển thị giỏ hàng
+
+opt Thêm / sửa / xóa món
+  C -> UI: 2. Chọn món, Size/Topping, số lượng\nhoặc xác nhận xóa
+  UI -> Cart: Kiểm tra & cập nhật giỏ
+  alt Tùy chọn, số lượng hợp lệ & đủ tồn kho
+    Cart --> UI: Giỏ đã cập nhật
+  else Không hợp lệ / hủy xóa
+    Cart --> UI: Báo lý do / giữ nguyên giỏ
+  end
+end
+
+opt Áp / thay mã Promotion
+  C -> UI: 3. Nhập mã giảm giá
+  UI -> Cart: Lấy tạm tính
+  Cart --> UI: Tạm tính giỏ hàng
+  UI -> Promo: Kiểm tra mã với giỏ hiện tại
+  Promo -> DB: Tra cứu Promotion
+  DB --> Promo: Kết quả tra cứu
+  alt Giỏ & mã đủ điều kiện áp dụng
+    Promo --> UI: Tiền giảm dự kiến
+    UI -> Cart: Áp / thay mã nếu giỏ chưa đổi
+  else Không hợp lệ / chưa kiểm tra được
+    Promo --> UI: Báo lý do / yêu cầu thử lại
+  end
+end
+
+opt Hủy mã
+  C -> UI: 4. Chọn hủy mã
+  UI -> Cart: Gỡ mã giảm giá
+end
+UI -> Cart: 5. Tính lại tổng; gỡ mã nếu không còn đủ điều kiện
+Cart --> UI: Giỏ hàng & tổng tiền dự kiến
+UI --> C: Hiển thị kết quả
+
+opt Tiếp tục đặt hàng
+  C -> UI: 6. Chọn Đặt hàng
+  UI -> Cart: Kiểm tra lại giỏ & trạng thái món
+  Cart --> UI: Kết quả kiểm tra
+  alt Giỏ có món & các món đã kiểm tra còn bán
+    UI --> C: Chuyển sang đặt hàng (UC-04)
+  else Chưa đủ điều kiện
+    UI --> C: Yêu cầu kiểm tra lại giỏ
+  end
+end
+@enduml

@@ -1,0 +1,70 @@
+@startuml activity-04-create-order
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+
+skinparam ActivityBorderThickness 1
+skinparam ArrowThickness 1
+skinparam ActivityDiamondBorderThickness 1
+skinparam SwimlaneBorderThickness 1
+skinparam SwimlaneTitleFontSize 13
+skinparam SwimlaneTitleFontWeight bold
+skinparam ActivityFontSize 11
+skinparam ActivityDiamondFontSize 10
+skinparam ArrowFontSize 10
+
+title SƠ ĐỒ HOẠT ĐỘNG (ACTIVITY DIAGRAM): AD-04 - KHỞI TẠO ĐƠN HÀNG, TÍNH TIỀN TẠI BUSINESS LAYER & KHÓA TỒN KHO NGUYÊN LIỆU (FR-05)
+
+|Khách hàng|
+|Hệ thống BrewLite (Next.js UI & NestJS API)|
+
+|Khách hàng|
+start
+:1. Nhấn nút "Đặt hàng / Tiến hành thanh toán"\ntrên màn hình Giỏ hàng (/cart);
+
+|Hệ thống BrewLite (Next.js UI & NestJS API)|
+:2. Kiểm tra trạng thái đăng nhập tài khoản\ncủa khách hàng;
+
+if () then ([Chưa đăng nhập])
+  :3. Thông báo yêu cầu đăng nhập\n& Chuyển hướng sang màn hình /login;
+  |Khách hàng|
+  :Đăng nhập tài khoản & nhận JWT Token;
+  |Hệ thống BrewLite (Next.js UI & NestJS API)|
+  :Lưu token & chuyển lại Giỏ hàng;
+else ([Đã đăng nhập])
+endif
+
+:4. Khóa nút Đặt hàng (chống bấm trùng)\n& Gửi yêu cầu khởi tạo đơn hàng;
+
+:5. Xác thực phiên đăng nhập tài khoản\n& Khởi tạo phiên giao dịch an toàn;
+
+:6. Đối soát đơn giá gốc & kiểm tra\ntrạng thái mở bán của các món;
+
+if () then ([Có món ngừng kinh doanh])
+  :7. Hủy phiên giao dịch (Rollback)\n& Cảnh báo món đã ngừng phục vụ;
+  |Khách hàng|
+  :Xóa món ngừng bán khỏi giỏ hàng;
+  stop
+else ([Tất cả món đang mở bán])
+  |Hệ thống BrewLite (Next.js UI & NestJS API)|
+  :8. Tính toán lại 100% tổng tiền đơn hàng\n(theo giá gốc CSDL & khấu trừ voucher nếu có);
+endif
+
+:9. Tra cứu công thức pha chế (RecipeItem)\n& Tổng hợp lượng nguyên liệu thô cần tiêu hao;
+
+:10. Thực thi trừ tồn kho nguyên liệu bằng\nKhóa kiểm soát đồng thời (Optimistic Locking);
+
+if () then ([Hết nguyên liệu / Xung đột tồn kho])
+  :11. Hủy phiên giao dịch, giữ nguyên kho\n& Báo lỗi không đủ nguyên liệu phục vụ;
+else ([Đủ kho & Cập nhật thành công])
+  :12. Khởi tạo đơn hàng mới (chờ thanh toán 15p),\nlưu chi tiết món & Xác nhận giao dịch hoàn tất;
+endif
+
+:13. Phản hồi kết quả xử lý giao dịch\n& Cập nhật trạng thái hiển thị trên Giỏ hàng;
+
+|Khách hàng|
+:14. Quan sát kết quả: Chuyển sang /checkout\nhoặc nhận cảnh báo để điều chỉnh lại giỏ hàng;
+
+stop
+@enduml

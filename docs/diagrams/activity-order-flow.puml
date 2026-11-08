@@ -1,0 +1,108 @@
+@startuml activity-order-flow
+!pragma useVerticalIf on
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+
+skinparam ActivityBorderThickness 1
+skinparam ArrowThickness 1
+skinparam ActivityDiamondBorderThickness 1
+skinparam SwimlaneBorderThickness 1
+skinparam SwimlaneTitleFontSize 13
+skinparam SwimlaneTitleFontWeight bold
+skinparam ActivityFontSize 11
+skinparam ActivityDiamondFontSize 11
+skinparam ArrowFontSize 10
+
+title ACTIVITY DIAGRAM TỔNG THỂ (TASK 2.1): LUỒNG ĐẶT & THANH TOÁN ĐƠN HÀNG END-TO-END (UC-01 -> UC-06)
+
+|Khách hàng|
+start
+:Truy cập trang Thực đơn (/menu),\nlọc theo danh mục hoặc tìm kiếm đồ uống (UC-01);
+
+|Next.js UI (Web/PWA)|
+:Hiển thị Skeleton Loading và gọi API GET /api/v1/products;
+
+|NestJS API & PostgreSQL (Business & DAL)|
+:Truy vấn danh sách Product kết hợp định mức công thức RecipeItem\nvà tồn kho nguyên liệu thô Ingredient.stockQuantity;\nTính số lượng khả dụng: availableStock = min(floor(stockQuantity / quantityRequired));
+
+|Next.js UI (Web/PWA)|
+-> Kiểm tra tồn kho khả dụng của món (availableStock)?;
+if () then ([Còn hàng: availableStock > 0])
+  :Hiển thị thẻ sản phẩm (ProductCard) ở trạng thái mở bán;
+  |Khách hàng|
+  :Chọn món, tùy biến Size (S/M/L), Đường/Đá, Topping,\nkiểm tra mã khuyến mãi (Promotion) tại Giỏ hàng (/cart) (UC-02)\nvà bấm nút "Đặt hàng / Tiến hành thanh toán";
+
+  |Next.js UI (Web/PWA)|
+  -> Kiểm tra trạng thái đăng nhập (JWT Token)?;
+  if () then ([Chưa đăng nhập])
+    :Chuyển hướng sang màn hình Đăng nhập (/login?redirect=/cart);\nKhách hàng đăng nhập / đăng ký tài khoản thành công (UC-03)\nvà nhận JWT AccessToken;
+  else ([Đã đăng nhập])
+    :Giữ nguyên phiên đăng nhập hợp lệ;
+  endif
+
+  :Gửi request tạo đơn hàng POST /api/v1/orders\nkèm Bearer JWT, danh sách món và promoCode (UC-04);
+
+  |NestJS API & PostgreSQL (Business & DAL)|
+  :Mở Database Transaction (prisma.$transaction):\n1. Truy vấn đơn giá gốc từ CSDL & tính lại 100% tổng tiền tại Business Layer\n2. Kiểm tra điều kiện Promotion & điểm đổi thưởng (nếu có)\n3. Thực thi trừ kho nguyên liệu Ingredient bằng Optimistic Locking (cột version);
+  -> Kiểm tra tồn kho nguyên liệu & Optimistic Lock (affectedRows > 0)?;
+
+  if () then ([Thành công: Đủ nguyên liệu & Khớp version])
+    :Lưu bản ghi Order (status = PENDING, giữ chỗ TTL 15 phút)\nvà các bản ghi OrderItem; COMMIT Transaction;
+    |Next.js UI (Web/PWA)|
+    :Xóa giỏ hàng tạm (clearCart), chuyển sang trang /checkout;\nSinh khóa chống trùng lặp Idempotency-Key (UUID v4);
+    |Khách hàng|
+    :Chọn phương thức thanh toán (VNPay / MoMo / VietQR Sandbox)\nvà bấm "Xác nhận thanh toán" (UC-05);
+    |Next.js UI (Web/PWA)|
+    :Gửi POST /api/v1/payments kèm Header Idempotency-Key;
+
+    |NestJS API & PostgreSQL (Business & DAL)|
+    -> Kiểm tra Idempotency-Key trong bảng Payment?;
+    if () then ([Đã tồn tại - Request gửi trùng lặp])
+      :Trả về ngay kết quả giao dịch đã lưu (HTTP 200 OK),\nkhông tạo giao dịch mới và không trừ tiền lần 2;
+    else ([Giao dịch mới])
+      :Tạo bản ghi Payment (status = PENDING, idempotencyKey);\nGọi Cổng Thanh toán Sandbox khởi tạo phiên giao dịch;
+      |Cổng Thanh toán Sandbox|
+      :Cấp đường dẫn paymentUrl / mã QR thanh toán;\nKhách hàng thực hiện giao dịch trên Cổng Sandbox;\nMáy chủ Cổng Sandbox bắn gói tin JSON ngầm về Webhook Backend\n(POST /api/v1/payments/webhook kèm chữ ký HMAC);
+
+      |NestJS API & PostgreSQL (Business & DAL)|
+      :Webhook Backend xác thực chữ ký HMAC và đọc kết quả trong JSON message;
+      -> Kết quả giao dịch từ Webhook Sandbox (hoặc Hết hạn TTL / Khách hủy)?;
+
+      if () then ([JSON message báo SUCCESS])
+        :Mở Database Transaction:\n1. Cập nhật Payment (status = SUCCESS) & Order (status = PAID)\n2. Tính điểm thưởng & ghi nhận LoyaltyTransaction (type = EARN)\n3. Cộng điểm vào User.loyaltyPoints; COMMIT Transaction;
+        |Next.js UI (Web/PWA)|
+        :Hiển thị Biên nhận điện tử (/checkout/success)\nvà thanh tiến trình OrderStatusStepper (UC-06);
+        |NestJS API & PostgreSQL (Business & DAL)|
+        :Nhân viên Quầy / Barista tiếp nhận đơn PAID,\npha chế và cập nhật trạng thái: PAID -> PREPARING -> COMPLETED;
+        |Khách hàng|
+        :Nhận đồ uống hoàn tất và tra cứu lịch sử đơn / điểm thưởng;
+      else ([JSON message báo FAILED / Quá hạn TTL 15p / Khách hủy đơn])
+        |NestJS API & PostgreSQL (Business & DAL)|
+        :Mở Database Transaction (Atomic Restock Rollback):\n1. Cập nhật Payment (status = FAILED) & Order (status = CANCELLED)\n2. Cộng hoàn trả 100% nguyên liệu thô vào Ingredient.stockQuantity\n   theo định mức RecipeItem; COMMIT Transaction;
+        |Next.js UI (Web/PWA)|
+        :Hiển thị thông báo giao dịch thất bại / đơn đã hủy\nvà cho phép khách hàng đặt lại hoặc đổi phương thức thanh toán;
+        |Khách hàng|
+        :Nhận thông báo hủy đơn và hoàn kho an toàn;
+      endif
+    endif
+
+  else ([Thất bại: Hết nguyên liệu hoặc Xung đột Concurrency])
+    |NestJS API & PostgreSQL (Business & DAL)|
+    :ROLLBACK 100% Database Transaction;\nTrả về lỗi HTTP 409 Conflict ("Nguyên liệu pha chế vừa hết hàng");
+    |Next.js UI (Web/PWA)|
+    :Hiển thị cảnh báo hết hàng và yêu cầu khách điều chỉnh giỏ hàng;
+    |Khách hàng|
+    :Cập nhật lại số lượng hoặc chọn món khác;
+  endif
+
+else ([Hết nguyên liệu: availableStock == 0])
+  |Next.js UI (Web/PWA)|
+  :Làm mờ thẻ món, gắn nhãn "Hết hàng (Sold Out)"\nvà vô hiệu hóa nút thêm vào giỏ hàng;
+  |Khách hàng|
+  :Chọn món đồ uống khác còn nguyên liệu phục vụ;
+endif
+
+stop
+@enduml

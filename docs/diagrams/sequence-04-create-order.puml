@@ -1,0 +1,111 @@
+@startuml sequence-04-create-order
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+
+hide footbox
+skinparam sequenceMessageAlign left
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 300
+
+title SƠ ĐỒ TUẦN TỰ: UC-04 – KHỞI TẠO ĐƠN HÀNG, TÍNH TIỀN TẠI BUSINESS LAYER & KHÓA TỒN KHO NGUYÊN LIỆU (FR-05)
+
+actor "Khách hàng\n(Customer)" as Customer
+participant "«giao diện»\n:Giao diện giỏ hàng\n(CartPage)" as CartPage
+participant "«điều khiển»\n:Bộ điều khiển đơn hàng\n(OrdersController)" as Controller
+participant "«điều khiển»\n:Dịch vụ đơn hàng\n(OrdersService)" as Service
+participant "«thực thể»\n:Cơ sở dữ liệu\n(PostgreSQL)" as DB
+
+Customer -> CartPage: 1. Chọn "Đặt hàng"()
+activate CartPage
+
+CartPage -> CartPage: 2. Kiểm tra token đăng nhập (LocalStorage)
+
+alt [Chưa đăng nhập / Token không tồn tại]
+    CartPage --> Customer: Chuyển hướng sang màn hình /login\n(kèm đường dẫn quay lại giỏ hàng)
+else [Đã đăng nhập có JWT Token hợp lệ]
+    CartPage -> Controller: 3. POST /api/v1/orders\n(Header: Bearer <JWT>, thông tin giỏ hàng & promoCode)
+    activate Controller
+    
+    alt [JWT Token không hợp lệ hoặc hết hạn]
+        Controller --> CartPage: Báo lỗi xác thực (HTTP 401 Unauthorized)
+        CartPage --> Customer: Cảnh báo hết phiên đăng nhập & yêu cầu đăng nhập lại
+    else [JWT Token hợp lệ]
+        Controller -> Service: 4. createOrder(userId, createOrderDto)
+        activate Service
+        
+        Service -> DB: 5. Bắt đầu giao dịch (BEGIN Transaction)
+        activate DB
+        
+        Service -> DB: 6. Truy vấn bảng giá gốc & trạng thái mở bán sản phẩm
+        DB --> Service: Trả về danh sách sản phẩm gốc
+        
+        alt [Phát hiện có sản phẩm đã ngừng phục vụ]
+            Service -> DB: ROLLBACK Transaction
+            Service --> Controller: Báo lỗi món ngừng bán (HTTP 409 Conflict)
+            Controller --> CartPage: HTTP 409 Conflict
+            CartPage --> Customer: Cảnh báo món ngừng bán & đề nghị xóa khỏi giỏ
+        else [Tất cả sản phẩm hợp lệ và đang mở bán]
+            Service -> Service: 7. Tính toán lại 100% tổng tiền đơn hàng tại Business Layer\n(theo giá gốc CSDL, bỏ qua giá Client)
+            
+            opt [Khách hàng gửi kèm mã giảm giá promoCode]
+                Service -> DB: 8. Tra cứu thông tin mã khuyến mãi
+                DB --> Service: Thông tin mã khuyến mãi
+                
+                alt [Mã khuyến mãi hợp lệ (còn hạn, còn lượt, đạt đơn tối thiểu)]
+                    Service -> Service: 9. Áp dụng mức giảm giá vào tổng thanh toán
+                    Service -> DB: 10. Cập nhật tăng số lượt đã dùng của mã (+1)
+                else [Mã không hợp lệ hoặc hết hạn]
+                    Service -> Service: Bỏ qua giảm giá, áp dụng tổng tiền gốc
+                end
+            end
+            
+            Service -> DB: 11. Tra cứu định mức công thức nguyên liệu (RecipeItem)
+            DB --> Service: Trả về danh sách định mức nguyên liệu
+            
+            Service -> Service: 12. Tổng hợp tổng lượng nguyên liệu thô cần tiêu hao
+            
+            Service -> DB: 13. Cập nhật trừ tồn kho bằng Khóa lạc quan\n(Optimistic Lock: kiểm tra đủ tồn kho & đúng version)
+            DB --> Service: Kết quả số dòng cập nhật (affectedRows)
+            
+            alt [Thành công: affectedRows > 0 (Đủ tồn kho & Đúng version)]
+                Service -> DB: 14. Tạo bản ghi đơn hàng PENDING & lưu chi tiết OrderItem
+                DB --> Service: Xác nhận tạo đơn hàng mới thành công
+                
+                Service -> DB: 15. COMMIT Transaction
+                DB --> Service: Giao dịch hoàn tất thành công
+                deactivate DB
+                
+                Service --> Controller: 16. Trả về thông tin đơn hàng đã khởi tạo (OrderResponseDto)
+                deactivate Service
+                
+                Controller --> CartPage: 17. HTTP 201 Created (Thông tin đơn PENDING)
+                deactivate Controller
+                
+                CartPage -> CartPage: 18. Xóa dữ liệu giỏ hàng (clearCart)
+                CartPage --> Customer: 19. Điều hướng sang màn hình Thanh toán (/checkout)\n(Bàn giao đơn PENDING sang UC-05)
+            else [Thất bại: affectedRows == 0 (Hết nguyên liệu hoặc Xung đột version)]
+                Service -> DB: ROLLBACK Transaction (giữ nguyên tồn kho nguyên liệu)
+                activate DB
+                DB --> Service: Giao dịch đã hủy
+                deactivate DB
+                
+                Service --> Controller: Báo lỗi hết hàng / xung đột tồn kho (HTTP 409 Conflict)
+                activate Controller
+                activate Service
+                deactivate Service
+                
+                Controller --> CartPage: HTTP 409 Conflict
+                deactivate Controller
+                
+                CartPage -> CartPage: Mở khóa nút Đặt hàng (isSubmitting = false)
+                CartPage --> Customer: Hiển thị Toast cảnh báo hết hàng / xung đột đồng thời\nvà đánh dấu món cần chỉnh sửa trên giỏ hàng
+            end
+        end
+    end
+end
+
+deactivate CartPage
+
+@enduml

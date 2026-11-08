@@ -1,0 +1,167 @@
+@startuml class-04-order
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam backgroundColor white
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide empty members
+
+title Class-04: Domain Khởi tạo đơn hàng, Tính tiền & Khóa tồn kho nguyên liệu (FR-05 & UC-04)
+
+package "Server Domain — Phân hệ Đơn hàng & Chi tiết (Core Order)" as OrderDomain {
+  class Order <<aggregate root>> {
+    - id: UUID
+    - orderCode: String {unique}
+    - userId: UUID
+    - status: OrderStatus
+    - subtotalAmount: Decimal
+    - discountAmount: Decimal
+    - finalAmount: Decimal
+    - paymentDeadline: DateTime
+    - promotionId: UUID [0..1]
+    - createdAt: DateTime
+    - updatedAt: DateTime
+    + calculateTotals(discount: Decimal): void
+    + canTransitionTo(target: OrderStatus): Boolean
+    + transitionTo(target: OrderStatus): void
+    + isPaymentExpired(currentTime: DateTime): Boolean
+  }
+
+  class OrderItem <<entity>> {
+    - id: UUID
+    - orderId: UUID
+    - productId: UUID
+    - productName: String
+    - size: SizeOption
+    - sizePrice: Decimal
+    - sugar: Int
+    - ice: Int
+    - quantity: Int
+    - unitPrice: Decimal
+    - lineTotal: Decimal
+    + calculateLineTotal(): Decimal
+  }
+
+  class OrderItemTopping <<value object>> {
+    - toppingId: UUID
+    - toppingName: String
+    - price: Decimal
+  }
+
+  enum OrderStatus {
+    PENDING
+    PAID
+    PREPARING
+    READY
+    COMPLETED
+    CANCELLED
+  }
+
+  enum SizeOption {
+    S
+    M
+    L
+  }
+
+  Order "1" *-- "1..*" OrderItem : items
+  OrderItem "1" *-- "0..*" OrderItemTopping : toppings
+  Order --> OrderStatus : status
+  OrderItem --> SizeOption : size
+}
+
+package "Server Domain — Phân hệ Định mức & Tồn kho (Recipe & Inventory)" as InventoryDomain {
+  class Ingredient <<entity>> {
+    - id: UUID
+    - name: String
+    - unit: String
+    - stockQuantity: Decimal
+    - minThreshold: Decimal
+    - version: Int
+    - updatedAt: DateTime
+    + deductStock(amount: Decimal, expectedVersion: Int): Boolean
+    + isStockAvailable(required: Decimal): Boolean
+  }
+
+  class RecipeItem <<entity>> {
+    - id: UUID
+    - productId: UUID
+    - ingredientId: UUID
+    - quantityRequired: Decimal
+    + getConsumption(itemQuantity: Int): Decimal
+  }
+
+  RecipeItem "0..*" --> "1" Ingredient : trừ tồn kho thô
+}
+
+package "External Domains — Phân hệ Tích hợp (Tương tác nghiệp vụ)" as ExternalDomain {
+  class Product <<external entity>> {
+    - id: UUID
+    - name: String
+    - basePrice: Decimal
+    - isAvailable: Boolean
+  }
+
+  class Promotion <<external entity>> {
+    - id: UUID
+    - code: String {unique}
+    - discountType: String
+    - discountValue: Decimal
+    - minOrderValue: Decimal
+    - maxDiscountAmount: Decimal [0..1]
+    - usedCount: Int
+    - usageLimit: Int
+    - isActive: Boolean
+    + isValid(orderSubtotal: Decimal, now: DateTime): Boolean
+    + calculateDiscount(orderSubtotal: Decimal): Decimal
+  }
+
+  class PaymentTransaction <<external entity>> {
+    - id: UUID
+    - orderId: UUID
+    - paymentMethod: String
+    - transactionStatus: String
+  }
+
+  class User <<external entity>> {
+    - id: UUID
+    - email: String
+    - role: String
+  }
+}
+
+OrderItem "0..*" ..> "1" Product : tham chiếu productId (snapshot giá)
+Product "1" *-- "1..*" RecipeItem : định mức công thức
+Order "0..*" --> "0..1" Promotion : áp dụng (promotionId)
+Order "1" <-- "0..1" PaymentTransaction : thanh toán (UC-05)
+Order "0..*" ..> "1" User : sở hữu bởi (userId)
+
+note bottom of Order
+  • Snapshot giá bảo mật: Tính lại 100% đơn giá tại Business Layer từ CSDL.
+  • Bỏ qua hoàn toàn giá Client gửi lên để chống tấn công can thiệp payload.
+  • Đơn mới khởi tạo luôn có status = PENDING và paymentDeadline = createdAt + 15 phút.
+  • Chỉ chuyển sang PAID khi có Webhook thanh toán hợp lệ (UC-05); quá hạn hủy CANCELLED.
+end note
+
+note bottom of Ingredient
+  • Tồn kho quản lý theo nguyên liệu thô (Ingredient: hạt cafe g, sữa đặc ml, ly pcs...).
+  • Không lưu trữ tồn kho ly cafe pha sẵn.
+  • Khóa lạc quan (Optimistic Locking) trên cột version:
+    UPDATE "Ingredient" SET stockQuantity = stockQuantity - :qty, version = version + 1
+    WHERE id = :id AND version = :curVersion AND stockQuantity >= :qty.
+  • affectedRows == 0: Hết nguyên liệu hoặc xung đột version concurrent -> Rollback 100%.
+end note
+
+note bottom of OrderItem
+  • unitPrice = Product.basePrice + sizePrice + sum(toppings.price).
+  • lineTotal = unitPrice * quantity.
+  • Snapshot đóng băng tại thời điểm đặt đơn, không bị ảnh hưởng khi giá Product thay đổi sau này.
+end note
+
+legend bottom
+  Decimal: số thực chính xác cao lưu trữ trong PostgreSQL (tránh sai số làm tròn số học).
+  Quan hệ composition (*--): Vòng đời OrderItem gắn liền chặt chẽ với Order; xóa Order sẽ xóa toàn bộ OrderItem.
+  Optimistic Locking: Đảm bảo toàn vẹn dữ liệu đa luồng, chống bán âm kho (stockQuantity < 0) khi nhiều khách cùng đặt.
+  Các lớp <<external entity>> biểu diễn các thực thể thuộc phân hệ của các thành viên khác trong nhóm (UC-01, UC-02, UC-03, UC-05).
+endlegend
+@enduml
