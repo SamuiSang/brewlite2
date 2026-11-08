@@ -1,81 +1,74 @@
 @startuml activity-03-auth
 !pragma useVerticalIf on
-scale 0.75
 skinparam monochrome true
 skinparam shadowing false
 skinparam backgroundColor white
 skinparam defaultFontName "Segoe UI", "Arial", sans-serif
 
-skinparam ActivityBorderThickness 1
-skinparam ArrowThickness 1
-skinparam ActivityDiamondBorderThickness 1
-skinparam SwimlaneBorderThickness 1
-skinparam SwimlaneTitleFontSize 12
+skinparam ActivityBorderThickness 1.3
+skinparam ArrowThickness 1.3
+skinparam ActivityDiamondBorderThickness 1.3
+skinparam SwimlaneBorderThickness 1.4
+skinparam SwimlaneTitleFontSize 13
 skinparam SwimlaneTitleFontWeight bold
 skinparam ActivityFontSize 11
 skinparam ActivityDiamondFontSize 10
-skinparam ArrowFontSize 9
-skinparam ActivityMaxWidth 190
+skinparam ArrowFontSize 10
+skinparam ActivityMaxWidth 250
 
-title SƠ ĐỒ HOẠT ĐỘNG: AD-03 – ĐĂNG NHẬP, XÁC THỰC NGƯỜI DÙNG & CẤP MÃ PHIÊN JWT (FR-04)
+title SƠ ĐỒ HOẠT ĐỘNG (TASK 2.1): AD-03 - XÁC THỰC NGƯỜI DÙNG & ĐĂNG NHẬP HỆ THỐNG
 
 |Khách hàng|
 |Hệ thống BrewLite (Next.js UI & NestJS API)|
 
 |Khách hàng|
 start
-:1. Truy cập trang Đăng nhập\nvà điền Email, Mật khẩu;
-:2. Bấm nút "Đăng nhập";
+:1. Truy cập trang Đăng nhập\nvà điền thông tin Email, Mật khẩu;
+:2. Nhấn nút "Đăng nhập";
 
 |Hệ thống BrewLite (Next.js UI & NestJS API)|
-:3. Kiểm tra tính hợp lệ\ncủa thông tin form đã nhập;
+:3. Tiếp nhận thông tin, kiểm tra tính hợp lệ\n(định dạng email & mật khẩu tối thiểu 6 ký tự);
 
 if () then ([Thông tin hợp lệ])
-  :4. Tìm kiếm tài khoản\nngười dùng theo Email;
+  :4. Tra cứu tài khoản người dùng\ntheo địa chỉ Email trong CSDL;
   
   if () then ([Tìm thấy tài khoản])
-    :5. Kiểm tra tính chính xác\ncủa mật khẩu đã cung cấp;
+    :5. Kiểm tra mật khẩu mã hóa\nvới dữ liệu tài khoản lưu trữ;
     
     if () then ([Mật khẩu chính xác])
-      :6. Cấp mã phiên JWT (24h)\nvà trả về thông tin đăng nhập;
-      :7. Lưu phiên đăng nhập\nvào bộ nhớ trình duyệt;
+      :6. Cấp mã phiên JWT (thời hạn 24h)\nvà trả về thông tin đăng nhập;
+      :7. Lưu phiên làm việc trên trình duyệt\n& gán mã xác thực cho các yêu cầu sau;
       
-      if () then ([Có chuyển hướng ?redirect=/checkout])
-        :8. Chuyển hướng sang trang Thanh toán\n(Bảo toàn toàn bộ giỏ hàng);
+      if () then ([Có tham số ?redirect=/checkout])
+        :8. Chuyển hướng sang trang Thanh toán\n(Bảo toàn toàn bộ giỏ hàng đang chọn);
       else ([Đăng nhập thông thường])
-        :8. Chuyển hướng sang trang Thực đơn\nđể tiếp tục chọn món;
+        :8. Chuyển hướng sang trang Thực đơn\nđể tiếp tục trải nghiệm chọn món;
       endif
       
       |Khách hàng|
-      :9. Tiếp tục sử dụng hệ thống\nvới tư cách Thành viên;
+      :9. Bắt đầu phiên làm việc\nvới tư cách Khách hàng thành viên;
 
     else ([Mật khẩu không đúng])
       |Hệ thống BrewLite (Next.js UI & NestJS API)|
-      :Hiển thị thông báo:\n"Email hoặc mật khẩu không chính xác";
+      :10. Ghi nhận thất bại & phản hồi lỗi:\n"Email hoặc mật khẩu không chính xác";
       |Khách hàng|
-      :Nhận thông báo và nhập lại mật khẩu;
+      :11. Nhận thông báo lỗi và kiểm tra lại mật khẩu;
     endif
 
   else ([Tài khoản không tồn tại])
     |Hệ thống BrewLite (Next.js UI & NestJS API)|
-    :Hiển thị thông báo:\n"Email hoặc mật khẩu không chính xác";
+    :12. Ghi nhận thất bại & phản hồi lỗi:\n"Email hoặc mật khẩu không chính xác";
     |Khách hàng|
-    :Nhận cảnh báo lỗi tài khoản;
+    :13. Nhận thông báo lỗi và kiểm tra lại tài khoản;
   endif
 
 else ([Sai định dạng hoặc để trống])
-  :Hiển thị cảnh báo lỗi định dạng\ntrực tiếp trên form đăng nhập;
+  :14. Hiển thị cảnh báo lỗi định dạng\nngay dưới các ô nhập liệu;
   |Khách hàng|
-  :Kiểm tra và sửa lại thông tin;
+  :15. Chỉnh sửa lại thông tin đăng nhập;
 endif
 
 |Khách hàng|
 stop
 
-legend bottom
-  Ghi chú Sơ đồ Hoạt động Chức năng 3 (Hiếu - PO | Chuẩn UML Monochrome & Ngôn ngữ tự nhiên):
-  • Sử dụng ngôn ngữ tự nhiên, các bước đánh số thứ tự rõ ràng, dễ hiểu cho người dùng và hội đồng nghiệm thu.
-  • Bố cục 2 làn bơi (Khách hàng & Hệ thống) nhỏ gọn, trực quan, không bị kéo giãn theo chiều ngang.
-  • Điểm rẽ nhánh sử dụng hình thoi rỗng chuẩn UML, tất cả nhánh rẽ hội tụ về DUY NHẤT 1 điểm kết thúc (Bullseye).
-endlegend
 @enduml

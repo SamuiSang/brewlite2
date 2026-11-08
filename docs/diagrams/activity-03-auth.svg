@@ -1,1 +1,208 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" data-diagram-type="ACTIVITY" style="width:1461px;height:848px;background:#FFFFFF;" width="1461px" height="848.25px" viewBox="0 0 1461 848" zoomAndPan="magnify" preserveAspectRatio="none" contentStyleType="text/css"><?plantuml 1.2026.9?><defs/><g font-family="sans-serif" lengthAdjust="spacing"><g class="title" data-source-line="19"><text x="447.27" y="24.746" fill="#000" font-size="10.5" textLength="565.165" font-weight="700" font-family="'Segoe UI', 'Arial', sans-serif">SƠ ĐỒ HOẠT ĐỘNG: AD-03 - ĐĂNG NHẬP, XÁC THỰC NGƯỜI DÙNG &amp; CẤP MÃ PHIÊN JWT (FR-04)</text></g><rect x="15" y="40.22" width="1425.954" height="10.477" fill="none" style="stroke:none;"/><ellipse cx="409.824" cy="61.947" rx="7.5" ry="7.5" fill="#222" style="stroke:#222;stroke-width:0.75;"/><rect x="342.741" y="84.447" width="134.166" height="34.207" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;" rx="9.375" ry="9.375"/><text x="350.241" y="99.605" fill="#000" font-size="8.25" textLength="119.166" font-family="'Segoe UI', 'Arial', sans-serif">1. Truy cập trang Đăng nhập</text><text x="350.241" y="109.208" fill="#000" font-size="8.25" textLength="99.471" font-family="'Segoe UI', 'Arial', sans-serif">và điền Email, Mật khẩu</text><rect x="351.795" y="133.654" width="116.058" height="24.604" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;" rx="9.375" ry="9.375"/><text x="359.295" y="148.812" fill="#000" font-size="8.25" textLength="101.058" font-family="'Segoe UI', 'Arial', sans-serif">2. Bấm nút "Đăng nhập"</text><rect x="19.5" y="615.5" width="133.989" height="34.207" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;" rx="9.375" ry="9.375"/><text x="27" y="630.657" fill="#000" font-size="8.25" textLength="118.989" font-family="'Segoe UI', 'Arial', sans-serif">9. Tiếp tục sử dụng hệ thống</text><text x="27" y="640.261" fill="#000" font-size="8.25" textLength="93.791" font-family="'Segoe UI', 'Arial', sans-serif">với tư cách Thành viên</text><rect x="160.989" y="469.085" width="171.303" height="24.604" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;" rx="9.375" ry="9.375"/><text x="168.489" y="484.243" fill="#000" font-size="8.25" textLength="156.303" font-family="'Segoe UI', 'Arial', sans-serif">Nhận thông báo và nhập lại mật khẩu</text><rect x="339.791" y="386.878" width="130.738" height="24.604" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;" rx="9.375" ry="9.375"/><text x="347.291" y="402.036" fill="#000" font-size="8.25" textLength="115.738" font-family="'Segoe UI', 'Arial', sans-serif">Nhận cảnh báo lỗi tài khoản</text><rect x="484.407" y="255.464" width="144.055" height="34.207" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;" rx="9.375" ry="9.375"/><text x="491.907" y="270.622" fill="#000" font-size="8.25" textLength="129.055" font-family="'Segoe UI', 'Arial', sans-serif">Hiển thị cảnh báo lỗi định dạng</text><text x="491.907" y="280.226" fill="#000" font-size="8.25" textLength="123.162" font-family="'Segoe UI', 'Arial', sans-serif">trực tiếp trên form đăng nhập</text><rect x="490.373" y="304.671" width="132.123" height="24.604" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;" rx="9.375" ry="9.375"/><text x="497.873" y="319.829" fill="#000" font-size="8.25" textLength="117.123" font-family="'Segoe UI', 'Arial', sans-serif">Kiểm tra và sửa lại thông tin</text><ellipse cx="409.824" cy="749.457" rx="8.25" ry="8.25" fill="none" style="stroke:#222;stroke-width:0.75;"/><ellipse cx="409.824" cy="749.457" rx="4.5" ry="4.5" fill="#222" style="stroke:#222;stroke-width:0.75;"/><line x1="15" y1="40.22" x2="15" y2="757.707" style="stroke:#000;stroke-width:0.75;"/><rect x="1262.682" y="173.257" width="128.087" height="34.207" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;" rx="9.375" ry="9.375"/><text x="1270.182" y="188.415" fill="#000" font-size="8.25" textLength="92.345" font-family="'Segoe UI', 'Arial', sans-serif">3. Kiểm tra tính hợp lệ</text><text x="1270.182" y="198.019" fill="#000" font-size="8.25" textLength="113.087" font-family="'Segoe UI', 'Arial', sans-serif">của thông tin form đã nhập</text><polygon points="1326.725,222.464,1326.725,222.464,1335.725,231.464,1326.725,240.464,1326.725,240.464,1317.725,231.464,1326.725,222.464" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><text x="1257.407" y="229.872" fill="#000" font-size="6.75" textLength="60.318" font-family="'Segoe UI', 'Arial', sans-serif">[Thông tin hợp lệ]</text><text x="1335.725" y="229.872" fill="#000" font-size="6.75" textLength="100.798" font-family="'Segoe UI', 'Arial', sans-serif">[Sai định dạng hoặc để trống]</text><rect x="1092.605" y="255.464" width="108.308" height="34.207" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;" rx="9.375" ry="9.375"/><text x="1100.105" y="270.622" fill="#000" font-size="8.25" textLength="89.832" font-family="'Segoe UI', 'Arial', sans-serif">4. Tìm kiếm tài khoản</text><text x="1100.105" y="280.226" fill="#000" font-size="8.25" textLength="93.308" font-family="'Segoe UI', 'Arial', sans-serif">người dùng theo Email</text><polygon points="1146.759,304.671,1146.759,304.671,1155.759,313.671,1146.759,322.671,1146.759,322.671,1137.759,313.671,1146.759,304.671" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><text x="1069.036" y="312.079" fill="#000" font-size="6.75" textLength="68.723" font-family="'Segoe UI', 'Arial', sans-serif">[Tìm thấy tài khoản]</text><text x="1155.759" y="312.079" fill="#000" font-size="6.75" textLength="85.308" font-family="'Segoe UI', 'Arial', sans-serif">[Tài khoản không tồn tại]</text><rect x="909.007" y="337.671" width="124.901" height="34.207" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;" rx="9.375" ry="9.375"/><text x="916.507" y="352.829" fill="#000" font-size="8.25" textLength="106.452" font-family="'Segoe UI', 'Arial', sans-serif">5. Kiểm tra tính chính xác</text><text x="916.507" y="362.433" fill="#000" font-size="8.25" textLength="109.901" font-family="'Segoe UI', 'Arial', sans-serif">của mật khẩu đã cung cấp</text><polygon points="971.457,386.878,971.457,386.878,980.457,395.878,971.457,404.878,971.457,404.878,962.457,395.878,971.457,386.878" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><text x="891.282" y="394.286" fill="#000" font-size="6.75" textLength="71.175" font-family="'Segoe UI', 'Arial', sans-serif">[Mật khẩu chính xác]</text><text x="980.457" y="394.286" fill="#000" font-size="6.75" textLength="78.917" font-family="'Segoe UI', 'Arial', sans-serif">[Mật khẩu không đúng]</text><rect x="754.282" y="419.878" width="138.553" height="34.207" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;" rx="9.375" ry="9.375"/><text x="761.782" y="435.036" fill="#000" font-size="8.25" textLength="110.984" font-family="'Segoe UI', 'Arial', sans-serif">6. Cấp mã phiên JWT (24h)</text><text x="761.782" y="444.64" fill="#000" font-size="8.25" textLength="123.553" font-family="'Segoe UI', 'Arial', sans-serif">và trả về thông tin đăng nhập</text><rect x="767.066" y="469.085" width="112.985" height="34.207" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;" rx="9.375" ry="9.375"/><text x="774.566" y="484.243" fill="#000" font-size="8.25" textLength="97.985" font-family="'Segoe UI', 'Arial', sans-serif">7. Lưu phiên đăng nhập</text><text x="774.566" y="493.847" fill="#000" font-size="8.25" textLength="94.299" font-family="'Segoe UI', 'Arial', sans-serif">vào bộ nhớ trình duyệt</text><polygon points="823.558,518.292,823.558,518.292,832.558,527.292,823.558,536.292,823.558,536.292,814.558,527.292,823.558,518.292" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><text x="679.367" y="525.701" fill="#000" font-size="6.75" textLength="135.191" font-family="'Segoe UI', 'Arial', sans-serif">[Có chuyển hướng ?redirect=/checkout]</text><text x="832.558" y="525.701" fill="#000" font-size="6.75" textLength="90.123" font-family="'Segoe UI', 'Arial', sans-serif">[Đăng nhập thông thường]</text><rect x="635.963" y="543.792" width="182.296" height="34.207" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;" rx="9.375" ry="9.375"/><text x="643.463" y="558.95" fill="#000" font-size="8.25" textLength="167.296" font-family="'Segoe UI', 'Arial', sans-serif">8. Chuyển hướng sang trang Thanh toán</text><text x="643.463" y="568.554" fill="#000" font-size="8.25" textLength="116.056" font-family="'Segoe UI', 'Arial', sans-serif">(Bảo toàn toàn bộ giỏ hàng)</text><rect x="833.259" y="543.792" width="173.494" height="34.207" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;" rx="9.375" ry="9.375"/><text x="840.759" y="558.95" fill="#000" font-size="8.25" textLength="158.494" font-family="'Segoe UI', 'Arial', sans-serif">8. Chuyển hướng sang trang Thực đơn</text><text x="840.759" y="568.554" fill="#000" font-size="8.25" textLength="87.995" font-family="'Segoe UI', 'Arial', sans-serif">để tiếp tục chọn món</text><polygon points="823.558,582.5,832.558,591.5,823.558,600.5,814.558,591.5,823.558,582.5" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><rect x="1029.253" y="419.878" width="180.205" height="34.207" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;" rx="9.375" ry="9.375"/><text x="1036.753" y="435.036" fill="#000" font-size="8.25" textLength="79.519" font-family="'Segoe UI', 'Arial', sans-serif">Hiển thị thông báo:</text><text x="1036.753" y="444.64" fill="#000" font-size="8.25" textLength="165.205" font-family="'Segoe UI', 'Arial', sans-serif">"Email hoặc mật khẩu không chính xác"</text><polygon points="971.457,657.207,980.457,666.207,971.457,675.207,962.457,666.207,971.457,657.207" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><rect x="1231.958" y="337.671" width="180.205" height="34.207" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;" rx="9.375" ry="9.375"/><text x="1239.458" y="352.829" fill="#000" font-size="8.25" textLength="79.519" font-family="'Segoe UI', 'Arial', sans-serif">Hiển thị thông báo:</text><text x="1239.458" y="362.433" fill="#000" font-size="8.25" textLength="165.205" font-family="'Segoe UI', 'Arial', sans-serif">"Email hoặc mật khẩu không chính xác"</text><polygon points="1146.759,682.707,1155.759,691.707,1146.759,700.707,1137.759,691.707,1146.759,682.707" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><polygon points="1326.725,708.207,1335.725,717.207,1326.725,726.207,1317.725,717.207,1326.725,708.207" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="631.463" y1="40.22" x2="631.463" y2="757.707" style="stroke:#000;stroke-width:0.75;"/><line x1="1440.274" y1="40.22" x2="1440.274" y2="757.707" style="stroke:#000;stroke-width:0.75;"/><line x1="409.824" y1="69.447" x2="409.824" y2="84.447" style="stroke:#181818;stroke-width:0.75;"/><polygon points="406.824,76.947,409.824,84.447,412.824,76.947,409.824,79.947" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="409.824" y1="118.654" x2="409.824" y2="133.654" style="stroke:#181818;stroke-width:0.75;"/><polygon points="406.824,126.154,409.824,133.654,412.824,126.154,409.824,129.154" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="556.435" y1="289.671" x2="556.435" y2="304.671" style="stroke:#181818;stroke-width:0.75;"/><polygon points="553.435,297.171,556.435,304.671,559.435,297.171,556.435,300.171" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="823.558" y1="454.085" x2="823.558" y2="469.085" style="stroke:#181818;stroke-width:0.75;"/><polygon points="820.558,461.585,823.558,469.085,826.558,461.585,823.558,464.585" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="814.558" y1="527.292" x2="727.111" y2="527.292" style="stroke:#181818;stroke-width:0.75;"/><line x1="727.111" y1="527.292" x2="727.111" y2="543.792" style="stroke:#181818;stroke-width:0.75;"/><polygon points="724.111,536.292,727.111,543.792,730.111,536.292,727.111,539.292" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="832.558" y1="527.292" x2="920.006" y2="527.292" style="stroke:#181818;stroke-width:0.75;"/><line x1="920.006" y1="527.292" x2="920.006" y2="543.792" style="stroke:#181818;stroke-width:0.75;"/><polygon points="917.006,536.292,920.006,543.792,923.006,536.292,920.006,539.292" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="727.111" y1="578" x2="727.111" y2="591.5" style="stroke:#181818;stroke-width:0.75;"/><line x1="727.111" y1="591.5" x2="814.558" y2="591.5" style="stroke:#181818;stroke-width:0.75;"/><polygon points="807.058,588.5,814.558,591.5,807.058,594.5,810.058,591.5" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="920.006" y1="578" x2="920.006" y2="591.5" style="stroke:#181818;stroke-width:0.75;"/><line x1="920.006" y1="591.5" x2="832.558" y2="591.5" style="stroke:#181818;stroke-width:0.75;"/><polygon points="840.058,588.5,832.558,591.5,840.058,594.5,837.058,591.5" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="823.558" y1="503.292" x2="823.558" y2="518.292" style="stroke:#181818;stroke-width:0.75;"/><polygon points="820.558,510.792,823.558,518.292,826.558,510.792,823.558,513.792" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="962.457" y1="395.878" x2="823.558" y2="395.878" style="stroke:#181818;stroke-width:0.75;"/><line x1="823.558" y1="395.878" x2="823.558" y2="419.878" style="stroke:#181818;stroke-width:0.75;"/><polygon points="820.558,412.378,823.558,419.878,826.558,412.378,823.558,415.378" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="980.457" y1="395.878" x2="1119.356" y2="395.878" style="stroke:#181818;stroke-width:0.75;"/><line x1="1119.356" y1="395.878" x2="1119.356" y2="419.878" style="stroke:#181818;stroke-width:0.75;"/><polygon points="1116.356,412.378,1119.356,419.878,1122.356,412.378,1119.356,415.378" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="971.457" y1="371.878" x2="971.457" y2="386.878" style="stroke:#181818;stroke-width:0.75;"/><polygon points="968.457,379.378,971.457,386.878,974.457,379.378,971.457,382.378" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="1137.759" y1="313.671" x2="971.457" y2="313.671" style="stroke:#181818;stroke-width:0.75;"/><line x1="971.457" y1="313.671" x2="971.457" y2="337.671" style="stroke:#181818;stroke-width:0.75;"/><polygon points="968.457,330.171,971.457,337.671,974.457,330.171,971.457,333.171" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="1155.759" y1="313.671" x2="1322.061" y2="313.671" style="stroke:#181818;stroke-width:0.75;"/><line x1="1322.061" y1="313.671" x2="1322.061" y2="337.671" style="stroke:#181818;stroke-width:0.75;"/><polygon points="1319.061,330.171,1322.061,337.671,1325.061,330.171,1322.061,333.171" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="971.457" y1="675.207" x2="971.457" y2="691.707" style="stroke:#181818;stroke-width:0.75;"/><line x1="971.457" y1="691.707" x2="1137.759" y2="691.707" style="stroke:#181818;stroke-width:0.75;"/><polygon points="1130.259,688.707,1137.759,691.707,1130.259,694.707,1133.259,691.707" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="1146.759" y1="289.671" x2="1146.759" y2="304.671" style="stroke:#181818;stroke-width:0.75;"/><polygon points="1143.759,297.171,1146.759,304.671,1149.759,297.171,1146.759,300.171" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="1317.725" y1="231.464" x2="1146.759" y2="231.464" style="stroke:#181818;stroke-width:0.75;"/><line x1="1146.759" y1="231.464" x2="1146.759" y2="255.464" style="stroke:#181818;stroke-width:0.75;"/><polygon points="1143.759,247.964,1146.759,255.464,1149.759,247.964,1146.759,250.964" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="1146.759" y1="700.707" x2="1146.759" y2="717.207" style="stroke:#181818;stroke-width:0.75;"/><line x1="1146.759" y1="717.207" x2="1317.725" y2="717.207" style="stroke:#181818;stroke-width:0.75;"/><polygon points="1310.225,714.207,1317.725,717.207,1310.225,720.207,1313.225,717.207" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="1326.725" y1="207.464" x2="1326.725" y2="222.464" style="stroke:#181818;stroke-width:0.75;"/><polygon points="1323.725,214.964,1326.725,222.464,1329.725,214.964,1326.725,217.964" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="409.824" y1="158.257" x2="409.824" y2="162.007" style="stroke:#181818;stroke-width:0.75;"/><line x1="409.824" y1="162.007" x2="1326.725" y2="162.007" style="stroke:#181818;stroke-width:0.75;"/><line x1="1326.725" y1="162.007" x2="1326.725" y2="173.257" style="stroke:#181818;stroke-width:0.75;"/><polygon points="1323.725,165.757,1326.725,173.257,1329.725,165.757,1326.725,168.757" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="823.558" y1="600.5" x2="823.558" y2="604.25" style="stroke:#181818;stroke-width:0.75;"/><line x1="823.558" y1="604.25" x2="86.494" y2="604.25" style="stroke:#181818;stroke-width:0.75;"/><line x1="86.494" y1="604.25" x2="86.494" y2="615.5" style="stroke:#181818;stroke-width:0.75;"/><polygon points="83.494,608,86.494,615.5,89.494,608,86.494,611" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="1119.356" y1="454.085" x2="1119.356" y2="457.835" style="stroke:#181818;stroke-width:0.75;"/><line x1="1119.356" y1="457.835" x2="246.64" y2="457.835" style="stroke:#181818;stroke-width:0.75;"/><line x1="246.64" y1="457.835" x2="246.64" y2="469.085" style="stroke:#181818;stroke-width:0.75;"/><polygon points="243.64,461.585,246.64,469.085,249.64,461.585,246.64,464.585" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="86.494" y1="649.707" x2="86.494" y2="666.207" style="stroke:#181818;stroke-width:0.75;"/><line x1="86.494" y1="666.207" x2="962.457" y2="666.207" style="stroke:#181818;stroke-width:0.75;"/><polygon points="954.957,663.207,962.457,666.207,954.957,669.207,957.957,666.207" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="246.64" y1="493.689" x2="246.64" y2="652.707" style="stroke:#181818;stroke-width:0.75;"/><line x1="246.64" y1="652.707" x2="993.957" y2="652.707" style="stroke:#181818;stroke-width:0.75;"/><line x1="993.957" y1="652.707" x2="993.957" y2="666.207" style="stroke:#181818;stroke-width:0.75;"/><line x1="993.957" y1="666.207" x2="980.457" y2="666.207" style="stroke:#181818;stroke-width:0.75;"/><polygon points="987.957,663.207,980.457,666.207,987.957,669.207,984.957,666.207" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="1322.061" y1="371.878" x2="1322.061" y2="375.628" style="stroke:#181818;stroke-width:0.75;"/><line x1="1322.061" y1="375.628" x2="405.16" y2="375.628" style="stroke:#181818;stroke-width:0.75;"/><line x1="405.16" y1="375.628" x2="405.16" y2="386.878" style="stroke:#181818;stroke-width:0.75;"/><polygon points="402.16,379.378,405.16,386.878,408.16,379.378,405.16,382.378" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="405.16" y1="411.482" x2="405.16" y2="678.207" style="stroke:#181818;stroke-width:0.75;"/><line x1="405.16" y1="678.207" x2="1169.259" y2="678.207" style="stroke:#181818;stroke-width:0.75;"/><line x1="1169.259" y1="678.207" x2="1169.259" y2="691.707" style="stroke:#181818;stroke-width:0.75;"/><line x1="1169.259" y1="691.707" x2="1155.759" y2="691.707" style="stroke:#181818;stroke-width:0.75;"/><polygon points="1163.259,688.707,1155.759,691.707,1163.259,694.707,1160.259,691.707" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="1335.725" y1="231.464" x2="1344.725" y2="231.464" style="stroke:#181818;stroke-width:0.75;"/><line x1="1344.725" y1="231.464" x2="1344.725" y2="244.964" style="stroke:#181818;stroke-width:0.75;"/><line x1="1344.725" y1="244.964" x2="556.435" y2="244.964" style="stroke:#181818;stroke-width:0.75;"/><line x1="556.435" y1="244.964" x2="556.435" y2="255.464" style="stroke:#181818;stroke-width:0.75;"/><polygon points="553.435,247.964,556.435,255.464,559.435,247.964,556.435,250.964" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="556.435" y1="329.275" x2="556.435" y2="703.707" style="stroke:#181818;stroke-width:0.75;"/><line x1="556.435" y1="703.707" x2="1349.225" y2="703.707" style="stroke:#181818;stroke-width:0.75;"/><line x1="1349.225" y1="703.707" x2="1349.225" y2="717.207" style="stroke:#181818;stroke-width:0.75;"/><line x1="1349.225" y1="717.207" x2="1335.725" y2="717.207" style="stroke:#181818;stroke-width:0.75;"/><polygon points="1343.225,714.207,1335.725,717.207,1343.225,720.207,1340.225,717.207" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><line x1="1326.725" y1="726.207" x2="1326.725" y2="729.957" style="stroke:#181818;stroke-width:0.75;"/><line x1="1326.725" y1="729.957" x2="409.824" y2="729.957" style="stroke:#181818;stroke-width:0.75;"/><line x1="409.824" y1="729.957" x2="409.824" y2="741.207" style="stroke:#181818;stroke-width:0.75;"/><polygon points="406.824,733.707,409.824,741.207,412.824,733.707,409.824,736.707" fill="#181818" style="stroke:#181818;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:10;"/><text x="296.596" y="48.574" fill="#000" font-size="9" textLength="53.271" font-family="'Segoe UI', 'Arial', sans-serif">Khách hàng</text><text x="938.173" y="48.574" fill="#000" font-size="9" textLength="195.39" font-family="'Segoe UI', 'Arial', sans-serif">Hệ thống BrewLite (Next.js UI &amp; NestJS API)</text><g class="legend" data-source-line="74"><rect x="420.049" y="774.207" width="619.607" height="56.391" fill="none" style="stroke:#000;stroke-width:0.75;" rx="5.625" ry="5.625"/><text x="423.799" y="787.703" fill="#000" font-size="10.5" textLength="518.704" font-family="'Segoe UI', 'Arial', sans-serif">Ghi chú Sơ đồ Hoạt động Chức năng 3 (Hiếu - PO | Chuẩn UML Monochrome &amp; Ngôn ngữ tự nhiên):</text><text x="423.799" y="799.926" fill="#000" font-size="10.5" textLength="590.246" font-family="'Segoe UI', 'Arial', sans-serif">• Sử dụng ngôn ngữ tự nhiên, các bước đánh số thứ tự rõ ràng, dễ hiểu cho người dùng và hội đồng nghiệm thu.</text><text x="423.799" y="812.148" fill="#000" font-size="10.5" textLength="532.516" font-family="'Segoe UI', 'Arial', sans-serif">• Bố cục 2 làn bơi (Khách hàng &amp; Hệ thống) nhỏ gọn, trực quan, không bị kéo giãn theo chiều ngang.</text><text x="423.799" y="824.371" fill="#000" font-size="10.5" textLength="612.107" font-family="'Segoe UI', 'Arial', sans-serif">• Điểm rẽ nhánh sử dụng hình thoi rỗng chuẩn UML, tất cả nhánh rẽ hội tụ về DUY NHẤT 1 điểm kết thúc (Bullseye).</text></g><?plantuml-src hLRVRzjK57xtNt780qgaDBHTnrWYXFg3DTtQh28P0r4UNEVMliI-DzZN_O7wGAdG92QqbJsCQangwIfKr6gT1aBOGZouolzX_fATU-qqTbigDY6rIMpV-vtlE-Sxv_gjhgkRZWw-Hpuchg26Riyi0MUQXxy835UkNTMy3cLTtTKTS3ZZXkLoXu1mVP9vubbwcwzGPiAIRdlP9ukwqJ5TxhFs9BUv2oiM5TddRRAa-xQumPbew0XSQ1AJ4xWpKoX3OTobkeq_F9rvGnvnwPAMsJfk2BfCnTe4Tzl4RLdKw33YUJ2INUEwVELV7gNRfwYEmjgNeJHNg6FhZFoNDIqgR2BbDEbN14P6Brjobr3J4h38xVO5n0OWbz0UB1e-A_lqqVKBji_fgtTfMrWmSdrOquHa1CtU3fmyZCCVe7ux3dPQwkB7ndGLngU6Xg_04Duu-QOn3Orw71pEb-6JQ6CIMlKuF9w4ndJlUHp-D0DJqJOkUHicu-3PFCn5cp1Vduc-Qy3DkoqetlXeQ7Yif6dhjwnerx30YdQOkQwj8yWz45OSRg699booCei-WMA3h8hA5nxw0H4Rn1Ctcp0-FrDQFuVW2TqLMdMa0YtNNmCZ3ewwQ5CTuP3r9dunIzvROCiHojoYSRZ1u4D7ftOPvl29W0ukEF1hMdMq0XDniEy0Ym81XTp-Garx0xRLAnMuXI4t7Sa9H7J4a7aSxdN1Hgm5PiJXBtZVYdv3H44PB77NGPhHNXeNmz8bA9Pm3M5G_AmrM3h0-Roa0LJ7C0VHeGCT6WT_Oy1eXw8s7WTxR84nitSSXqyfjAC_vNwBy2GBDToAV_aW4WPr1ljhEHWL1oDTlK2LOQclLInENvQJIM-YoV0nDjPelrjJIEeZ5pfRaYnc6Xg3lrkH7jllWeE0NOj6lxB4OwDZLYafit2HBInZgREfFTdArBFMXxjMWTdUiTz7oYrIQ1mMut1RtWcV879qY8pQ_XgcNVH1qg-SaCde9VANwpQnL3BvJn3t0vUqgKiCyVuxXaMC3lV5gJ8aynvgExV7asPEBDsoT8mkUBIB9IsYMVUulDfXwQTYQc9f7YJzKUep93YUaLJEqgUvKP6UClFrcCJX2mFJrPDKJhPm8IOPZOUmSRXleFOu_9vXaLwoKnAiZQCybx8ptPm6luvEpc9vSNW4RVo9WQrC3s9za1W5qJi6G-6q9905oxAMs3ePwJbZTHBbwCaW8_lr-plbMwSgJtBd_NvM5wDTNbrW1TLa8Fld3oFV4Ic9ZCaBjKlJqf1bOza08DsULjEEWrsQYv2W9LdNJXFHoZHqdmEc-H42IuGq6s-MY_yx4nVaePy5G_AtaYpW37nCSvDARa-5fxAREWLfq_koVL6ej5929JMlgwGcepGdutoaFCu2atkn6Vh-T-KWIGVvcP5pJb0rCqXbCQNLzRIMWzbLqr8nvqu_tjKqcvZu6DydXE0EOavRLEOom9DzLt5z17MKkYlKnJP2JgAm0mEOOdS5YdN9tCUJVlushCl6nx8mk3Ct2tE3bp-ijuc4W9bn-5nQvWKAaurMgcBGVxx-6PgPFcKNhoshHeL5DL9axd6KMLBrbihsGRBMZNx7VvHObd3VWYMJ9Cy33cSECfaptBUT5EMH2YnNtvC7c5z9YKr8V4FDab6mrQJiOOABsMoYlgpdIshYFm1JZh4of2N-qjVn8lNhedH79phWE7AZFPOSgeQClk4Z3HoJ_VWd3vCguxdq5-BsDG-6cZfLXCKfBWaVgruuhK5PDkQ-K3xiRrP0YMuv8fEpRkhEf-eTxLaBHf9N7GpPmSeAQQN0WEA4RsCth95IHHegySqh?></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 1080" width="980" height="1080" style="background-color:#ffffff;font-family:'Segoe UI',Arial,sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#000000"/>
+    </marker>
+    <style>
+      .title { font-size: 14.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .lane-header { font-size: 13px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .step-box { fill: #ffffff; stroke: #000000; stroke-width: 1.3; rx: 12; ry: 12; }
+      .step-text { font-size: 11px; fill: #000000; text-anchor: middle; }
+      .diamond { fill: #ffffff; stroke: #000000; stroke-width: 1.3; }
+      .guard { font-size: 10px; fill: #000000; }
+      .flow { fill: none; stroke: #000000; stroke-width: 1.25; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <text x="490" y="30" class="title">SƠ ĐỒ HOẠT ĐỘNG (TASK 2.1): AD-03 - XÁC THỰC NGƯỜI DÙNG &amp; ĐĂNG NHẬP HỆ THỐNG</text>
+
+  <!-- Swimlane Outer Frame & Header -->
+  <rect x="25" y="52" width="930" height="1004" fill="none" stroke="#000000" stroke-width="1.5"/>
+  <line x1="25" y1="90" x2="955" y2="90" stroke="#000000" stroke-width="1.4"/>
+  <text x="192.5" y="76" class="lane-header">Khách hàng</text>
+  <line x1="360" y1="52" x2="360" y2="1056" stroke="#000000" stroke-width="1.4"/>
+  <text x="657.5" y="76" class="lane-header">Hệ thống BrewLite (Next.js UI &amp; NestJS API)</text>
+
+  <!-- Start & Final Nodes -->
+  <circle cx="60" cy="130" r="11" fill="#000000"/>
+  <circle cx="217.5" cy="1025" r="12" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <circle cx="217.5" cy="1025" r="7.5" fill="#000000"/>
+
+  <!-- Step 1 (Khách hàng) -->
+  <rect x="85" y="108" width="250" height="44" class="step-box"/>
+  <text x="210" y="126" class="step-text">1. Truy cập trang Đăng nhập</text>
+  <text x="210" y="142" class="step-text">và điền thông tin Email, Mật khẩu</text>
+
+  <!-- Step 2 (Khách hàng) -->
+  <rect x="105" y="180" width="210" height="42" class="step-box"/>
+  <text x="210" y="206" class="step-text">2. Nhấn nút "Đăng nhập"</text>
+
+  <!-- Step 3 (Hệ thống) -->
+  <rect x="490" y="179" width="335" height="44" class="step-box"/>
+  <text x="657.5" y="197" class="step-text">3. Tiếp nhận thông tin, kiểm tra tính hợp lệ</text>
+  <text x="657.5" y="213" class="step-text">(định dạng email &amp; mật khẩu tối thiểu 6 ký tự)</text>
+
+  <!-- Diamond 1: Kiểm tra form -->
+  <polygon points="657.5,255 674.5,272 657.5,289 640.5,272" class="diamond"/>
+
+  <!-- Step 14: Lỗi form (Hệ thống) -->
+  <rect x="375" y="315" width="210" height="44" class="step-box"/>
+  <text x="480" y="333" class="step-text">14. Hiển thị cảnh báo lỗi định dạng</text>
+  <text x="480" y="349" class="step-text">ngay dưới các ô nhập liệu trên form</text>
+
+  <!-- Step 15: Sửa form (Khách hàng) -->
+  <rect x="85" y="315" width="250" height="44" class="step-box"/>
+  <text x="210" y="333" class="step-text">15. Chỉnh sửa lại thông tin đăng nhập</text>
+  <text x="210" y="349" class="step-text">&amp; thực hiện gửi lại biểu mẫu</text>
+
+  <!-- Step 4: Tra cứu User (Hệ thống) -->
+  <rect x="530" y="315" width="255" height="44" class="step-box"/>
+  <text x="657.5" y="333" class="step-text">4. Tra cứu tài khoản người dùng</text>
+  <text x="657.5" y="349" class="step-text">theo địa chỉ Email trong CSDL</text>
+
+  <!-- Diamond 2: Kiểm tra tồn tại User -->
+  <polygon points="657.5,390 674.5,407 657.5,424 640.5,407" class="diamond"/>
+
+  <!-- Step 12: Không thấy User (Hệ thống) -->
+  <rect x="375" y="450" width="210" height="44" class="step-box"/>
+  <text x="480" y="468" class="step-text">12. Hiển thị thông báo lỗi:</text>
+  <text x="480" y="484" class="step-text">"Email hoặc mật khẩu không chính xác"</text>
+
+  <!-- Step 13: Báo lỗi tài khoản (Khách hàng) -->
+  <rect x="85" y="450" width="250" height="44" class="step-box"/>
+  <text x="210" y="468" class="step-text">13. Nhận thông báo lỗi</text>
+  <text x="210" y="484" class="step-text">&amp; kiểm tra lại thông tin tài khoản</text>
+
+  <!-- Step 5: Kiểm tra mật khẩu (Hệ thống) -->
+  <rect x="530" y="450" width="255" height="44" class="step-box"/>
+  <text x="657.5" y="468" class="step-text">5. Kiểm tra mật khẩu mã hóa</text>
+  <text x="657.5" y="484" class="step-text">với dữ liệu tài khoản lưu trữ</text>
+
+  <!-- Diamond 3: Mật khẩu chính xác -->
+  <polygon points="657.5,525 674.5,542 657.5,559 640.5,542" class="diamond"/>
+
+  <!-- Step 10: Sai mật khẩu (Hệ thống) -->
+  <rect x="375" y="585" width="210" height="44" class="step-box"/>
+  <text x="480" y="603" class="step-text">10. Hiển thị thông báo lỗi:</text>
+  <text x="480" y="619" class="step-text">"Email hoặc mật khẩu không chính xác"</text>
+
+  <!-- Step 11: Nhập lại mật khẩu (Khách hàng) -->
+  <rect x="85" y="585" width="250" height="44" class="step-box"/>
+  <text x="210" y="603" class="step-text">11. Nhận thông báo lỗi</text>
+  <text x="210" y="619" class="step-text">&amp; nhập lại mật khẩu chính xác</text>
+
+  <!-- Step 6: Cấp mã JWT (Hệ thống) -->
+  <rect x="520" y="585" width="275" height="44" class="step-box"/>
+  <text x="657.5" y="603" class="step-text">6. Cấp mã phiên JWT (thời hạn 24h)</text>
+  <text x="657.5" y="619" class="step-text">&amp; trả về thông tin đăng nhập thành công</text>
+
+  <!-- Step 7: Lưu phiên (Hệ thống) -->
+  <rect x="520" y="660" width="275" height="44" class="step-box"/>
+  <text x="657.5" y="678" class="step-text">7. Lưu phiên làm việc trên trình duyệt</text>
+  <text x="657.5" y="694" class="step-text">&amp; gán mã xác thực cho các yêu cầu sau</text>
+
+  <!-- Diamond 4: Redirect param -->
+  <polygon points="657.5,735 674.5,752 657.5,769 640.5,752" class="diamond"/>
+
+  <!-- Step 8a: Redirect Checkout (Hệ thống) -->
+  <rect x="405" y="795" width="235" height="44" class="step-box"/>
+  <text x="522.5" y="813" class="step-text">8. Chuyển hướng sang trang Thanh toán</text>
+  <text x="522.5" y="829" class="step-text">(Bảo toàn toàn bộ giỏ hàng đang chọn)</text>
+
+  <!-- Step 8b: Redirect Menu (Hệ thống) -->
+  <rect x="670" y="795" width="235" height="44" class="step-box"/>
+  <text x="787.5" y="813" class="step-text">8. Chuyển hướng sang trang Thực đơn</text>
+  <text x="787.5" y="829" class="step-text">để tiếp tục trải nghiệm chọn món</text>
+
+  <!-- Step 9: Phiên thành viên (Khách hàng) -->
+  <rect x="85" y="885" width="250" height="44" class="step-box"/>
+  <text x="210" y="903" class="step-text">9. Bắt đầu phiên làm việc</text>
+  <text x="210" y="919" class="step-text">với tư cách Khách hàng thành viên</text>
+
+  <!-- Directed Flows -->
+  <!-- Start -> Step 1 -->
+  <path d="M 71 130 L 85 130" class="flow"/>
+
+  <!-- Step 1 -> Step 2 -->
+  <path d="M 210 152 L 210 180" class="flow"/>
+
+  <!-- Step 2 -> Step 3 -->
+  <path d="M 315 201 L 490 201" class="flow"/>
+
+  <!-- Step 3 -> Diamond 1 -->
+  <path d="M 657.5 223 L 657.5 255" class="flow"/>
+
+  <!-- Diamond 1 -> Step 14 [Sai định dạng] -->
+  <path d="M 640.5 272 L 480 272 L 480 315" class="flow"/>
+  <text x="545" y="265" class="guard" text-anchor="middle">[Sai định dạng / Để trống]</text>
+
+  <!-- Step 14 -> Step 15 -->
+  <path d="M 375 337 L 335 337" class="flow"/>
+
+  <!-- Step 15 -> Final Node along margin -->
+  <path d="M 85 337 L 45 337 L 45 1025 L 205.5 1025" class="flow"/>
+
+  <!-- Diamond 1 -> Step 4 [Thông tin hợp lệ] -->
+  <path d="M 657.5 289 L 657.5 315" class="flow"/>
+  <text x="735" y="304" class="guard" text-anchor="middle">[Thông tin hợp lệ]</text>
+
+  <!-- Step 4 -> Diamond 2 -->
+  <path d="M 657.5 359 L 657.5 390" class="flow"/>
+
+  <!-- Diamond 2 -> Step 12 [Tài khoản không tồn tại] -->
+  <path d="M 640.5 407 L 480 407 L 480 450" class="flow"/>
+  <text x="545" y="400" class="guard" text-anchor="middle">[Tài khoản không tồn tại]</text>
+
+  <!-- Step 12 -> Step 13 -->
+  <path d="M 375 472 L 335 472" class="flow"/>
+
+  <!-- Step 13 -> margin flow -->
+  <path d="M 85 472 L 45 472" class="flow"/>
+
+  <!-- Diamond 2 -> Step 5 [Tìm thấy tài khoản] -->
+  <path d="M 657.5 424 L 657.5 450" class="flow"/>
+  <text x="735" y="439" class="guard" text-anchor="middle">[Tìm thấy tài khoản]</text>
+
+  <!-- Step 5 -> Diamond 3 -->
+  <path d="M 657.5 494 L 657.5 525" class="flow"/>
+
+  <!-- Diamond 3 -> Step 10 [Mật khẩu không đúng] -->
+  <path d="M 640.5 542 L 480 542 L 480 585" class="flow"/>
+  <text x="545" y="535" class="guard" text-anchor="middle">[Mật khẩu không đúng]</text>
+
+  <!-- Step 10 -> Step 11 -->
+  <path d="M 375 607 L 335 607" class="flow"/>
+
+  <!-- Step 11 -> margin flow -->
+  <path d="M 85 607 L 45 607" class="flow"/>
+
+  <!-- Diamond 3 -> Step 6 [Mật khẩu chính xác] -->
+  <path d="M 657.5 559 L 657.5 585" class="flow"/>
+  <text x="735" y="574" class="guard" text-anchor="middle">[Mật khẩu chính xác]</text>
+
+  <!-- Step 6 -> Step 7 -->
+  <path d="M 657.5 629 L 657.5 660" class="flow"/>
+
+  <!-- Step 7 -> Diamond 4 -->
+  <path d="M 657.5 704 L 657.5 735" class="flow"/>
+
+  <!-- Diamond 4 -> Step 8a [Có ?redirect=/checkout] -->
+  <path d="M 640.5 752 L 522.5 752 L 522.5 795" class="flow"/>
+  <text x="535" y="745" class="guard" text-anchor="middle">[Có redirect /checkout]</text>
+
+  <!-- Diamond 4 -> Step 8b [Đăng nhập thông thường] -->
+  <path d="M 674.5 752 L 787.5 752 L 787.5 795" class="flow"/>
+  <text x="775" y="745" class="guard" text-anchor="middle">[Đăng nhập thường]</text>
+
+  <!-- Step 8a -> merge line -->
+  <path d="M 522.5 839 L 522.5 862 L 657.5 862" class="flow"/>
+
+  <!-- Step 8b -> merge line -->
+  <path d="M 787.5 839 L 787.5 862 L 657.5 862" class="flow"/>
+
+  <!-- Merge line -> Step 9 -->
+  <path d="M 657.5 862 L 657.5 907 L 335 907" class="flow"/>
+
+  <!-- Step 9 -> Final Node -->
+  <path d="M 210 929 L 210 970 L 217.5 970 L 217.5 1013" class="flow"/>
+</svg>
