@@ -3,194 +3,63 @@ skinparam monochrome true
 skinparam shadowing false
 skinparam defaultFontName SansSerif
 skinparam backgroundColor white
+skinparam sequenceParticipantBackgroundColor white
+skinparam actorBackgroundColor white
+skinparam ParticipantPadding 20
 hide footbox
-autonumber
-title Sequence-02: Tùy biến món, giỏ hàng và kiểm tra khuyến mãi
-actor "Khách hàng\n(Customer / Guest)" as C
-boundary "CustomizationModal / CartPage\nNext.js UI" as UI
-control "useCartStore\nZustand" as Store
-database "localStorage\nBrowser" as Local
-control "PromotionsController\nNestJS API" as API
-control "PromotionsService\nBusiness Layer" as Service
-entity "PrismaService\nDAL" as Prisma
-database "PostgreSQL" as DB
+title SƠ ĐỒ TUẦN TỰ (TASK 2.2): UC-02 - GIỎ HÀNG & KHUYẾN MÃI
+actor "Khách hàng" as C
+participant "«giao diện»\n:Màn hình giỏ hàng" as UI
+participant "«điều khiển»\n:Quản lý giỏ" as Cart
+participant "«điều khiển»\n:Khuyến mãi" as Promo
+participant "«thực thể»\n:Cơ sở dữ liệu" as DB
 
-note over C, DB
-  Lifelines xác định trước: Customer → Next.js UI → Zustand → localStorage;
-  khi kiểm tra mã: Next.js UI → Controller → Service → Prisma → PostgreSQL.
-  Guest không cần JWT trong UC-02. Checkout / payment thuộc UC-04 / UC-05.
-end note
+C -> UI: 1. Mở giỏ hàng
+UI -> Cart: Lấy giỏ hàng
+Cart --> UI: Danh sách món & tổng tiền
+UI --> C: Hiển thị giỏ hàng
 
-== Khôi phục giỏ hàng ==
-C -> UI: openMenuOrCart()
-UI -> Store: hydrate()
-Store -> Local: getItem(cartKey)
-alt Đọc được localStorage
-  Local --> Store: serializedState / null
-  alt Dữ liệu hợp lệ hoặc chưa có dữ liệu
-    Store -> Store: Nạp state hoặc dùng giỏ rỗng
-  else JSON / cấu trúc hỏng
-    Store -> Store: items = []; appliedPromotion = null
-    Store -> Local: try removeItem(cartKey)
-    note right of Store: Bắt lỗi nếu không xóa được key; UI không crash.
-  end
-else Trình duyệt chặn / lỗi đọc
-  Local --> Store: Storage exception
-  Store -> Store: Giữ state trong bộ nhớ hoặc khởi tạo giỏ rỗng
-  Store --> UI: Cảnh báo không khôi phục được giỏ đã lưu
-end
-note over Store, Local
-  Mọi setItem bên dưới đều bọc try/catch:
-  thành công: state đã lưu; lỗi quota / bị chặn: giữ state trong bộ nhớ,
-  báo giỏ chưa lưu được và có thể mất thay đổi khi tải lại trang.
-  Mỗi thay đổi items hoặc mã thực sự có hiệu lực tăng cartVersion;
-  không tăng khi hủy thao tác hoặc thao tác bị từ chối.
-end note
-Store --> UI: items, appliedPromotion, badge
-
-== Tùy biến và thêm món ==
-opt Khách hàng chọn món từ Menu
-  C -> UI: selectProduct(product)
-  alt isAvailable và availableStock > 0
-    UI --> C: Mở Modal (S, đường 100%, đá 100%, qty = 1)
-    loop Mỗi lần đổi tùy chọn
-      C -> UI: selectOptions(size, toppings, sugar, ice, qty)
-      UI -> UI: preview = (basePrice + sizePrice + sum(toppingPrices)) * qty
-      UI --> C: Hiển thị giá tạm tính
-    end
-    opt Xác nhận thêm món
-      C -> UI: addToCart()
-      UI -> Store: addItem(product, options, qty)
-      Store -> Store: Validate options, qty nguyên dương;\ntotalQty = sum(quantity cùng productId) + qty
-      alt Đầu vào sai hoặc totalQty > availableStock
-        Store --> UI: Không đổi state; lỗi đầu vào / tồn kho
-        UI --> C: Báo lỗi; chặn nút tăng khi hết khả dụng
-      else Đủ tồn kho tham khảo
-        Store -> Store: itemKey(productId, size, sortedToppingIds, sugar, ice)
-        alt Trùng itemKey
-          Store -> Store: existingItem.quantity += qty
-        else Khác itemKey
-          Store -> Store: items.push(new CartItemModel)
-        end
-        Store -> Store: Tính lại subtotal, badge và giảm dự kiến;\ngỡ mã nếu không đủ minOrderValue
-        Store -> Local: setItem(cartKey, serializedState)
-        Store --> UI: Cập nhật state
-        UI --> C: Đóng Modal; thông báo thành công
-      end
-    end
-  else Hết hàng / ngừng phục vụ
-    UI --> C: Báo lỗi; khóa thêm món
+opt Thêm / sửa / xóa món
+  C -> UI: 2. Chọn món, Size/Topping, số lượng\nhoặc xác nhận xóa
+  UI -> Cart: Kiểm tra & cập nhật giỏ
+  alt Tùy chọn, số lượng hợp lệ & đủ tồn kho
+    Cart --> UI: Giỏ đã cập nhật
+  else Không hợp lệ / hủy xóa
+    Cart --> UI: Báo lý do / giữ nguyên giỏ
   end
 end
 
-== Xem và sửa giỏ ==
-C -> UI: openCart()
-UI -> Store: getState()
-Store --> UI: items, subtotal, appliedPromotion
-ref over UI, DB
-  FR-01/02: lấy trạng thái mới nhất của các productId từ API sản phẩm.
-  Luồng ProductsController → ProductsService → Prisma → PostgreSQL thuộc sơ đồ Menu.
-end ref
-alt Lấy trạng thái thành công
-  UI -> Store: Cập nhật availableStock; đánh dấu món ngừng bán / không tồn tại
-  Store --> UI: Các dòng bị chặn
-  UI --> C: Cảnh báo; khóa checkout đến khi xóa các dòng bị chặn
-else Lỗi API sản phẩm / mất mạng
-  UI --> C: Giữ giỏ; báo lỗi, cho thử lại; khóa checkout đến khi kiểm tra được
-end
-opt Đổi số lượng / xóa dòng / xóa tất cả
-  C -> UI: updateQuantity() / removeItem() / clearCart()
-  alt Xóa hoặc giảm về 0
-    UI --> C: Yêu cầu xác nhận
-    alt Đồng ý
-      UI -> Store: removeItem(itemKey) / clearCart()
-      Store -> Store: Xóa items tương ứng
-    else Hủy
-      UI -> UI: Giữ nguyên giỏ
-    end
-  else Quantity mới > 0
-    UI -> Store: updateQuantity(itemKey, qty)
-    Store -> Store: Kiểm tra qty nguyên dương và tổng productId <= availableStock
-    alt Hợp lệ
-      Store -> Store: Cập nhật quantity
-    else Vượt tồn kho / qty sai
-      Store --> UI: Lỗi; giữ nguyên quantity
-      UI --> C: Báo lỗi tồn kho / đầu vào
-    end
+opt Áp / thay mã Promotion
+  C -> UI: 3. Nhập mã giảm giá
+  UI -> Cart: Lấy tạm tính
+  Cart --> UI: Tạm tính giỏ hàng
+  UI -> Promo: Kiểm tra mã với giỏ hiện tại
+  Promo -> DB: Tra cứu Promotion
+  DB --> Promo: Kết quả tra cứu
+  alt Giỏ & mã đủ điều kiện áp dụng
+    Promo --> UI: Tiền giảm dự kiến
+    UI -> Cart: Áp / thay mã nếu giỏ chưa đổi
+  else Không hợp lệ / chưa kiểm tra được
+    Promo --> UI: Báo lý do / yêu cầu thử lại
   end
-  Store -> Store: Tính lại subtotal, badge; gỡ mã nếu giỏ rỗng / dưới minOrderValue;\nnếu còn mã: tính lại giảm dự kiến theo subtotal mới
-  Store -> Local: setItem(cartKey, serializedState)
-  Store --> UI: State mới / không đổi khi hủy
-end
-
-== Áp dụng / thay mã (chỉ khi giỏ có món) ==
-opt Khách hàng nhập mã
-  C -> UI: applyVoucher(code)
-  UI -> Store: getState()
-  Store --> UI: cartSubtotal, cartVersion
-  UI -> UI: Loading; chặn bấm lặp; lưu requestCartVersion = cartVersion
-  UI -> API: POST /api/v1/promotions/validate\n{ code, cartSubtotal }
-  API -> API: ValidationPipe: code hợp lệ; subtotal hữu hạn, không âm
-  alt DTO sai
-    API --> UI: HTTP 400 Bad Request (lý do)
-  else DTO hợp lệ
-    API -> Service: validatePromotion(dto)
-    Service -> Service: Chuẩn hóa code; dùng thời gian máy chủ
-    Service -> Prisma: promotion.findUnique({ where: { code } })
-    Prisma -> DB: SELECT Promotion WHERE code = ?
-    alt Truy vấn thành công
-      DB --> Prisma: Promotion / null
-      Prisma --> Service: Promotion / null
-      Service -> Service: Kiểm tra tồn tại, isActive, startDate <= now <= endDate,\nusedCount < usageLimit, subtotal >= minOrderValue
-      alt Voucher hợp lệ
-        Service -> Service: calculateDiscount(subtotal)\nPERCENTAGE: min(subtotal, subtotal * value / 100, maxDiscountAmount nếu có)\nFIXED_AMOUNT: min(value, subtotal)
-        Service --> API: { valid: true, promoId, code, discountAmount,\ndiscountType, discountValue, minOrderValue, maxDiscountAmount }
-        API --> UI: HTTP 200 OK (toàn bộ kết quả preview và điều kiện giảm giá)
-        UI -> Store: getState().cartVersion
-        Store --> UI: currentCartVersion
-        alt requestCartVersion == currentCartVersion
-          UI -> Store: setAppliedPromotion(promoData)
-          Store -> Store: Thay mã cũ; không cộng dồn
-          Store -> Local: setItem(cartKey, serializedState)
-        else Giỏ đã đổi trong lúc chờ
-          UI -> UI: Bỏ kết quả cũ; yêu cầu áp lại mã với giỏ hiện tại
-        end
-      else Không tồn tại / vô hiệu / sai hạn / hết lượt / chưa đủ tối thiểu
-        Service --> API: BadRequestException(lý do)
-        API --> UI: HTTP 400 Bad Request (lý do)
-      end
-    else Lỗi truy vấn
-      DB --> Prisma: Database error
-      Prisma --> Service: Exception
-      Service --> API: InternalServerErrorException
-      API --> UI: HTTP 500 Internal Server Error
-    end
-  end
-  UI -> UI: Kết thúc loading; HTTP 400/500: báo lý do;\ngiữ items và mã cũ nếu còn hợp lệ
-  note over UI, API
-    Mất mạng / timeout: Client bắt lỗi, kết thúc loading,
-    báo thử lại; không xóa items hay mã cũ.
-    Validate chỉ đọc: không UPDATE usedCount, không giữ kho.
-  end note
-  UI --> C: Hiển thị lỗi hoặc tổng tiền dự kiến sau giảm
 end
 
 opt Hủy mã
-  C -> UI: removeVoucher()
-  UI -> Store: removePromotion()
-  Store -> Store: appliedPromotion = null; discountAmount = 0
-  Store -> Local: setItem(cartKey, serializedState)
-  Store --> UI: Tổng dự kiến = subtotal
+  C -> UI: 4. Chọn hủy mã
+  UI -> Cart: Gỡ mã giảm giá
 end
+UI -> Cart: 5. Tính lại tổng; gỡ mã nếu không còn đủ điều kiện
+Cart --> UI: Giỏ hàng & tổng tiền dự kiến
+UI --> C: Hiển thị kết quả
 
-opt Giỏ có món, trạng thái đã kiểm tra, không có dòng ngừng bán / không tồn tại và khách hàng tiếp tục đặt hàng
-  C -> UI: proceedToCheckout()
-  UI -> Store: getCheckoutItemsAndPromotionCode()
-  Store --> UI: productId, size, toppingIds, sugar, ice, qty; promotionCode
-  UI --> C: Chuyển tiếp UC-04
+opt Tiếp tục đặt hàng
+  C -> UI: 6. Chọn Đặt hàng
+  UI -> Cart: Kiểm tra lại giỏ & trạng thái món
+  Cart --> UI: Kết quả kiểm tra
+  alt Giỏ có món & các món đã kiểm tra còn bán
+    UI --> C: Chuyển sang đặt hàng (UC-04)
+  else Chưa đủ điều kiện
+    UI --> C: Yêu cầu kiểm tra lại giỏ
+  end
 end
-note over UI, DB
-  UC-04 tính lại giá và voucher từ DB, kiểm tra / trừ tồn kho nguyên liệu,
-  tăng usedCount trong transaction. Không tin giá hoặc discountAmount Client.
-end note
 @enduml
