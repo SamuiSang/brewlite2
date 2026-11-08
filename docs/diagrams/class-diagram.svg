@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 860" width="1060" height="860" style="background-color:#ffffff;font-family:Helvetica,'Segoe UI',Arial,sans-serif;">
+  <defs>
+    <marker id="arrow-open" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 1 1 L 10 6 L 1 11" fill="none" stroke="#000000" stroke-width="1.4"/>
+    </marker>
+    <marker id="diamond-filled" viewBox="0 0 16 12" refX="1" refY="6" markerWidth="11" markerHeight="9" orient="auto">
+      <polygon points="1,6 8,1 15,6 8,11" fill="#000000" stroke="#000000" stroke-width="1.2"/>
+    </marker>
+    <marker id="diamond-hollow" viewBox="0 0 16 12" refX="1" refY="6" markerWidth="11" markerHeight="9" orient="auto">
+      <polygon points="1,6 8,1 15,6 8,11" fill="#ffffff" stroke="#000000" stroke-width="1.3"/>
+    </marker>
+    <style>
+      .title { font-size: 14.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .cls-box { fill: #ffffff; stroke: #000000; stroke-width: 1.4; }
+      .cls-div { stroke: #000000; stroke-width: 1.1; }
+      .cls-name { font-size: 12.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .cls-item { font-size: 10.8px; fill: #000000; }
+      .rel-line { fill: none; stroke: #000000; stroke-width: 1.3; }
+      .rel-label { font-size: 10.5px; fill: #000000; text-anchor: middle; }
+      .mult-label { font-size: 10.5px; font-weight: 600; fill: #000000; }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <text x="530" y="28" class="title">SƠ ĐỒ LỚP MỨC DOMAIN TỔNG THỂ HỆ THỐNG BREWLITE (TASK 2.3)</text>
+  <path d="M 715 125 L 620 125" class="rel-line" marker-start="url(#diamond-filled)"/>
+  <text x="668" y="117" class="rel-label">công thức</text>
+  <text x="702" y="140" class="mult-label">1</text>
+  <text x="626" y="140" class="mult-label">1..*</text>
+  <path d="M 375 125 L 280 125" class="rel-line" marker-end="url(#arrow-open)"/>
+  <text x="328" y="117" class="rel-label">định mức</text>
+  <text x="350" y="140" class="mult-label">0..*</text>
+  <text x="286" y="140" class="mult-label">1</text>
+  <path d="M 870 305 L 870 227" class="rel-line" marker-end="url(#arrow-open)"/>
+  <text x="922" y="270" class="rel-label">tham chiếu món</text>
+  <text x="845" y="298" class="mult-label">0..*</text>
+  <text x="856" y="242" class="mult-label">1</text>
+  <path d="M 280 400 L 365 400" class="rel-line" marker-end="url(#arrow-open)"/>
+  <text x="322" y="392" class="rel-label">đặt đơn</text>
+  <text x="286" y="415" class="mult-label">1</text>
+  <text x="340" y="415" class="mult-label">0..*</text>
+  <path d="M 630 400 L 715 400" class="rel-line" marker-start="url(#diamond-filled)"/>
+  <text x="672" y="392" class="rel-label">gồm chi tiết</text>
+  <text x="636" y="415" class="mult-label">1</text>
+  <text x="690" y="415" class="mult-label">1..*</text>
+  <path d="M 140 508 L 140 615" class="rel-line" marker-start="url(#diamond-filled)"/>
+  <text x="98" y="565" class="rel-label">tích/đổi điểm</text>
+  <text x="148" y="523" class="mult-label">1</text>
+  <text x="148" y="607" class="mult-label">0..*</text>
+  <path d="M 405 558 L 405 585 L 250 585 L 250 615" class="rel-line" marker-end="url(#arrow-open)"/>
+  <text x="325" y="578" class="rel-label">phát sinh điểm</text>
+  <text x="378" y="572" class="mult-label">0..1</text>
+  <text x="256" y="607" class="mult-label">0..*</text>
+  <path d="M 495 558 L 495 615" class="rel-line" marker-end="url(#arrow-open)"/>
+  <text x="538" y="590" class="rel-label">áp dụng mã</text>
+  <text x="470" y="572" class="mult-label">0..*</text>
+  <text x="468" y="607" class="mult-label">0..1</text>
+  <path d="M 590 558 L 590 585 L 780 585 L 780 615" class="rel-line" marker-end="url(#arrow-open)"/>
+  <text x="695" y="578" class="rel-label">thanh toán Sandbox/Webhook</text>
+  <text x="597" y="572" class="mult-label">1</text>
+  <text x="787" y="607" class="mult-label">0..1</text>
+  <!-- Class: Ingredient -->
+  <rect x="35" y="55" width="245" height="180" class="cls-box"/>
+  <text x="157.5" y="74" class="cls-name">Ingredient</text>
+  <line x1="35" y1="83" x2="280" y2="83" class="cls-div"/>
+  <text x="43" y="99" class="cls-item">- id: String</text>
+  <text x="43" y="115.5" class="cls-item">- name: String</text>
+  <text x="43" y="132" class="cls-item">- unit: String (g, ml, pcs)</text>
+  <text x="43" y="148.5" class="cls-item">- stockQuantity: double</text>
+  <text x="43" y="165" class="cls-item">- minThreshold: double</text>
+  <text x="43" y="181.5" class="cls-item">- version: int (Optimistic Lock)</text>
+  <line x1="35" y1="192" x2="280" y2="192" class="cls-div"/>
+  <text x="43" y="208" class="cls-item">+ deductStock(qty: double, ver: int): boolean</text>
+  <text x="43" y="224.5" class="cls-item">+ restock(returnedQty: double): void</text>
+  <!-- Class: RecipeItem -->
+  <rect x="375" y="55" width="245" height="130.5" class="cls-box"/>
+  <text x="497.5" y="74" class="cls-name">RecipeItem</text>
+  <line x1="375" y1="83" x2="620" y2="83" class="cls-div"/>
+  <text x="383" y="99" class="cls-item">- id: String</text>
+  <text x="383" y="115.5" class="cls-item">- productId: String</text>
+  <text x="383" y="132" class="cls-item">- ingredientId: String</text>
+  <text x="383" y="148.5" class="cls-item">- quantityRequired: double</text>
+  <line x1="375" y1="159" x2="620" y2="159" class="cls-div"/>
+  <text x="383" y="175" class="cls-item">+ getRequiredAmount(orderQty: int): double</text>
+  <!-- Class: Product -->
+  <rect x="715" y="55" width="310" height="180" class="cls-box"/>
+  <text x="870" y="74" class="cls-name">Product</text>
+  <line x1="715" y1="83" x2="1025" y2="83" class="cls-div"/>
+  <text x="723" y="99" class="cls-item">- id: String</text>
+  <text x="723" y="115.5" class="cls-item">- name: String</text>
+  <text x="723" y="132" class="cls-item">- description: String</text>
+  <text x="723" y="148.5" class="cls-item">- basePrice: double</text>
+  <text x="723" y="165" class="cls-item">- category: String</text>
+  <text x="723" y="181.5" class="cls-item">- isAvailable: boolean</text>
+  <line x1="715" y1="192" x2="1025" y2="192" class="cls-div"/>
+  <text x="723" y="208" class="cls-item">+ calculateAvailableStock(): int</text>
+  <text x="723" y="224.5" class="cls-item">+ checkAvailability(qty: int): boolean</text>
+  <!-- Class: User -->
+  <rect x="35" y="305" width="245" height="196.5" class="cls-box"/>
+  <text x="157.5" y="324" class="cls-name">User</text>
+  <line x1="35" y1="333" x2="280" y2="333" class="cls-div"/>
+  <text x="43" y="349" class="cls-item">- id: String</text>
+  <text x="43" y="365.5" class="cls-item">- email: String</text>
+  <text x="43" y="382" class="cls-item">- fullName: String</text>
+  <text x="43" y="398.5" class="cls-item">- phone: String</text>
+  <text x="43" y="415" class="cls-item">- passwordHash: String</text>
+  <text x="43" y="431.5" class="cls-item">- role: String (CUSTOMER/STAFF/ADMIN)</text>
+  <text x="43" y="448" class="cls-item">- loyaltyPoints: int</text>
+  <line x1="35" y1="458.5" x2="280" y2="458.5" class="cls-div"/>
+  <text x="43" y="474.5" class="cls-item">+ verifyPassword(plain: String): boolean</text>
+  <text x="43" y="491" class="cls-item">+ canRedeemPoints(pts: int): boolean</text>
+  <!-- Class: Order -->
+  <rect x="365" y="305" width="265" height="246" class="cls-box"/>
+  <text x="497.5" y="324" class="cls-name">Order</text>
+  <line x1="365" y1="333" x2="630" y2="333" class="cls-div"/>
+  <text x="373" y="349" class="cls-item">- id: String</text>
+  <text x="373" y="365.5" class="cls-item">- orderCode: String</text>
+  <text x="373" y="382" class="cls-item">- userId: String</text>
+  <text x="373" y="398.5" class="cls-item">- promotionId: String</text>
+  <text x="373" y="415" class="cls-item">- subtotalAmount: double</text>
+  <text x="373" y="431.5" class="cls-item">- discountAmount: double</text>
+  <text x="373" y="448" class="cls-item">- loyaltyPointsUsed: int</text>
+  <text x="373" y="464.5" class="cls-item">- finalAmount: double</text>
+  <text x="373" y="481" class="cls-item">- status: String (PENDING..PAID)</text>
+  <text x="373" y="497.5" class="cls-item">- paymentDeadline: DateTime</text>
+  <line x1="365" y1="508" x2="630" y2="508" class="cls-div"/>
+  <text x="373" y="524" class="cls-item">+ calculateFinalAmount(): double</text>
+  <text x="373" y="540.5" class="cls-item">+ transitionTo(newStatus: String): void</text>
+  <!-- Class: OrderItem -->
+  <rect x="715" y="305" width="310" height="213" class="cls-box"/>
+  <text x="870" y="324" class="cls-name">OrderItem</text>
+  <line x1="715" y1="333" x2="1025" y2="333" class="cls-div"/>
+  <text x="723" y="349" class="cls-item">- id: String</text>
+  <text x="723" y="365.5" class="cls-item">- orderId: String</text>
+  <text x="723" y="382" class="cls-item">- productId: String</text>
+  <text x="723" y="398.5" class="cls-item">- productName: String</text>
+  <text x="723" y="415" class="cls-item">- size: String</text>
+  <text x="723" y="431.5" class="cls-item">- toppingsJson: String</text>
+  <text x="723" y="448" class="cls-item">- unitPrice: double</text>
+  <text x="723" y="464.5" class="cls-item">- quantity: int</text>
+  <text x="723" y="481" class="cls-item">- lineTotal: double</text>
+  <line x1="715" y1="491.5" x2="1025" y2="491.5" class="cls-div"/>
+  <text x="723" y="507.5" class="cls-item">+ calculateLineTotal(): double</text>
+  <!-- Class: LoyaltyTransaction -->
+  <rect x="35" y="615" width="265" height="180" class="cls-box"/>
+  <text x="167.5" y="634" class="cls-name">LoyaltyTransaction</text>
+  <line x1="35" y1="643" x2="300" y2="643" class="cls-div"/>
+  <text x="43" y="659" class="cls-item">- id: String</text>
+  <text x="43" y="675.5" class="cls-item">- userId: String</text>
+  <text x="43" y="692" class="cls-item">- orderId: String</text>
+  <text x="43" y="708.5" class="cls-item">- type: String (EARN/REDEEM/REFUND)</text>
+  <text x="43" y="725" class="cls-item">- points: int</text>
+  <text x="43" y="741.5" class="cls-item">- createdAt: DateTime</text>
+  <line x1="35" y1="752" x2="300" y2="752" class="cls-div"/>
+  <text x="43" y="768" class="cls-item">+ calculateEarnedPoints(amount: double): int</text>
+  <text x="43" y="784.5" class="cls-item">+ validateBalance(balance: int): boolean</text>
+  <!-- Class: Promotion -->
+  <rect x="365" y="615" width="265" height="213" class="cls-box"/>
+  <text x="497.5" y="634" class="cls-name">Promotion</text>
+  <line x1="365" y1="643" x2="630" y2="643" class="cls-div"/>
+  <text x="373" y="659" class="cls-item">- id: String</text>
+  <text x="373" y="675.5" class="cls-item">- code: String</text>
+  <text x="373" y="692" class="cls-item">- discountType: String</text>
+  <text x="373" y="708.5" class="cls-item">- discountValue: double</text>
+  <text x="373" y="725" class="cls-item">- minOrderValue: double</text>
+  <text x="373" y="741.5" class="cls-item">- usageLimit: int</text>
+  <text x="373" y="758" class="cls-item">- usedCount: int</text>
+  <text x="373" y="774.5" class="cls-item">- isActive: boolean</text>
+  <line x1="365" y1="785" x2="630" y2="785" class="cls-div"/>
+  <text x="373" y="801" class="cls-item">+ isValid(orderSubtotal: double): boolean</text>
+  <text x="373" y="817.5" class="cls-item">+ calculateDiscount(subtotal: double): double</text>
+  <!-- Class: Payment -->
+  <rect x="715" y="615" width="310" height="213" class="cls-box"/>
+  <text x="870" y="634" class="cls-name">Payment</text>
+  <line x1="715" y1="643" x2="1025" y2="643" class="cls-div"/>
+  <text x="723" y="659" class="cls-item">- id: String</text>
+  <text x="723" y="675.5" class="cls-item">- orderId: String</text>
+  <text x="723" y="692" class="cls-item">- idempotencyKey: String</text>
+  <text x="723" y="708.5" class="cls-item">- amount: double</text>
+  <text x="723" y="725" class="cls-item">- method: String (MOMO/VNPAY/VIETQR)</text>
+  <text x="723" y="741.5" class="cls-item">- status: String (PENDING/SUCCESS/FAILED)</text>
+  <text x="723" y="758" class="cls-item">- transactionRef: String</text>
+  <text x="723" y="774.5" class="cls-item">- paidAt: DateTime</text>
+  <line x1="715" y1="785" x2="1025" y2="785" class="cls-div"/>
+  <text x="723" y="801" class="cls-item">+ markAsSuccess(txRef: String): void</text>
+  <text x="723" y="817.5" class="cls-item">+ markAsFailed(reason: String): void</text>
+</svg>

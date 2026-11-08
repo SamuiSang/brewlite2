@@ -1,0 +1,82 @@
+@startuml class-06-loyalty-history
+hide circle
+hide stereotype
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam backgroundColor white
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide empty members
+
+title SƠ ĐỒ LỚP (CLASS DIAGRAM): CLASS-06 - BIÊN NHẬN, LỊCH SỬ ĐƠN HÀNG & ĐIỂM THƯỞNG LOYALTY
+
+class User {
+  - id: String
+  - email: String
+  - fullName: String
+  - phone: String
+  - role: String
+  - loyaltyPoints: int
+  + canRedeemPoints(points: int): boolean
+  + updateLoyaltyBalance(delta: int): void
+}
+
+class Order {
+  - id: String
+  - orderCode: String
+  - userId: String
+  - subtotalAmount: double
+  - discountAmount: double
+  - loyaltyPointsUsed: int
+  - finalAmount: double
+  - status: String
+  - createdAt: DateTime
+  + isOwnedBy(userId: String): boolean
+  + transitionTo(newStatus: String): void
+}
+
+class Payment {
+  - id: String
+  - orderId: String
+  - idempotencyKey: String
+  - amount: double
+  - method: String
+  - status: String
+  - transactionRef: String
+  - paidAt: DateTime
+  + markAsSuccess(txRef: String): void
+  + markAsFailed(reason: String): void
+}
+
+class LoyaltyTransaction {
+  - id: String
+  - userId: String
+  - orderId: String
+  - type: String
+  - points: int
+  - description: String
+  - createdAt: DateTime
+  + calculateEarnedPoints(finalAmount: double): int
+  + validateBalanceBeforeRedeem(balance: int): boolean
+  + refundPointsOnCancel(orderId: String): void
+}
+
+class OrderStatusLog {
+  - id: String
+  - orderId: String
+  - previousStatus: String
+  - newStatus: String
+  - changedByUserId: String
+  - note: String
+  - changedAt: DateTime
+  + isValidTransition(): boolean
+  + getOrderTimeline(orderId: String): OrderStatusLog[]
+}
+
+User "1" -right-> "0..*" Order : đặt đơn
+Order "1" -right-> "0..1" Payment : biên nhận
+User "1" *-down- "0..*" LoyaltyTransaction : sở hữu lịch sử điểm
+Order "0..1" -down-> "0..*" LoyaltyTransaction : phát sinh điểm (EARN/REDEEM)
+Order "1" *-down- "1..*" OrderStatusLog : lưu vết tiến trình đơn
+@enduml

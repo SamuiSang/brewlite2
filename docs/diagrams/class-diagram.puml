@@ -1,0 +1,130 @@
+@startuml class-diagram
+hide circle
+hide stereotype
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam backgroundColor white
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide empty members
+
+title SƠ ĐỒ LỚP MỨC DOMAIN TỔNG THỂ HỆ THỐNG BREWLITE (TASK 2.3)
+
+class Ingredient {
+  - id: String
+  - name: String
+  - unit: String
+  - stockQuantity: double
+  - minThreshold: double
+  - version: int
+  + deductStock(qty: double, ver: int): boolean
+  + restock(returnedQty: double): void
+}
+
+class RecipeItem {
+  - id: String
+  - productId: String
+  - ingredientId: String
+  - quantityRequired: double
+  + getRequiredAmount(orderQty: int): double
+}
+
+class Product {
+  - id: String
+  - name: String
+  - description: String
+  - basePrice: double
+  - category: String
+  - isAvailable: boolean
+  + calculateAvailableStock(): int
+  + checkAvailability(qty: int): boolean
+}
+
+class User {
+  - id: String
+  - email: String
+  - fullName: String
+  - phone: String
+  - passwordHash: String
+  - role: String
+  - loyaltyPoints: int
+  + verifyPassword(plain: String): boolean
+  + canRedeemPoints(pts: int): boolean
+}
+
+class Order {
+  - id: String
+  - orderCode: String
+  - userId: String
+  - promotionId: String
+  - subtotalAmount: double
+  - discountAmount: double
+  - loyaltyPointsUsed: int
+  - finalAmount: double
+  - status: String
+  - paymentDeadline: DateTime
+  + calculateFinalAmount(): double
+  + transitionTo(newStatus: String): void
+}
+
+class OrderItem {
+  - id: String
+  - orderId: String
+  - productId: String
+  - productName: String
+  - size: String
+  - toppingsJson: String
+  - unitPrice: double
+  - quantity: int
+  - lineTotal: double
+  + calculateLineTotal(): double
+}
+
+class LoyaltyTransaction {
+  - id: String
+  - userId: String
+  - orderId: String
+  - type: String
+  - points: int
+  - createdAt: DateTime
+  + calculateEarnedPoints(amount: double): int
+  + validateBalance(balance: int): boolean
+}
+
+class Promotion {
+  - id: String
+  - code: String
+  - discountType: String
+  - discountValue: double
+  - minOrderValue: double
+  - usageLimit: int
+  - usedCount: int
+  - isActive: boolean
+  + isValid(orderSubtotal: double): boolean
+  + calculateDiscount(subtotal: double): double
+}
+
+class Payment {
+  - id: String
+  - orderId: String
+  - idempotencyKey: String
+  - amount: double
+  - method: String
+  - status: String
+  - transactionRef: String
+  - paidAt: DateTime
+  + markAsSuccess(txRef: String): void
+  + markAsFailed(reason: String): void
+}
+
+Product "1" *-left- "1..*" RecipeItem : công thức
+RecipeItem "0..*" -left-> "1" Ingredient : định mức
+OrderItem "0..*" -up-> "1" Product : tham chiếu món
+User "1" -right-> "0..*" Order : đặt đơn
+Order "1" *-right- "1..*" OrderItem : gồm chi tiết
+User "1" *-down- "0..*" LoyaltyTransaction : tích/đổi điểm
+Order "0..1" -down-> "0..*" LoyaltyTransaction : phát sinh điểm
+Order "0..*" -down-> "0..1" Promotion : áp dụng mã
+Order "1" -down-> "0..1" Payment : thanh toán Sandbox/Webhook
+@enduml
