@@ -154,8 +154,7 @@ note bottom of PaymentDomain
        mới chuyển trạng thái đơn hàng Order từ PENDING sang PAID.
   • **Hoàn kho nguyên tử (Restock Rollback)**:
     Khi thanh toán FAILED / Hủy / Quá hạn 15p:
-    Cập nhật Order = CANCELLED và cộng hoàn trả 100% nguyên liệu thô:
-    UPDATE "Ingredient" SET stockQuantity = stockQuantity + qty, version = version + 1.
+    Cập nhật Order = CANCELLED và tự động hoàn trả 100% nguyên liệu thô về kho (Optimistic Locking).
 end note
 
 legend bottom
