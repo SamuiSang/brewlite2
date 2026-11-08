@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 1020" width="960" height="1020" style="background-color:#ffffff;font-family:'Segoe UI',Arial,sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#000000"/>
+    </marker>
+    <style>
+      .title { font-size: 14.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .lane-header { font-size: 13px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .step-box { fill: #ffffff; stroke: #000000; stroke-width: 1.3; rx: 12; ry: 12; }
+      .step-text { font-size: 11px; fill: #000000; text-anchor: middle; }
+      .diamond { fill: #ffffff; stroke: #000000; stroke-width: 1.3; }
+      .guard { font-size: 10px; fill: #000000; }
+      .flow { fill: none; stroke: #000000; stroke-width: 1.25; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <text x="480" y="30" class="title">SƠ ĐỒ HOẠT ĐỘNG (ACTIVITY DIAGRAM): AD-06 - BIÊN NHẬN, LỊCH SỬ ĐƠN HÀNG &amp; ĐIỂM THƯỞNG LOYALTY</text>
+
+  <!-- Swimlane Outer Frame & Header -->
+  <rect x="30" y="52" width="900" height="944" fill="none" stroke="#000000" stroke-width="1.5"/>
+  <line x1="30" y1="90" x2="930" y2="90" stroke="#000000" stroke-width="1.4"/>
+  <text x="240" y="76" class="lane-header">Khách hàng / Nhân viên Quầy</text>
+  <line x1="450" y1="52" x2="450" y2="996" stroke="#000000" stroke-width="1.4"/>
+  <text x="690" y="76" class="lane-header">Hệ thống BrewLite (Next.js UI &amp; NestJS API)</text>
+  <circle cx="80" cy="135" r="11" fill="#000000"/>
+  <circle cx="245" cy="970" r="12" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <circle cx="245" cy="970" r="7.5" fill="#000000"/>
+  <rect x="125" y="112" width="240" height="46" class="step-box"/>
+  <text x="245" y="131" class="step-text">1. Hoàn tất thanh toán đơn (PAID)</text>
+  <text x="245" y="147" class="step-text">&amp; Mở màn hình Biên nhận / Lịch sử</text>
+  <rect x="560" y="112" width="260" height="46" class="step-box"/>
+  <text x="690" y="131" class="step-text">2. Xác thực JWT, kiểm tra chủ sở hữu đơn</text>
+  <text x="690" y="147" class="step-text">&amp; tự động cộng điểm EARN (+1đ/10.000đ)</text>
+  <rect x="470" y="247" width="190" height="46" class="step-box"/>
+  <text x="565" y="266" class="step-text">3. Báo lỗi 403 Forbidden</text>
+  <text x="565" y="282" class="step-text">(Chặn xem đơn người khác)</text>
+  <rect x="700" y="247" width="210" height="46" class="step-box"/>
+  <text x="805" y="266" class="step-text">4. Lưu LoyaltyTransaction (EARN)</text>
+  <text x="805" y="282" class="step-text">&amp; Hiển thị Biên nhận (#BL-XXXX)</text>
+  <rect x="120" y="332" width="250" height="46" class="step-box"/>
+  <text x="245" y="351" class="step-text">5. Nhân viên Quầy cập nhật tiến trình:</text>
+  <text x="245" y="367" class="step-text">PAID → PREPARING → COMPLETED</text>
+  <rect x="565" y="332" width="250" height="46" class="step-box"/>
+  <text x="690" y="351" class="step-text">6. Ghi nhận OrderStatusLog &amp; Đồng bộ</text>
+  <text x="690" y="367" class="step-text">thanh tiến trình OrderStatusStepper</text>
+  <rect x="120" y="417" width="250" height="46" class="step-box"/>
+  <text x="245" y="436" class="step-text">7. Khách hàng chọn Xem lịch sử đơn</text>
+  <text x="245" y="452" class="step-text">hoặc Đổi điểm thưởng (REDEEM)</text>
+  <rect x="125" y="567" width="240" height="46" class="step-box"/>
+  <text x="245" y="586" class="step-text">8. Yêu cầu xem danh sách Lịch sử đơn</text>
+  <text x="245" y="602" class="step-text">&amp; Ví điểm thưởng (/orders/my-orders)</text>
+  <rect x="560" y="567" width="260" height="46" class="step-box"/>
+  <text x="690" y="586" class="step-text">9. Truy vấn danh sách Order (mới → cũ)</text>
+  <text x="690" y="602" class="step-text">&amp; bảng sao kê LoyaltyTransaction</text>
+  <rect x="125" y="677" width="240" height="46" class="step-box"/>
+  <text x="245" y="696" class="step-text">10. Nhập số điểm muốn quy đổi</text>
+  <text x="245" y="712" class="step-text">giảm giá (pointsToRedeem &gt;= 10)</text>
+  <rect x="472.5" y="762" width="205" height="46" class="step-box"/>
+  <text x="575" y="781" class="step-text">11. Báo lỗi 400 Bad Request</text>
+  <text x="575" y="797" class="step-text">(Chặn số dư điểm bị âm)</text>
+  <rect x="707.5" y="762" width="205" height="46" class="step-box"/>
+  <text x="810" y="781" class="step-text">12. Trừ điểm User &amp; Ghi nhận</text>
+  <text x="810" y="797" class="step-text">LoyaltyTransaction (REDEEM)</text>
+  <rect x="560" y="882" width="260" height="46" class="step-box"/>
+  <text x="690" y="901" class="step-text">13. Phản hồi dữ liệu hoàn tất &amp; Cập nhật</text>
+  <text x="690" y="917" class="step-text">số dư điểm / trạng thái trên giao diện</text>
+  <rect x="125" y="882" width="240" height="46" class="step-box"/>
+  <text x="245" y="901" class="step-text">14. Quan sát Biên nhận, Lịch sử đơn</text>
+  <text x="245" y="917" class="step-text">&amp; Số dư điểm thưởng mới</text>
+  <polygon points="690,187 708,205 690,223 672,205" class="diamond"/>
+  <polygon points="245,497 263,515 245,533 227,515" class="diamond"/>
+  <polygon points="690,682 708,700 690,718 672,700" class="diamond"/>
+  <polygon points="690,829 706,845 690,861 674,845" class="diamond"/>
+  <path d="M 91 135 L 125 135" class="flow"/>
+  <path d="M 365 135 L 560 135" class="flow"/>
+  <path d="M 690 158 L 690 187" class="flow"/>
+  <path d="M 672 205 L 565 205 L 565 247" class="flow"/>
+  <text x="615" y="198" class="guard" text-anchor="middle">[Sai chủ sở hữu]</text>
+  <path d="M 708 205 L 805 205 L 805 247" class="flow"/>
+  <text x="758" y="198" class="guard" text-anchor="middle">[Đúng chủ sở hữu]</text>
+  <path d="M 470 270 L 462 270 L 462 970 L 257 970" class="flow"/>
+  <path d="M 805 293 L 805 318 L 690 318 L 690 332" class="flow"/>
+  <path d="M 565 355 L 370 355" class="flow"/>
+  <path d="M 245 378 L 245 417" class="flow"/>
+  <path d="M 245 463 L 245 497" class="flow"/>
+  <path d="M 245 533 L 245 567" class="flow"/>
+  <text x="308" y="552" class="guard" text-anchor="middle">[Xem lịch sử &amp; Ví điểm]</text>
+  <path d="M 227 515 L 95 515 L 95 700 L 125 700" class="flow"/>
+  <text x="158" y="508" class="guard" text-anchor="middle">[Đổi điểm REDEEM]</text>
+  <path d="M 365 590 L 560 590" class="flow"/>
+  <path d="M 820 590 L 918 590 L 918 845 L 706 845" class="flow"/>
+  <path d="M 365 700 L 672 700" class="flow"/>
+  <path d="M 690 718 L 690 740 L 575 740 L 575 762" class="flow"/>
+  <text x="625" y="734" class="guard" text-anchor="middle">[Thiếu điểm / &lt; 10đ]</text>
+  <path d="M 708 700 L 810 700 L 810 762" class="flow"/>
+  <text x="760" y="693" class="guard" text-anchor="middle">[Đủ điểm hợp lệ]</text>
+  <path d="M 472 785 L 245 785 L 245 723" class="flow"/>
+  <path d="M 810 808 L 810 845 L 706 845" class="flow"/>
+  <path d="M 690 861 L 690 882" class="flow"/>
+  <path d="M 560 905 L 365 905" class="flow"/>
+  <path d="M 245 928 L 245 958" class="flow"/>
+</svg>
