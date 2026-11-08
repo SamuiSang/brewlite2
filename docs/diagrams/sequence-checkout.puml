@@ -1,0 +1,104 @@
+@startuml sequence-checkout
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+
+hide footbox
+skinparam sequenceMessageAlign left
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 280
+
+title SƠ ĐỒ TUẦN TỰ TRỌNG TÂM (TASK 2.2): LUỒNG ĐẶT & THANH TOÁN ĐƠN HÀNG (UC-04 & UC-05)
+
+actor "Customer\n(Khách hàng)" as Customer
+participant "«giao diện»\nNext.js UI\n(Cart & Checkout Page)" as UI
+participant "«điều khiển & nghiệp vụ»\nNestJS API\n(OrdersService & PaymentsService)" as API
+participant "«thực thể»\nDatabase\n(PostgreSQL)" as DB
+participant "«hệ thống ngoài»\nPayment Service\n(Sandbox Payment Gateway)" as Gateway
+
+== Bước 1: Xác thực JWT, Tính lại Tổng tiền tại Business Layer & Khóa kho Nguyên liệu (UC-04) ==
+Customer -> UI: 1. Nhấn nút "Đặt hàng / Tiến hành thanh toán" tại /cart
+activate UI
+UI -> API: 2. POST /api/v1/orders\n[Header: Authorization Bearer <JWT>]\nBody: { items[], promoCode, pointsToRedeem }
+activate API
+API -> API: 3. JwtAuthGuard xác thực JWT Token & ValidationPipe kiểm tra CreateOrderDto
+
+alt [JWT Token không hợp lệ hoặc hết hạn]
+    API --> UI: HTTP 401 Unauthorized ("Phiên đăng nhập không hợp lệ")
+    UI --> Customer: Chuyển hướng sang trang Đăng nhập (/login?redirect=/cart)
+else [JWT Token hợp lệ]
+    API -> DB: 4. BEGIN TRANSACTION (prisma.$transaction)
+    activate DB
+    API -> DB: 5. SELECT Product (basePrice, isAvailable), RecipeItem, Promotion
+    DB --> API: Dữ liệu giá gốc, định mức công thức & điều kiện khuyến mãi
+    API -> API: 6. Tính lại 100% tổng tiền tại Business Logic Layer:\nfinalAmount = sum(itemTotal) - promoDiscount - loyaltyDiscount\n(Bỏ qua mọi đơn giá từ Client gửi lên)
+    API -> DB: 7. Khóa & trừ tồn kho nguyên liệu thô bằng Optimistic Locking:\nUPDATE "Ingredient" SET stockQuantity = stockQuantity - :requiredQty, version = version + 1\nWHERE id = :ingredientId AND version = :currentVersion AND stockQuantity >= :requiredQty
+    DB --> API: Kết quả cập nhật (affectedRows)
+
+    alt [Hết nguyên liệu pha chế hoặc Xung đột Concurrency (affectedRows == 0)]
+        API -> DB: 8a. ROLLBACK TRANSACTION (Bảo toàn 100% tồn kho nguyên liệu)
+        DB --> API: Đã hủy giao dịch
+        API --> UI: 9a. HTTP 409 Conflict ("Nguyên liệu pha chế vừa hết hàng hoặc thay đổi tồn kho")
+        UI --> Customer: 10a. Hiển thị cảnh báo hết hàng & Yêu cầu điều chỉnh giỏ hàng
+    else [Đủ nguyên liệu & Khớp version (affectedRows > 0 cho mọi nguyên liệu)]
+        API -> DB: 8b. INSERT INTO "Order" (status='PENDING', finalAmount, paymentDeadline=+15m)\n& INSERT INTO "OrderItem"
+        API -> DB: 9b. COMMIT TRANSACTION
+        DB --> API: Đơn hàng #BL-XXXX (trạng thái PENDING)
+        deactivate DB
+        API --> UI: 10b. HTTP 201 Created (OrderResponseDto - status: PENDING)
+        UI -> UI: 11. Xóa giỏ hàng tạm (clearCart) & Điều hướng sang /checkout
+
+        == Bước 2: Khởi tạo Phiên Thanh toán kèm Khóa Chống Trùng lặp Idempotency-Key (UC-05) ==
+        Customer -> UI: 12. Chọn phương thức (VNPay / MoMo / VietQR Sandbox) & bấm "Xác nhận thanh toán"
+        UI -> UI: 13. Sinh mã định danh duy nhất Idempotency-Key (UUID v4)
+        UI -> API: 14. POST /api/v1/payments\n[Header: Authorization Bearer <JWT>, Idempotency-Key: <UUIDv4>]\nBody: { orderId, paymentMethod }
+        API -> DB: 15. SELECT * FROM "Payment" WHERE idempotencyKey = :key
+        activate DB
+        DB --> API: Bản ghi thanh toán hiện có (existingPayment)
+        deactivate DB
+
+        alt [Idempotency-Key đã tồn tại (Gửi trùng request do rớt mạng / bấm đúp)]
+            API --> UI: 16a. HTTP 200 OK (Trả về existingPayment, KHÔNG gọi lại cổng thanh toán & KHÔNG trừ tiền lần 2)
+            UI --> Customer: Hiển thị trạng thái giao dịch hiện tại
+        else [Idempotency-Key mới & Order đang ở trạng thái PENDING]
+            API -> DB: 16b. INSERT INTO "Payment" (orderId, idempotencyKey, amount, status='PENDING')
+            activate DB
+            DB --> API: Đã lưu Payment (status = PENDING)
+            deactivate DB
+            API -> Gateway: 17. createSandboxPaymentUrl(orderId, finalAmount, paymentMethod)
+            activate Gateway
+            Gateway --> API: 18. Trả về { paymentUrl, qrCodeData, sessionId }
+            API --> UI: 19. HTTP 201 Created { paymentId, status: "PENDING", paymentUrl }
+            UI --> Customer: 20. Hiển thị mã QR / Giao diện Cổng Thanh toán Sandbox
+
+            == Bước 3: Cổng Sandbox Bắn Gói tin JSON Ngầm về Webhook của Backend (POST /api/v1/payments/webhook) ==
+            Customer -> Gateway: 21. Quét mã QR / Xác nhận thanh toán trên trang Cổng Sandbox
+            Gateway -> API: 22. POST /api/v1/payments/webhook\n[Header: x-signature: <HMAC-SHA256>]\nJSON Body: { orderId, transactionRef, status, amount }
+            deactivate Gateway
+            API -> API: 23. Xác thực chữ ký bảo mật HMAC-SHA256 của gói tin Webhook
+
+            alt [JSON message từ Sandbox báo thành công (status == "SUCCESS")]
+                API -> DB: 24a. BEGIN TRANSACTION:\n1. UPDATE "Payment" SET status='SUCCESS', transactionRef=:txRef, paidAt=NOW()\n2. UPDATE "Order" SET status='PAID', updatedAt=NOW()\n3. INSERT INTO "LoyaltyTransaction" (type='EARN', points=floor(finalAmount/10000))\n4. UPDATE "User" SET loyaltyPoints = loyaltyPoints + earnedPoints\nCOMMIT TRANSACTION
+                activate DB
+                DB --> API: Hoàn tất cập nhật PAID & tích điểm thưởng
+                deactivate DB
+                API --> Gateway: HTTP 200 OK { message: "Webhook processed" }
+                API --> UI: 25a. Đồng bộ trạng thái Order = PAID
+                UI --> Customer: 26a. Chuyển sang trang Biên nhận (/checkout/success) & Theo dõi tiến trình đơn (UC-06)
+            else [JSON message từ Sandbox báo lỗi (status == "FAILED") hoặc Quá hạn TTL 15 phút]
+                API -> DB: 24b. BEGIN TRANSACTION (Atomic Restock Rollback):\n1. UPDATE "Payment" SET status='FAILED', failureReason=:errorCode\n2. UPDATE "Order" SET status='CANCELLED'\n3. UPDATE "Ingredient" SET stockQuantity = stockQuantity + :requiredQty, version = version + 1\nCOMMIT TRANSACTION
+                activate DB
+                DB --> API: Đã hủy đơn CANCELLED & Hoàn trả 100% nguyên liệu về kho
+                deactivate DB
+                API --> Gateway: HTTP 200 OK { message: "Rollback completed" }
+                API --> UI: 25b. Thông báo giao dịch thất bại / Đơn hàng đã hủy (HTTP 402 / CANCELLED)
+                UI --> Customer: 26b. Hiển thị lý do lỗi thanh toán & Cho phép chọn phương thức khác
+            end
+        end
+    end
+end
+deactivate API
+deactivate UI
+
+@enduml
