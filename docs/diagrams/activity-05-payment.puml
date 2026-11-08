@@ -1,0 +1,69 @@
+@startuml activity-05-payment
+!pragma useVerticalIf on
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+
+skinparam ActivityBorderThickness 1.3
+skinparam ArrowThickness 1.3
+skinparam ActivityDiamondBorderThickness 1.3
+skinparam SwimlaneBorderThickness 1.4
+skinparam SwimlaneTitleFontSize 13
+skinparam SwimlaneTitleFontWeight bold
+skinparam ActivityFontSize 11
+skinparam ActivityDiamondFontSize 10
+skinparam ArrowFontSize 10
+skinparam ActivityMaxWidth 250
+
+title SƠ ĐỒ HOẠT ĐỘNG (TASK 2.1): AD-05 - THANH TOÁN QUA CỔNG SANDBOX & WEBHOOK BACKEND
+
+|Khách hàng|
+|Hệ thống BrewLite (Next.js UI & NestJS API)|
+|Cổng Thanh toán Sandbox|
+
+|Khách hàng|
+start
+:1. Đơn hàng ở trạng thái PENDING;\nChọn phương thức & bấm Xác nhận thanh toán;
+
+|Hệ thống BrewLite (Next.js UI & NestJS API)|
+:2. Tiếp nhận yêu cầu, trích xuất Idempotency-Key\n& kiểm tra khóa giao dịch trong CSDL;
+
+if () then ([Giao dịch trùng lặp])
+  :3. Trả về kết quả giao dịch cũ\n(Chống trừ tiền lần 2);
+  |Khách hàng|
+  :4. Hiển thị lại kết quả giao dịch\nđã được xử lý trước đó;
+else ([Giao dịch mới])
+  |Hệ thống BrewLite (Next.js UI & NestJS API)|
+  :5. Tạo Payment PENDING & gửi yêu cầu\nkhởi tạo phiên sang Cổng Sandbox;
+  
+  |Cổng Thanh toán Sandbox|
+  :6. Khởi tạo phiên giao dịch thử nghiệm,\ncấp URL & mã QR VietQR đối soát;
+  
+  |Khách hàng|
+  :7. Quét mã QR VietQR / nhập thông tin thẻ\ntrên Cổng thanh toán Sandbox;
+  
+  |Cổng Thanh toán Sandbox|
+  :8. Xử lý giao dịch thử nghiệm, tạo chữ ký\nsố HMAC & bắn Webhook JSON ngầm;
+  
+  |Hệ thống BrewLite (Next.js UI & NestJS API)|
+  -> [Webhook JSON Callback];
+  :9. Webhook tiếp nhận bản tin JSON, xác thực\nchữ ký HMAC & đối soát giao dịch;
+  
+  if () then ([SUCCESS])
+    :11. Mở DB Transaction: Payment = SUCCESS,\nOrder = PAID & Tích lũy điểm Loyalty;
+    :13. Hiển thị Biên nhận & cập nhật trạng thái\nđơn hàng (PAID → PREPARING → COMPLETED);
+    |Khách hàng|
+    :14. Nhận biên nhận đơn hàng thành công\n& quan sát tiến trình quầy pha chế;
+  else ([FAILED / Quá hạn 15p])
+    |Hệ thống BrewLite (Next.js UI & NestJS API)|
+    :10. Mở DB Transaction: Payment = FAILED,\nOrder = CANCELLED & Hoàn kho;
+    |Khách hàng|
+    :12. Hiển thị thông báo thanh toán thất bại,\nhoàn kho an toàn & hướng dẫn thử lại;
+  endif
+endif
+
+|Khách hàng|
+stop
+
+@enduml

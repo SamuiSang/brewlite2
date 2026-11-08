@@ -1,0 +1,102 @@
+@startuml activity-06-history-loyalty
+!pragma useVerticalIf on
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+
+skinparam ActivityBorderThickness 1
+skinparam ArrowThickness 1
+skinparam ActivityDiamondBorderThickness 1
+skinparam SwimlaneBorderThickness 1
+skinparam SwimlaneTitleFontSize 13
+skinparam SwimlaneTitleFontWeight bold
+skinparam ActivityFontSize 11
+skinparam ActivityDiamondFontSize 11
+skinparam ArrowFontSize 10
+
+title ACTIVITY DIAGRAM: AD-06 – BIÊN NHẬN ĐIỆN TỬ, LỊCH SỬ ĐƠN HÀNG, THEO DÕI TRẠNG THÁI & TÍCH/ĐỔI ĐIỂM LOYALTY (FR-07, FR-08, FR-10)
+
+|NestJS Orders & Loyalty API|
+start
+:Nhận sự kiện đơn hàng chuyển sang trạng thái PAID\n(từ Webhook xác nhận thanh toán thành công của UC-05);
+-> Kiểm tra lịch sử cộng điểm của orderId?;
+
+if () then ([Chưa cộng điểm cho orderId này])
+  :Tính điểm thưởng tích lũy tại Business Layer:\nearnedPoints = floor(Order.finalAmount / 10.000);
+  |PostgreSQL & Nhân viên Quầy (Barista)|
+  :Trong cùng Database Transaction (prisma.$transaction):\n1. INSERT bản ghi LoyaltyTransaction (type = EARN, points = +earnedPoints)\n2. UPDATE User SET loyaltyPoints = loyaltyPoints + earnedPoints;
+else ([Đã tồn tại bản ghi EARN - Webhook gửi lặp])
+  |NestJS Orders & Loyalty API|
+  :Bỏ qua thao tác cộng điểm (Chống cộng điểm trùng lặp);
+endif
+
+|Next.js UI (Receipt & History)|
+:Điều hướng khách hàng tới màn hình Biên nhận\n(/checkout/success?orderId=...) và gọi GET /api/v1/orders/:id;
+
+|NestJS Orders & Loyalty API|
+:Xác thực JWT Token (JwtAuthGuard) và kiểm tra quyền sở hữu đơn hàng\n(order.userId == currentUser.id);
+-> Kiểm tra quyền truy cập đơn hàng?;
+
+if () then ([Đúng chủ sở hữu hoặc Nhân viên/Admin])
+  |PostgreSQL & Nhân viên Quầy (Barista)|
+  :Truy vấn chi tiết Order, OrderItem[], Payment và LoyaltyTransaction;
+  |NestJS Orders & Loyalty API|
+  :Trả về HTTP 200 OK kèm OrderDetailDto;
+  |Next.js UI (Receipt & History)|
+  :Hiển thị Biên nhận điện tử (#BL-XXXX), danh sách món,\nsố điểm vừa tích lũy (+earnedPoints) và thanh tiến trình OrderStatusStepper;
+  |Khách hàng|
+  :Xem biên nhận và theo dõi tiến trình chế biến đơn hàng\n(PENDING -> PAID -> PREPARING -> COMPLETED);
+
+  |PostgreSQL & Nhân viên Quầy (Barista)|
+  :Nhân viên Quầy / Barista tiếp nhận đơn PAID tại quầy,\npha chế và gọi PATCH /api/v1/orders/:id/status\nchuyển trạng thái sang PREPARING -> COMPLETED;
+
+  |Khách hàng|
+  :Mở trang "Lịch sử đơn hàng & Điểm thưởng" (/orders/my-orders)\nhoặc nhập số điểm muốn đổi giảm giá ở đơn hàng tiếp theo;
+  -> Thao tác của khách hàng?;
+
+  if () then ([Xem Lịch sử đơn & Ví điểm thưởng])
+    |Next.js UI (Receipt & History)|
+    :Gửi song song GET /api/v1/orders/my-orders\nvà GET /api/v1/loyalty/balance (kèm Bearer JWT);
+    |PostgreSQL & Nhân viên Quầy (Barista)|
+    :Truy vấn danh sách đơn hàng của userId (ORDER BY createdAt DESC)\nvà danh sách lịch sử biến động điểm LoyaltyTransaction;
+    |Next.js UI (Receipt & History)|
+    :Hiển thị danh sách lịch sử đơn hàng, nhãn trạng thái\nvà tổng số dư điểm thưởng hiện tại;
+    |Khách hàng|
+    :Tra cứu lại các đơn hàng cũ và biến động điểm (EARN / REDEEM / REFUND);
+  else ([Đổi điểm thưởng giảm giá - REDEEM])
+    |Next.js UI (Receipt & History)|
+    :Nhập số điểm muốn quy đổi (pointsToRedeem)\nvà gửi yêu cầu kiểm tra/áp dụng điểm thưởng;
+    |NestJS Orders & Loyalty API|
+    :Kiểm tra điều kiện quy đổi tại LoyaltyService:\npointsToRedeem >= 10 và User.loyaltyPoints >= pointsToRedeem;
+    -> Kiểm tra số dư điểm khả dụng?;
+
+    if () then ([Đủ số dư điểm hợp lệ])
+      :Quy đổi số tiền giảm: loyaltyDiscount = pointsToRedeem * 1.000đ\n(tối đa không vượt quá 50% giá trị đơn hàng);
+      |PostgreSQL & Nhân viên Quầy (Barista)|
+      :Trong Database Transaction khi xác nhận đơn:\n1. UPDATE User SET loyaltyPoints = loyaltyPoints - pointsToRedeem\n2. INSERT LoyaltyTransaction (type = REDEEM, points = -pointsToRedeem);
+      |Next.js UI (Receipt & History)|
+      :Cập nhật số tiền giảm giá từ điểm thưởng và số dư điểm mới;
+      |Khách hàng|
+      :Hoàn tất áp dụng điểm thưởng cho đơn hàng mới;
+    else ([Vượt quá số dư điểm hoặc < 10 điểm])
+      |NestJS Orders & Loyalty API|
+      :Chặn thao tác và trả về HTTP 400 Bad Request\n("Số dư điểm thưởng không đủ" - tuyệt đối không để điểm âm);
+      |Next.js UI (Receipt & History)|
+      :Hiển thị thông báo lỗi tại ô RedeemPointsInput;
+      |Khách hàng|
+      :Nhận cảnh báo và nhập lại số điểm hợp lệ;
+    endif
+  endif
+
+else ([Truy cập đơn hàng của người dùng khác])
+  |NestJS Orders & Loyalty API|
+  :Trả về mã lỗi HTTP 403 Forbidden ("Không có quyền xem đơn hàng này");
+  |Next.js UI (Receipt & History)|
+  :Hiển thị màn hình cảnh báo từ chối truy cập\nvà điều hướng về danh sách đơn cá nhân (/orders/my-orders);
+  |Khách hàng|
+  :Nhận thông báo lỗi phân quyền;
+endif
+
+stop
+@enduml

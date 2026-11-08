@@ -1,0 +1,123 @@
+@startuml sequence-06-history-loyalty
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+
+hide footbox
+skinparam sequenceMessageAlign left
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 280
+
+title SƠ ĐỒ TUẦN TỰ: UC-06 – BIÊN NHẬN ĐIỆN TỬ, LỊCH SỬ ĐƠN HÀNG, THEO DÕI TRẠNG THÁI & TÍCH/ĐỔI ĐIỂM LOYALTY (FR-07, FR-08, FR-10)
+
+actor "Khách hàng\n(Customer)" as Customer
+actor "Nhân viên Quầy\n(Barista)" as Barista
+participant "«giao diện»\n:Giao diện Biên nhận & Lịch sử\n(Receipt & History UI)" as UI
+participant "«điều khiển»\n:Bộ điều khiển Đơn & Loyalty\n(Orders / LoyaltyController)" as Controller
+participant "«nghiệp vụ»\n:Dịch vụ Đơn hàng & Điểm thưởng\n(Orders / LoyaltyService)" as Service
+participant "«thực thể»\n:Cơ sở dữ liệu\n(PostgreSQL)" as DB
+
+== Giai đoạn 1: Tự động Tích lũy Điểm thưởng (EARN) khi Đơn hàng chuyển sang PAID ==
+Service -> DB: 1. Kiểm tra tồn tại LoyaltyTransaction(orderId, type='EARN')
+activate Service
+activate DB
+DB --> Service: Kết quả kiểm tra (existingTx)
+
+alt [Chưa cộng điểm cho orderId này (existingTx == null)]
+    Service -> Service: 2. Tính điểm tích lũy: earnedPoints = floor(Order.finalAmount / 10000)
+    Service -> DB: 3. INSERT INTO "LoyaltyTransaction" (type='EARN', points=+earnedPoints, orderId)\n& UPDATE "User" SET loyaltyPoints = loyaltyPoints + earnedPoints
+    DB --> Service: Xác nhận cộng điểm thành công trong Transaction
+else [Đã cộng điểm trước đó (Webhook gửi lặp)]
+    Service -> Service: Bỏ qua cộng điểm (Đảm bảo tính bất biến Idempotency)
+end
+deactivate DB
+deactivate Service
+
+== Giai đoạn 2: Xem Biên nhận Điện tử & Kiểm tra Quyền sở hữu Đơn hàng (/checkout/success) ==
+Customer -> UI: 4. Mở trang Biên nhận đơn hàng (/checkout/success?orderId=...)
+activate UI
+UI -> Controller: 5. GET /api/v1/orders/:id (Header: Authorization Bearer <JWT>)
+activate Controller
+Controller -> Service: 6. getOrderById(orderId, currentUser)
+activate Service
+Service -> DB: 7. SELECT Order, OrderItem[], Payment, LoyaltyTransaction WHERE id = :orderId
+activate DB
+DB --> Service: Dữ liệu đơn hàng (orderRecord)
+deactivate DB
+
+alt [Đúng chủ sở hữu (order.userId == currentUser.id) hoặc role IN (STAFF, ADMIN)]
+    Service --> Controller: 8. Trả về chi tiết biên nhận (OrderDetailDto)
+    Controller --> UI: 9. HTTP 200 OK (Mã đơn #BL-XXXX, món, điểm +earnedPoints, status)
+    UI --> Customer: 10. Hiển thị Biên nhận điện tử & Thanh tiến trình OrderStatusStepper
+else [Truy cập trái phép đơn hàng của người dùng khác]
+    Service --> Controller: Ném ngoại lệ ForbiddenException
+    deactivate Service
+    Controller --> UI: HTTP 403 Forbidden ("Bạn không có quyền truy cập đơn hàng này")
+    deactivate Controller
+    UI --> Customer: Hiển thị cảnh báo 403 & Điều hướng về /orders/my-orders
+end
+deactivate UI
+
+== Giai đoạn 3: Cập nhật Tiến trình Chế biến tại Quầy & Tra cứu Lịch sử Đơn hàng ==
+Barista -> Controller: 11. PATCH /api/v1/orders/:id/status { status: "PREPARING" -> "COMPLETED" }
+activate Controller
+Controller -> Service: 12. updateOrderStatus(orderId, newStatus, staffId)
+activate Service
+Service -> DB: 13. UPDATE "Order" SET status = :newStatus, updatedAt = NOW()
+activate DB
+DB --> Service: Xác nhận cập nhật trạng thái đơn
+deactivate DB
+Service --> Controller: OrderStatusUpdatedDto
+deactivate Service
+Controller --> Barista: HTTP 200 OK
+deactivate Controller
+
+Customer -> UI: 14. Mở trang "Lịch sử đơn hàng & Ví điểm thưởng" (/orders/my-orders)
+activate UI
+UI -> Controller: 15. GET /api/v1/orders/my-orders & GET /api/v1/loyalty/balance (Bearer <JWT>)
+activate Controller
+Controller -> Service: 16. findByUser(userId) & getBalanceAndHistory(userId)
+activate Service
+Service -> DB: 17. SELECT * FROM "Order" WHERE userId = :userId ORDER BY createdAt DESC;\nSELECT loyaltyPoints FROM "User" & SELECT * FROM "LoyaltyTransaction"
+activate DB
+DB --> Service: Danh sách đơn hàng + Số dư điểm + Lịch sử biến động điểm
+deactivate DB
+Service --> Controller: MyOrdersAndLoyaltyResponseDto
+deactivate Service
+Controller --> UI: 18. HTTP 200 OK { orders[], loyaltyPoints, transactions[] }
+deactivate Controller
+UI --> Customer: 19. Hiển thị danh sách lịch sử đơn hàng & Bảng sao kê điểm thưởng (EARN/REDEEM)
+deactivate UI
+
+== Giai đoạn 4: Quy đổi Điểm thưởng Giảm giá (REDEEM) cho Đơn hàng Tiếp theo ==
+Customer -> UI: 20. Nhập số điểm muốn đổi (pointsToRedeem) tại ô RedeemPointsInput
+activate UI
+UI -> Controller: 21. POST /api/v1/loyalty/redeem-preview { pointsToRedeem, orderSubtotal }
+activate Controller
+Controller -> Service: 22. validateAndRedeemPoints(userId, pointsToRedeem, orderSubtotal)
+activate Service
+Service -> DB: 23. SELECT loyaltyPoints FROM "User" WHERE id = :userId
+activate DB
+DB --> Service: Số dư điểm hiện tại (currentBalance)
+deactivate DB
+
+alt [Đủ điều kiện: pointsToRedeem >= 10 VÀ currentBalance >= pointsToRedeem]
+    Service -> Service: 24. Tính tiền giảm: discount = pointsToRedeem * 1000 (tối đa 50% đơn)
+    Service -> DB: 25. Khi chốt đơn trong Transaction: UPDATE "User" SET loyaltyPoints = loyaltyPoints - :pts\n& INSERT INTO "LoyaltyTransaction" (type='REDEEM', points=-:pts)
+    activate DB
+    DB --> Service: Xác nhận trừ điểm & lưu lịch sử REDEEM
+    deactivate DB
+    Service --> Controller: 26. Trả về mức giảm giá hợp lệ (RedeemSuccessDto)
+    Controller --> UI: HTTP 200 OK { loyaltyDiscountAmount, remainingPoints }
+    UI --> Customer: Cập nhật số tiền giảm từ điểm thưởng trên đơn hàng
+else [Không đủ số dư điểm (pointsToRedeem > currentBalance) hoặc < 10 điểm]
+    Service --> Controller: Báo lỗi BadRequestException ("Số dư điểm thưởng không đủ")
+    deactivate Service
+    Controller --> UI: HTTP 400 Bad Request (Tuyệt đối không để số dư điểm âm)
+    deactivate Controller
+    UI --> Customer: Hiển thị cảnh báo lỗi số dư điểm tại ô nhập
+end
+deactivate UI
+
+@enduml

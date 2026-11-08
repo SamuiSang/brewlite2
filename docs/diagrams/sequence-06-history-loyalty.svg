@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 940" width="980" height="940" style="background-color:#ffffff;font-family:'Segoe UI',Arial,sans-serif;">
+  <defs>
+    <marker id="arrow-solid" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#000000"/>
+    </marker>
+    <marker id="arrow-open" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9" fill="none" stroke="#000000" stroke-width="1.3"/>
+    </marker>
+    <style>
+      .title { font-size: 14.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .part-box { fill: #ffffff; stroke: #000000; stroke-width: 1.4; }
+      .part-text { font-size: 11.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .actor-label { font-size: 12px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .lifeline { stroke: #000000; stroke-width: 1.2; stroke-dasharray: 5,4; }
+      .act-bar { fill: #ffffff; stroke: #000000; stroke-width: 1.2; }
+      .frag-box { fill: none; stroke: #000000; stroke-width: 1.2; }
+      .frag-tag { fill: #ffffff; stroke: #000000; stroke-width: 1.2; }
+      .frag-type { font-size: 10.5px; font-weight: 700; fill: #000000; }
+      .frag-cond { font-size: 10.5px; font-style: italic; fill: #000000; }
+      .frag-div { stroke: #000000; stroke-width: 1.1; stroke-dasharray: 4,3; }
+      .msg-solid { fill: none; stroke: #000000; stroke-width: 1.25; marker-end: url(#arrow-solid); }
+      .msg-dashed { fill: none; stroke: #000000; stroke-width: 1.2; stroke-dasharray: 5,3; marker-end: url(#arrow-open); }
+      .msg-label { font-size: 10.8px; fill: #000000; text-anchor: middle; }
+      .msg-self-label { font-size: 10.8px; fill: #000000; text-anchor: start; }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <text x="490" y="30" class="title">SƠ ĐỒ TUẦN TỰ: UC-06 - BIÊN NHẬN, LỊCH SỬ ĐƠN HÀNG &amp; ĐIỂM THƯỞNG LOYALTY</text>
+  <!-- Actor: Khách hàng -->
+  <circle cx="80" cy="56" r="10" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <line x1="80" y1="66" x2="80" y2="90" stroke="#000000" stroke-width="1.5"/>
+  <line x1="65" y1="74" x2="95" y2="74" stroke="#000000" stroke-width="1.5"/>
+  <line x1="80" y1="90" x2="69" y2="106" stroke="#000000" stroke-width="1.5"/>
+  <line x1="80" y1="90" x2="91" y2="106" stroke="#000000" stroke-width="1.5"/>
+  <text x="80" y="122" class="actor-label">Khách hàng</text>
+  <line x1="80" y1="116" x2="80" y2="912" class="lifeline"/>
+  <rect x="232.5" y="58" width="205" height="44" class="part-box"/>
+  <text x="335" y="75" class="part-text">«giao diện»</text>
+  <text x="335" y="92" class="part-text">:Màn hình Biên nhận &amp; Lịch sử</text>
+  <line x1="335" y1="102" x2="335" y2="912" class="lifeline"/>
+  <rect x="512.5" y="58" width="205" height="44" class="part-box"/>
+  <text x="615" y="75" class="part-text">«điều khiển»</text>
+  <text x="615" y="92" class="part-text">:Bộ điều khiển Đơn &amp; Loyalty</text>
+  <line x1="615" y1="102" x2="615" y2="912" class="lifeline"/>
+  <rect x="782.5" y="58" width="175" height="44" class="part-box"/>
+  <text x="870" y="75" class="part-text">«thực thể»</text>
+  <text x="870" y="92" class="part-text">:Cơ sở dữ liệu</text>
+  <line x1="870" y1="102" x2="870" y2="912" class="lifeline"/>
+  <rect x="560" y="265" width="365" height="110" class="frag-box"/>
+  <polygon points="560,265 602,265 602,276 594,284 560,284" class="frag-tag"/>
+  <text x="568" y="279" class="frag-type">opt</text>
+  <text x="612" y="279" class="frag-cond">[Đơn hàng vừa nhận Webhook chuyển sang PAID]</text>
+  <rect x="45" y="390" width="885" height="490" class="frag-box"/>
+  <polygon points="45,390 87,390 87,401 79,409 45,409" class="frag-tag"/>
+  <text x="53" y="404" class="frag-type">alt</text>
+  <text x="97" y="404" class="frag-cond">[2a: Truy cập đơn hàng của người dùng khác (Sai userId)]</text>
+  <line x1="45" y1="455" x2="930" y2="455" class="frag-div"/>
+  <text x="59" y="471" class="frag-cond">[Đúng chủ sở hữu đơn hàng (order.userId == currentUser.id)]</text>
+  <rect x="285" y="660" width="630" height="195" class="frag-box"/>
+  <polygon points="285,660 327,660 327,671 319,679 285,679" class="frag-tag"/>
+  <text x="293" y="674" class="frag-type">alt</text>
+  <text x="337" y="674" class="frag-cond">[6a: Số điểm muốn đổi &gt; Số dư điểm hiện tại hoặc &lt; 10 điểm]</text>
+  <line x1="285" y1="725" x2="915" y2="725" class="frag-div"/>
+  <text x="299" y="741" class="frag-cond">[Đủ số dư điểm hợp lệ (loyaltyPoints &gt;= pointsToRedeem)]</text>
+  <rect x="329.5" y="145" width="11" height="740" class="act-bar"/>
+  <rect x="609.5" y="175" width="11" height="690" class="act-bar"/>
+  <rect x="864.5" y="205" width="11" height="40" class="act-bar"/>
+  <rect x="864.5" y="315" width="11" height="40" class="act-bar"/>
+  <rect x="864.5" y="545" width="11" height="40" class="act-bar"/>
+  <rect x="864.5" y="755" width="11" height="40" class="act-bar"/>
+  <line x1="80" y1="150" x2="329.5" y2="150" class="msg-solid"/>
+  <text x="204.75" y="144" class="msg-label">1. Mở màn hình Biên nhận &amp; Lịch sử đơn()</text>
+  <line x1="340.5" y1="180" x2="609.5" y2="180" class="msg-solid"/>
+  <text x="475" y="174" class="msg-label">2. Yêu cầu thông tin đơn hàng &amp; điểm thưởng (Bearer JWT)()</text>
+  <line x1="620.5" y1="210" x2="864.5" y2="210" class="msg-solid"/>
+  <text x="742.5" y="204" class="msg-label">Truy vấn đơn hàng &amp; kiểm tra lịch sử EARN()</text>
+  <line x1="864.5" y1="240" x2="620.5" y2="240" class="msg-dashed"/>
+  <text x="742.5" y="234" class="msg-label">thongTinDonHang</text>
+  <path d="M 620.5 280 L 656.5 280 L 656.5 300 L 620.5 300" class="msg-solid"/>
+  <text x="664.5" y="294" class="msg-self-label">Tính điểm thưởng (+1đ / 10.000đ)()</text>
+  <line x1="620.5" y1="320" x2="864.5" y2="320" class="msg-solid"/>
+  <text x="742.5" y="314" class="msg-label">Lưu LoyaltyTransaction(EARN) &amp; Cộng điểm User()</text>
+  <line x1="864.5" y1="350" x2="620.5" y2="350" class="msg-dashed"/>
+  <text x="742.5" y="344" class="msg-label">Xác nhận cộng điểm</text>
+  <line x1="609.5" y1="420" x2="340.5" y2="420" class="msg-dashed"/>
+  <text x="475" y="414" class="msg-label">2a. Báo lỗi từ chối truy cập (HTTP 403 Forbidden)</text>
+  <line x1="329.5" y1="442" x2="80" y2="442" class="msg-dashed"/>
+  <text x="204.75" y="436" class="msg-label">Cảnh báo không có quyền xem đơn hàng</text>
+  <line x1="609.5" y1="488" x2="340.5" y2="488" class="msg-dashed"/>
+  <text x="475" y="482" class="msg-label">3. Hiển thị Biên nhận (#BL-XXXX) &amp; Thanh OrderStatusStepper()</text>
+  <line x1="80" y1="518" x2="329.5" y2="518" class="msg-solid"/>
+  <text x="204.75" y="512" class="msg-label">4. Chọn xem danh sách Lịch sử đơn &amp; Ví điểm (/orders/my-orders)()</text>
+  <line x1="340.5" y1="542" x2="609.5" y2="542" class="msg-solid"/>
+  <text x="475" y="536" class="msg-label">GET /api/v1/orders/my-orders &amp; /loyalty/balance()</text>
+  <line x1="620.5" y1="552" x2="864.5" y2="552" class="msg-solid"/>
+  <text x="742.5" y="546" class="msg-label">Truy vấn danh sách đơn (DESC) &amp; sao kê điểm()</text>
+  <line x1="864.5" y1="580" x2="620.5" y2="580" class="msg-dashed"/>
+  <text x="742.5" y="574" class="msg-label">danhSachLichSuVaDiem</text>
+  <line x1="609.5" y1="605" x2="340.5" y2="605" class="msg-dashed"/>
+  <text x="475" y="599" class="msg-label">5. Hiển thị lịch sử đơn hàng &amp; số dư điểm thưởng()</text>
+  <line x1="80" y1="632" x2="329.5" y2="632" class="msg-solid"/>
+  <text x="204.75" y="626" class="msg-label">6. Nhập số điểm quy đổi giảm giá (REDEEM)()</text>
+  <line x1="340.5" y1="650" x2="609.5" y2="650" class="msg-solid"/>
+  <text x="475" y="644" class="msg-label">Kiểm tra &amp; áp dụng đổi điểm thưởng()</text>
+  <line x1="609.5" y1="702" x2="340.5" y2="702" class="msg-dashed"/>
+  <text x="475" y="696" class="msg-label">6a. Báo lỗi thiếu điểm thưởng (HTTP 400 - Chống âm điểm)</text>
+  <line x1="620.5" y1="760" x2="864.5" y2="760" class="msg-solid"/>
+  <text x="742.5" y="754" class="msg-label">7. Trừ điểm User &amp; Lưu LoyaltyTransaction(REDEEM)()</text>
+  <line x1="864.5" y1="790" x2="620.5" y2="790" class="msg-dashed"/>
+  <text x="742.5" y="784" class="msg-label">Xác nhận quy đổi điểm</text>
+  <line x1="609.5" y1="830" x2="340.5" y2="830" class="msg-dashed"/>
+  <text x="475" y="824" class="msg-label">8. Báo áp dụng giảm giá điểm thưởng thành công()</text>
+  <line x1="329.5" y1="865" x2="80" y2="865" class="msg-dashed"/>
+  <text x="204.75" y="859" class="msg-label">Hiển thị hoàn tất Biên nhận / Lịch sử / Điểm thưởng</text>
+</svg>

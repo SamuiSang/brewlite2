@@ -1,0 +1,60 @@
+@startuml activity-02-cart
+!pragma useVerticalIf on
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam backgroundColor white
+skinparam conditionStyle diamond
+skinparam activityBackgroundColor white
+skinparam activityDiamondBackgroundColor white
+skinparam swimlaneTitleFontStyle bold
+skinparam swimlaneBorderColor black
+title SƠ ĐỒ HOẠT ĐỘNG (TASK 2.1): UC-02 - TÙY BIẾN MÓN & GIỎ HÀNG
+
+|Khách hàng|
+start
+:1. Mở Menu / Giỏ hàng;
+|Hệ thống BrewLite|
+:2. Hiển thị món & giỏ hàng;
+|Khách hàng|
+if (Chọn thao tác) then (Thêm / sửa món)
+  :3. Chọn món, Size/Topping,\nđường, đá & số lượng;
+  |Hệ thống BrewLite|
+  if (Tùy chọn & số lượng hợp lệ,\nmón còn bán và đủ tồn kho?) then (Có)
+    :4. Thêm / cập nhật món trong giỏ;
+  else (Không)
+    :Thông báo không thể cập nhật;\ngiữ nguyên giỏ;
+  endif
+elseif (Chọn thao tác) then (Xóa món / giỏ)
+  |Khách hàng|
+  :5. Chọn xóa & xác nhận;
+  |Hệ thống BrewLite|
+  :6. Xóa khi đồng ý;\nhủy thì giữ nguyên giỏ;
+elseif (Chọn thao tác) then (Áp mã)
+  |Khách hàng|
+  :7. Nhập mã Promotion;
+  |Hệ thống BrewLite|
+  if (Giỏ & mã đủ điều kiện áp dụng?) then (Có)
+    :8. Áp mã & tính tiền giảm dự kiến;\nthay mã cũ, không cộng dồn;
+  else (Không / chưa kiểm tra được)
+    :Thông báo lý do / yêu cầu thử lại;
+  endif
+else (Hủy mã)
+  |Khách hàng|
+  :9. Chọn hủy mã;
+  |Hệ thống BrewLite|
+  :Gỡ mã giảm giá;
+endif
+|Hệ thống BrewLite|
+:10. Cập nhật giỏ & tổng tiền dự kiến;\ngỡ mã nếu giỏ không còn đủ điều kiện;
+|Khách hàng|
+:11. Xem giỏ & chọn Đặt hàng;
+|Hệ thống BrewLite|
+if (Giỏ có món & kiểm tra lại\ncác món còn bán?) then (Đủ điều kiện)
+  :12. Chuyển sang đặt hàng (UC-04);
+else (Chưa đủ điều kiện)
+  :Yêu cầu kiểm tra lại giỏ;
+endif
+|Khách hàng|
+stop
+@enduml

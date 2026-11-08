@@ -1,0 +1,171 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 1080" width="980" height="1080" style="background-color:#ffffff;font-family:'Segoe UI',Arial,sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#000000"/>
+    </marker>
+    <style>
+      .title { font-size: 14.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .lane-header { font-size: 13px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .step-box { fill: #ffffff; stroke: #000000; stroke-width: 1.3; rx: 12; ry: 12; }
+      .step-text { font-size: 11px; fill: #000000; text-anchor: middle; }
+      .diamond { fill: #ffffff; stroke: #000000; stroke-width: 1.3; }
+      .guard { font-size: 10px; fill: #000000; }
+      .flow { fill: none; stroke: #000000; stroke-width: 1.25; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <text x="490" y="30" class="title">SƠ ĐỒ HOẠT ĐỘNG (TASK 2.1): AD-05 - THANH TOÁN QUA CỔNG SANDBOX &amp; WEBHOOK BACKEND</text>
+
+  <!-- Swimlane Outer Frame & Header -->
+  <rect x="25" y="52" width="930" height="1004" fill="none" stroke="#000000" stroke-width="1.5"/>
+  <line x1="25" y1="90" x2="955" y2="90" stroke="#000000" stroke-width="1.4"/>
+  <text x="175" y="76" class="lane-header">Khách hàng</text>
+  <line x1="325" y1="52" x2="325" y2="1056" stroke="#000000" stroke-width="1.4"/>
+  <text x="520" y="76" class="lane-header">Hệ thống BrewLite (Next.js UI &amp; NestJS API)</text>
+  <line x1="715" y1="52" x2="715" y2="1056" stroke="#000000" stroke-width="1.4"/>
+  <text x="835" y="76" class="lane-header">Cổng Thanh toán Sandbox</text>
+
+  <!-- Start & Final Nodes -->
+  <circle cx="65" cy="130" r="11" fill="#000000"/>
+  <circle cx="175" cy="1025" r="12" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <circle cx="175" cy="1025" r="7.5" fill="#000000"/>
+
+  <!-- Step 1 (Khách hàng) -->
+  <rect x="87.5" y="108" width="220" height="44" class="step-box"/>
+  <text x="197.5" y="126" class="step-text">1. Đơn hàng ở trạng thái PENDING;</text>
+  <text x="197.5" y="142" class="step-text">Chọn phương thức &amp; bấm Xác nhận thanh toán</text>
+
+  <!-- Step 2 (Hệ thống BrewLite) -->
+  <rect x="385" y="108" width="270" height="44" class="step-box"/>
+  <text x="520" y="126" class="step-text">2. Tiếp nhận yêu cầu, trích xuất Idempotency-Key</text>
+  <text x="520" y="142" class="step-text">&amp; kiểm tra khóa giao dịch trong CSDL</text>
+
+  <!-- Diamond 1: Idempotency Check -->
+  <polygon points="520,185 537,202 520,219 503,202" class="diamond"/>
+
+  <!-- Step 3: Giao dịch trùng lặp (Hệ thống) -->
+  <rect x="342.5" y="240" width="185" height="44" class="step-box"/>
+  <text x="435" y="258" class="step-text">3. Trả về kết quả giao dịch cũ</text>
+  <text x="435" y="274" class="step-text">(Chống trừ tiền lần 2)</text>
+
+  <!-- Step 4: Hiển thị lại (Khách hàng) -->
+  <rect x="65" y="240" width="220" height="44" class="step-box"/>
+  <text x="175" y="258" class="step-text">4. Hiển thị lại kết quả giao dịch</text>
+  <text x="175" y="274" class="step-text">đã được xử lý trước đó</text>
+
+  <!-- Step 5: Tạo Payment PENDING (Hệ thống) -->
+  <rect x="385" y="330" width="270" height="44" class="step-box"/>
+  <text x="520" y="348" class="step-text">5. Tạo Payment PENDING &amp; gửi yêu cầu</text>
+  <text x="520" y="364" class="step-text">khởi tạo phiên sang Cổng Sandbox</text>
+
+  <!-- Step 6: Khởi tạo phiên Sandbox (Cổng Sandbox) -->
+  <rect x="732.5" y="330" width="205" height="44" class="step-box"/>
+  <text x="835" y="348" class="step-text">6. Khởi tạo phiên thử nghiệm,</text>
+  <text x="835" y="364" class="step-text">cấp URL &amp; mã QR VietQR đối soát</text>
+
+  <!-- Step 7: Quét mã QR Sandbox (Khách hàng) -->
+  <rect x="65" y="418" width="220" height="44" class="step-box"/>
+  <text x="175" y="436" class="step-text">7. Quét mã QR VietQR / nhập thông tin thẻ</text>
+  <text x="175" y="452" class="step-text">trên Cổng thanh toán Sandbox</text>
+
+  <!-- Step 8: Bắn Webhook (Cổng Sandbox) -->
+  <rect x="732.5" y="497" width="205" height="46" class="step-box"/>
+  <text x="835" y="516" class="step-text">8. Xử lý giao dịch thử nghiệm, tạo chữ ký</text>
+  <text x="835" y="532" class="step-text">số HMAC &amp; bắn Webhook JSON ngầm</text>
+
+  <!-- Step 9: Tiếp nhận Webhook (Hệ thống) -->
+  <rect x="385" y="497" width="270" height="46" class="step-box"/>
+  <text x="520" y="516" class="step-text">9. Webhook tiếp nhận bản tin JSON, xác thực</text>
+  <text x="520" y="532" class="step-text">chữ ký HMAC &amp; đối soát giao dịch</text>
+
+  <!-- Diamond 2: Kết quả Webhook -->
+  <polygon points="520,580 537,597 520,614 503,597" class="diamond"/>
+
+  <!-- Step 10: Rollback / Hủy (Hệ thống) -->
+  <rect x="342.5" y="645" width="185" height="46" class="step-box"/>
+  <text x="435" y="664" class="step-text">10. Mở DB Transaction: Payment = FAILED,</text>
+  <text x="435" y="680" class="step-text">Order = CANCELLED &amp; Hoàn kho</text>
+
+  <!-- Step 11: Thành công PAID (Hệ thống) -->
+  <rect x="522.5" y="645" width="185" height="46" class="step-box"/>
+  <text x="615" y="664" class="step-text">11. Mở DB Transaction: Payment = SUCCESS,</text>
+  <text x="615" y="680" class="step-text">Order = PAID &amp; Tích lũy điểm Loyalty</text>
+
+  <!-- Step 12: Thông báo lỗi (Khách hàng) -->
+  <rect x="65" y="645" width="220" height="46" class="step-box"/>
+  <text x="175" y="664" class="step-text">12. Hiển thị thông báo thanh toán thất bại,</text>
+  <text x="175" y="680" class="step-text">hoàn kho an toàn &amp; hướng dẫn thử lại</text>
+
+  <!-- Step 13: Biên nhận / Tiến trình đơn (Hệ thống) -->
+  <rect x="390" y="770" width="260" height="44" class="step-box"/>
+  <text x="520" y="788" class="step-text">13. Hiển thị Biên nhận &amp; cập nhật trạng thái</text>
+  <text x="520" y="804" class="step-text">đơn hàng (PAID → PREPARING → COMPLETED)</text>
+
+  <!-- Step 14: Nhận biên nhận (Khách hàng) -->
+  <rect x="65" y="770" width="220" height="44" class="step-box"/>
+  <text x="175" y="788" class="step-text">14. Nhận biên nhận đơn hàng thành công</text>
+  <text x="175" y="804" class="step-text">&amp; quan sát tiến trình quầy pha chế</text>
+
+  <!-- Directed Flows -->
+  <!-- Start -> Step 1 -->
+  <path d="M 76 130 L 87 130" class="flow"/>
+
+  <!-- Step 1 -> Step 2 -->
+  <path d="M 307.5 130 L 385 130" class="flow"/>
+
+  <!-- Step 2 -> Diamond 1 -->
+  <path d="M 520 152 L 520 185" class="flow"/>
+
+  <!-- Diamond 1 -> Step 3 [Giao dịch trùng lặp] -->
+  <path d="M 503 202 L 435 202 L 435 240" class="flow"/>
+  <text x="455" y="195" class="guard" text-anchor="middle">[Giao dịch trùng lặp]</text>
+
+  <!-- Step 3 -> Step 4 -->
+  <path d="M 342.5 262 L 285 262" class="flow"/>
+
+  <!-- Step 4 -> Final Node (along margin) -->
+  <path d="M 65 262 L 45 262 L 45 1025 L 163 1025" class="flow"/>
+
+  <!-- Diamond 1 -> Step 5 [Giao dịch mới] -->
+  <path d="M 537 202 L 670 202 L 670 300 L 520 300 L 520 330" class="flow"/>
+  <text x="590" y="195" class="guard" text-anchor="middle">[Giao dịch mới]</text>
+
+  <!-- Step 5 -> Step 6 -->
+  <path d="M 655 352 L 732.5 352" class="flow"/>
+
+  <!-- Step 6 -> Step 7 -->
+  <path d="M 835 374 L 835 440 L 285 440" class="flow"/>
+
+  <!-- Step 7 -> Step 8 -->
+  <path d="M 175 462 L 175 480 L 710 480 L 710 520 L 732.5 520" class="flow"/>
+
+  <!-- Step 8 -> Step 9 [Webhook JSON Callback] -->
+  <path d="M 732.5 520 L 655 520" class="flow"/>
+  <text x="694" y="512" class="guard" text-anchor="middle">[Webhook JSON Callback]</text>
+
+  <!-- Step 9 -> Diamond 2 -->
+  <path d="M 520 543 L 520 580" class="flow"/>
+
+  <!-- Diamond 2 -> Step 10 [FAILED / Quá hạn 15p] -->
+  <path d="M 503 597 L 435 597 L 435 645" class="flow"/>
+  <text x="445" y="590" class="guard" text-anchor="middle">[FAILED / Quá hạn 15p]</text>
+
+  <!-- Step 10 -> Step 12 -->
+  <path d="M 342.5 668 L 285 668" class="flow"/>
+
+  <!-- Step 12 -> Final Node -->
+  <path d="M 175 691 L 175 750 L 55 750 L 55 1025 L 163 1025" class="flow"/>
+
+  <!-- Diamond 2 -> Step 11 [SUCCESS] -->
+  <path d="M 537 597 L 615 597 L 615 645" class="flow"/>
+  <text x="585" y="590" class="guard" text-anchor="middle">[SUCCESS]</text>
+
+  <!-- Step 11 -> Step 13 -->
+  <path d="M 615 691 L 615 745 L 520 745 L 520 770" class="flow"/>
+
+  <!-- Step 13 -> Step 14 -->
+  <path d="M 390 792 L 285 792" class="flow"/>
+
+  <!-- Step 14 -> Final Node -->
+  <path d="M 175 814 L 175 1013" class="flow"/>
+</svg>
