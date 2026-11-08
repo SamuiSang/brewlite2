@@ -1,1 +1,171 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="949px" preserveAspectRatio="none" style="width:1566px;height:949px;background:#FFFFFF;" version="1.1" viewBox="0 0 1566 949" width="1566px" zoomAndPan="magnify"><title>S&#416; &#272;&#7890; HO&#7840;T &#272;&#7896;NG (ACTIVITY DIAGRAM): AD-05 - THANH TO&#193;N QUA C&#7892;NG SANDBOX &amp; WEBHOOK</title><defs/><g><text fill="#000000" font-family="Segoe UI" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="677.9404" x="442.6938" y="35.1074">S&#416; &#272;&#7890; HO&#7840;T &#272;&#7896;NG (ACTIVITY DIAGRAM): AD-05 - THANH TO&#193;N QUA C&#7892;NG SANDBOX &amp; WEBHOOK</text><rect fill="none" height="17.291" style="stroke:none;stroke-width:1.0;" width="1533.3281" x="15" y="51.3838"/><ellipse cx="319.1128" cy="83.6748" fill="#222222" rx="10" ry="10" style="stroke:#222222;stroke-width:1.0;"/><rect fill="#F1F1F1" height="49.2617" rx="12.5" ry="12.5" style="stroke:#181818;stroke-width:1.0;" width="320.9585" x="158.6335" y="113.6748"/><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="225.5967" x="168.6335" y="135.5449">1. &#272;&#417;n h&#224;ng &#7903; tr&#7841;ng th&#225;i Ch&#7901; x&#7917; l&#253; (PENDING);</text><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="300.9585" x="168.6335" y="150.1758">Ch&#7885;n ph&#432;&#417;ng th&#7913;c thanh to&#225;n v&#224; nh&#7845;n "X&#225;c nh&#7853;n thanh to&#225;n"</text><rect fill="#F1F1F1" height="34.6309" rx="12.5" ry="12.5" style="stroke:#181818;stroke-width:1.0;" width="210.894" x="21" y="365.46"/><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="190.894" x="31" y="387.3301">4. Hi&#7875;n th&#7883; l&#7841;i k&#7871;t qu&#7843; giao d&#7883;ch &#273;&#227; x&#7917; l&#253;</text><ellipse cx="126.447" cy="445.7217" fill="none" rx="11" ry="11" style="stroke:#222222;stroke-width:1.0;"/><ellipse cx="126.447" cy="445.7217" fill="#222222" rx="6" ry="6" style="stroke:#222222;stroke-width:1.0;"/><rect fill="#F1F1F1" height="49.2617" rx="12.5" ry="12.5" style="stroke:#181818;stroke-width:1.0;" width="307.7725" x="357.8923" y="449.3525"/><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="287.7725" x="367.8923" y="471.2227">7. Qu&#233;t m&#227; QR VietQR ho&#7863;c nh&#7853;p th&#244;ng tin th&#7867; th&#7917; nghi&#7879;m</text><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="149.6387" x="367.8923" y="485.8535">tr&#234;n C&#7893;ng thanh to&#225;n Sandbox</text><rect fill="#F1F1F1" height="49.2617" rx="12.5" ry="12.5" style="stroke:#181818;stroke-width:1.0;" width="234.8223" x="262.7454" y="799.6611"/><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="214.8223" x="272.7454" y="821.5313">11. Hi&#7875;n th&#7883; bi&#234;n nh&#7853;n &#273;&#417;n h&#224;ng th&#224;nh c&#244;ng</text><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="164.9839" x="272.7454" y="836.1621">v&#224; chuy&#7875;n &#273;&#417;n sang qu&#7847;y pha ch&#7871;</text><ellipse cx="380.1565" cy="894.5537" fill="none" rx="11" ry="11" style="stroke:#222222;stroke-width:1.0;"/><ellipse cx="380.1565" cy="894.5537" fill="#222222" rx="6" ry="6" style="stroke:#222222;stroke-width:1.0;"/><rect fill="#F1F1F1" height="49.2617" rx="12.5" ry="12.5" style="stroke:#181818;stroke-width:1.0;" width="249.9634" x="518.4189" y="701.1377"/><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="229.9634" x="528.4189" y="723.0078">12. C&#7853;p nh&#7853;t thanh to&#225;n th&#7845;t b&#7841;i, h&#7911;y &#273;&#417;n h&#224;ng</text><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="220.9292" x="528.4189" y="737.6387">v&#224; t&#7921; &#273;&#7897;ng ho&#224;n tr&#7843; 100% nguy&#234;n li&#7879;u v&#7873; kho</text><rect fill="#F1F1F1" height="49.2617" rx="12.5" ry="12.5" style="stroke:#181818;stroke-width:1.0;" width="225.0254" x="530.8879" y="785.0303"/><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="205.0254" x="540.8879" y="806.9004">13. Hi&#7875;n th&#7883; th&#244;ng b&#225;o thanh to&#225;n th&#7845;t b&#7841;i</text><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="159.6719" x="540.8879" y="821.5313">v&#224; h&#432;&#7899;ng d&#7851;n kh&#225;ch h&#224;ng th&#7917; l&#7841;i</text><ellipse cx="643.4006" cy="879.9229" fill="none" rx="11" ry="11" style="stroke:#222222;stroke-width:1.0;"/><ellipse cx="643.4006" cy="879.9229" fill="#222222" rx="6" ry="6" style="stroke:#222222;stroke-width:1.0;"/><line style="stroke:#000000;stroke-width:1.0;" x1="15" x2="15" y1="51.3838" y2="937.5537"/><rect fill="#F1F1F1" height="49.2617" rx="12.5" ry="12.5" style="stroke:#181818;stroke-width:1.0;" width="176.7285" x="978.7314" y="182.9365"/><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="147.1626" x="988.7314" y="204.8066">2. Ki&#7875;m tra th&#244;ng tin giao d&#7883;ch</text><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="156.7285" x="988.7314" y="219.4375">v&#224; kh&#243;a ch&#7889;ng tr&#7915; ti&#7873;n tr&#249;ng l&#7863;p</text><polygon fill="#F1F1F1" points="1024.813,252.1982,1109.3784,252.1982,1121.3784,264.1982,1109.3784,276.1982,1024.813,276.1982,1012.813,264.1982,1024.813,252.1982" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="Segoe UI" font-size="10" lengthAdjust="spacing" textLength="84.5654" x="1024.813" y="268.3389">Ki&#7875;m tra giao d&#7883;ch?</text><text fill="#000000" font-family="Segoe UI" font-size="10" lengthAdjust="spacing" textLength="90.5322" x="922.2808" y="261.6885">[Giao d&#7883;ch tr&#249;ng l&#7863;p]</text><text fill="#000000" font-family="Segoe UI" font-size="10" lengthAdjust="spacing" textLength="67.3389" x="1121.3784" y="261.6885">[Giao d&#7883;ch m&#7899;i]</text><rect fill="#F1F1F1" height="49.2617" rx="12.5" ry="12.5" style="stroke:#181818;stroke-width:1.0;" width="192.0952" x="778.3823" y="296.1982"/><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="172.0952" x="788.3823" y="318.0684">3. Tr&#7843; v&#7873; k&#7871;t qu&#7843; giao d&#7883;ch tr&#432;&#7899;c &#273;&#243;</text><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="103.6782" x="788.3823" y="332.6992">(Ch&#7889;ng tr&#7915; ti&#7873;n l&#7847;n 2)</text><rect fill="#F1F1F1" height="49.2617" rx="12.5" ry="12.5" style="stroke:#181818;stroke-width:1.0;" width="261.9893" x="1128.7668" y="296.1982"/><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="172.9814" x="1138.7668" y="318.0684">5. T&#7841;o b&#7843;n ghi thanh to&#225;n Ch&#7901; x&#7917; l&#253;</text><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="241.9893" x="1138.7668" y="332.6992">v&#224; k&#7871;t n&#7889;i C&#7893;ng Sandbox kh&#7903;i t&#7841;o phi&#234;n giao d&#7883;ch</text><rect fill="#F1F1F1" height="49.2617" rx="12.5" ry="12.5" style="stroke:#181818;stroke-width:1.0;" width="211.7373" x="1153.8928" y="365.46"/><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="144.0151" x="1163.8928" y="387.3301">6. T&#7841;o m&#227; QR VietQR &#273;&#7889;i so&#225;t</text><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="191.7373" x="1163.8928" y="401.9609">ho&#7863;c li&#234;n k&#7871;t thanh to&#225;n C&#7893;ng Sandbox</text><rect fill="#F1F1F1" height="49.2617" rx="12.5" ry="12.5" style="stroke:#181818;stroke-width:1.0;" width="257.1123" x="1131.2053" y="518.6143"/><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="214.8545" x="1141.2053" y="540.4844">8. C&#7893;ng Sandbox x&#7917; l&#253; giao d&#7883;ch th&#7917; nghi&#7879;m</text><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="237.1123" x="1141.2053" y="555.1152">v&#224; g&#7917;i th&#244;ng b&#225;o k&#7871;t qu&#7843; (Webhook) v&#7873; m&#225;y ch&#7911;</text><rect fill="#F1F1F1" height="49.2617" rx="12.5" ry="12.5" style="stroke:#181818;stroke-width:1.0;" width="194.5767" x="1162.4731" y="587.876"/><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="162.9858" x="1172.4731" y="609.7461">9. Ti&#7871;p nh&#7853;n th&#244;ng b&#225;o Webhook</text><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="174.5767" x="1172.4731" y="624.377">v&#224; ki&#7875;m tra ch&#7919; k&#253; b&#7843;o m&#7853;t x&#225;c th&#7921;c</text><polygon fill="#F1F1F1" points="1175.4792,657.1377,1344.0437,657.1377,1356.0437,669.1377,1344.0437,681.1377,1175.4792,681.1377,1163.4792,669.1377,1175.4792,657.1377" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="Segoe UI" font-size="10" lengthAdjust="spacing" textLength="168.5645" x="1175.4792" y="673.2783">K&#7871;t qu&#7843; thanh to&#225;n t&#7915; C&#7893;ng Sandbox?</text><text fill="#000000" font-family="Segoe UI" font-size="10" lengthAdjust="spacing" textLength="109.0332" x="1054.446" y="666.6279">[Thanh to&#225;n th&#224;nh c&#244;ng]</text><text fill="#000000" font-family="Segoe UI" font-size="10" lengthAdjust="spacing" textLength="186.5039" x="1356.0437" y="666.6279">[Thanh to&#225;n th&#7845;t b&#7841;i / H&#7911;y &#273;&#417;n / Qu&#225; h&#7841;n]</text><rect fill="#F1F1F1" height="63.8926" rx="12.5" ry="12.5" style="stroke:#181818;stroke-width:1.0;" width="236.5249" x="1009.877" y="701.1377"/><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="177.5791" x="1019.877" y="723.0078">10. C&#7853;p nh&#7853;t thanh to&#225;n th&#224;nh c&#244;ng,</text><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="216.5249" x="1019.877" y="737.6387">chuy&#7875;n &#273;&#417;n h&#224;ng sang &#272;&#227; thanh to&#225;n (PAID)</text><text fill="#000000" font-family="Segoe UI" font-size="11" lengthAdjust="spacing" textLength="168.8242" x="1019.877" y="752.2695">v&#224; t&#237;ch l&#361;y &#273;i&#7875;m th&#432;&#7903;ng th&#224;nh vi&#234;n</text><line style="stroke:#000000;stroke-width:1.0;" x1="772.3823" x2="772.3823" y1="51.3838" y2="937.5537"/><line style="stroke:#000000;stroke-width:1.0;" x1="1547.5476" x2="1547.5476" y1="51.3838" y2="937.5537"/><line style="stroke:#181818;stroke-width:1.0;" x1="319.1128" x2="319.1128" y1="93.6748" y2="113.6748"/><polygon fill="#181818" points="315.1128,103.6748,319.1128,113.6748,323.1128,103.6748,319.1128,107.6748" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="126.447" x2="126.447" y1="400.0908" y2="434.7217"/><polygon fill="#181818" points="122.447,424.7217,126.447,434.7217,130.447,424.7217,126.447,428.7217" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="380.1565" x2="380.1565" y1="848.9229" y2="883.5537"/><polygon fill="#181818" points="376.1565,873.5537,380.1565,883.5537,384.1565,873.5537,380.1565,877.5537" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="643.4006" x2="643.4006" y1="750.3994" y2="785.0303"/><polygon fill="#181818" points="639.4006,775.0303,643.4006,785.0303,647.4006,775.0303,643.4006,779.0303" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="643.4006" x2="643.4006" y1="834.292" y2="868.9229"/><polygon fill="#181818" points="639.4006,858.9229,643.4006,868.9229,647.4006,858.9229,643.4006,862.9229" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="1259.7615" x2="1259.7615" y1="345.46" y2="365.46"/><polygon fill="#181818" points="1255.7615,355.46,1259.7615,365.46,1263.7615,355.46,1259.7615,359.46" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="1259.7615" x2="1259.7615" y1="567.876" y2="587.876"/><polygon fill="#181818" points="1255.7615,577.876,1259.7615,587.876,1263.7615,577.876,1259.7615,581.876" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="1163.4792" x2="1128.1394" y1="669.1377" y2="669.1377"/><line style="stroke:#181818;stroke-width:1.0;" x1="1128.1394" x2="1128.1394" y1="669.1377" y2="701.1377"/><polygon fill="#181818" points="1124.1394,691.1377,1128.1394,701.1377,1132.1394,691.1377,1128.1394,695.1377" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="1259.7615" x2="1259.7615" y1="637.1377" y2="657.1377"/><polygon fill="#181818" points="1255.7615,647.1377,1259.7615,657.1377,1263.7615,647.1377,1259.7615,651.1377" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="1012.813" x2="874.4299" y1="264.1982" y2="264.1982"/><line style="stroke:#181818;stroke-width:1.0;" x1="874.4299" x2="874.4299" y1="264.1982" y2="296.1982"/><polygon fill="#181818" points="870.4299,286.1982,874.4299,296.1982,878.4299,286.1982,874.4299,290.1982" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="1121.3784" x2="1259.7615" y1="264.1982" y2="264.1982"/><line style="stroke:#181818;stroke-width:1.0;" x1="1259.7615" x2="1259.7615" y1="264.1982" y2="296.1982"/><polygon fill="#181818" points="1255.7615,286.1982,1259.7615,296.1982,1263.7615,286.1982,1259.7615,290.1982" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="1067.0957" x2="1067.0957" y1="232.1982" y2="252.1982"/><polygon fill="#181818" points="1063.0957,242.1982,1067.0957,252.1982,1071.0957,242.1982,1067.0957,246.1982" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="319.1128" x2="319.1128" y1="162.9365" y2="167.9365"/><line style="stroke:#181818;stroke-width:1.0;" x1="319.1128" x2="1067.0957" y1="167.9365" y2="167.9365"/><line style="stroke:#181818;stroke-width:1.0;" x1="1067.0957" x2="1067.0957" y1="167.9365" y2="182.9365"/><polygon fill="#181818" points="1063.0957,172.9365,1067.0957,182.9365,1071.0957,172.9365,1067.0957,176.9365" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="874.4299" x2="874.4299" y1="345.46" y2="350.46"/><line style="stroke:#181818;stroke-width:1.0;" x1="874.4299" x2="126.447" y1="350.46" y2="350.46"/><line style="stroke:#181818;stroke-width:1.0;" x1="126.447" x2="126.447" y1="350.46" y2="365.46"/><polygon fill="#181818" points="122.447,355.46,126.447,365.46,130.447,355.46,126.447,359.46" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="1259.7615" x2="1259.7615" y1="414.7217" y2="431.8525"/><line style="stroke:#181818;stroke-width:1.0;" x1="1259.7615" x2="511.7786" y1="431.8525" y2="431.8525"/><line style="stroke:#181818;stroke-width:1.0;" x1="511.7786" x2="511.7786" y1="431.8525" y2="449.3525"/><polygon fill="#181818" points="507.7786,439.3525,511.7786,449.3525,515.7786,439.3525,511.7786,443.3525" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="511.7786" x2="511.7786" y1="498.6143" y2="503.6143"/><line style="stroke:#181818;stroke-width:1.0;" x1="511.7786" x2="1259.7615" y1="503.6143" y2="503.6143"/><line style="stroke:#181818;stroke-width:1.0;" x1="1259.7615" x2="1259.7615" y1="503.6143" y2="518.6143"/><polygon fill="#181818" points="1255.7615,508.6143,1259.7615,518.6143,1263.7615,508.6143,1259.7615,512.6143" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="1128.1394" x2="1128.1394" y1="765.0303" y2="782.1611"/><line style="stroke:#181818;stroke-width:1.0;" x1="1128.1394" x2="380.1565" y1="782.1611" y2="782.1611"/><line style="stroke:#181818;stroke-width:1.0;" x1="380.1565" x2="380.1565" y1="782.1611" y2="799.6611"/><polygon fill="#181818" points="376.1565,789.6611,380.1565,799.6611,384.1565,789.6611,380.1565,793.6611" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="1356.0437" x2="1368.0437" y1="669.1377" y2="669.1377"/><line style="stroke:#181818;stroke-width:1.0;" x1="1368.0437" x2="1368.0437" y1="669.1377" y2="687.1377"/><line style="stroke:#181818;stroke-width:1.0;" x1="1368.0437" x2="643.4006" y1="687.1377" y2="687.1377"/><line style="stroke:#181818;stroke-width:1.0;" x1="643.4006" x2="643.4006" y1="687.1377" y2="701.1377"/><polygon fill="#181818" points="639.4006,691.1377,643.4006,701.1377,647.4006,691.1377,643.4006,695.1377" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="Segoe UI" font-size="13" lengthAdjust="spacing" textLength="67.4185" x="359.9819" y="65.4121">Kh&#225;ch h&#224;ng</text><text fill="#000000" font-family="Segoe UI" font-size="13" lengthAdjust="spacing" textLength="53.9805" x="1132.9747" y="65.4121">H&#7879; th&#7889;ng</text><!--SRC=[ZLPHQzjM57xNhpWODcn8N3jPkyrv68hTnIRKRcgtwPZt84kAxyNolPvqdSGZBwKFUoY3PMomKKOJmWXf2UleOCnYz46P_uV-oSwzKcr9JSnUObltdEzyvplVkOete6nakCOGXfnnaxXyQ8DmnxRcpKyyObZyWB8-x1cEbppf6UQWx_8niwhSuIuS42gIvvQzPumTyJbdecaWSAvjzxaD3nkv5SZfBZKS_E8Pp5lrR9VkQObKtHHqduh99dSjs-qGQWwOxNbGJiQuBZ-uuIXEhr436xEMeRGFwD0ncFr_OZfKEBPifqs_iQ6ylYnarwPz8g377UiQOWkG9RGNGQLispSSnVdtZCDTQWa2QwMIfWb92Tgp4xZwFlH_W7ehd9vqr8-VcrkGrwkTngD6vmkeDVIj1_gzGWNqschfDgn2fwutwz1f1K-QiFDGXshe_uWfRRrPssmzXWzXz-vclTNQrhIZRHAScWH8SCBwHzfHFVI_1K52_rZ-p1vxmd25LYaNaSNib4MF8VHVeFd2wIb-5nXFeOe0ly9Xw5-24_m3-VjtcxL6SwkmqMNow3i68p9xFOiIGl_2n0-34H0yGDJzu0GO2QU_CSWznlBgnoLBnkGsj2pNobeHjcdeFnqY6KCI-LF2KmPzQd2mGl-PIRfCWWz8yCO0CygKrFrN61ZwJx266_oDpvnm-jS8Qz0zo2T04qYV5R24pI3_vTRYOIhzgu86K5alGWUrEODzn8T1E7qhuEknVD1FvSrUX_vp4wwEWpTTbgzUnmrHpnci5JOGDpCOBFHH4UgIALEIF9FHE8cR2cATi_c09A0d-4YpyQB8T3H4MbIraj4RIzx6th0AXnx2eyw4fkQOTa4ilUB348DAL_w4FRODPlNu8Ku5ZOG82d54QF0oDJf9idBdNSKXqjzv08-eBV3ZwbW1UbXMT1dXABy9ZaA82gPefSfAs6lr_BW8E-FWGcHAnU3AagEaor2OgQ_akGI6Kg1Omov3GxoSbqooo9H_JzjFYbbzvkkKCawcdjIuZu_eEsgz0DLAkY2_Q_S8vuD2vCXXS3fHgt2k1FuK1QOOFLeitG8cpemdkLWBcVux392QD08E1pC57ChLbVp-CECkrJObg2Jr4DBewOuNAzP91ieH4J0bBULBP5qkIRNaG1JhzBoJ2IjTPfBnHAt9rV7Y2iEtMH_lj23DANzVRzGAKRiYk4IvdNyl9fWOjqxaqhw8RZrPObywRaDHUizFacKviw8zvT1Ow2IT9EMeV8QruYj5F9_WggW9JDz6bTKY0yIhd5OExrGXPuGNmor0ovrFOhnRqkkdGEGbFXTrRQce2wmL80aerK6i6SvUxUOlo9PmF53lYJDy-vK-GDEE9x9_Hrft7D-FX2_HRpsZNzARDv6BcAX9FSTOAvo-Ol85C0UFLqXTbsa5cON_tAY__m40]--></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 1080" width="980" height="1080" style="background-color:#ffffff;font-family:'Segoe UI',Arial,sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#000000"/>
+    </marker>
+    <style>
+      .title { font-size: 14.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .lane-header { font-size: 13px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .step-box { fill: #ffffff; stroke: #000000; stroke-width: 1.3; rx: 12; ry: 12; }
+      .step-text { font-size: 11px; fill: #000000; text-anchor: middle; }
+      .diamond { fill: #ffffff; stroke: #000000; stroke-width: 1.3; }
+      .guard { font-size: 10px; fill: #000000; }
+      .flow { fill: none; stroke: #000000; stroke-width: 1.25; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <text x="490" y="30" class="title">SƠ ĐỒ HOẠT ĐỘNG (TASK 2.1): AD-05 - THANH TOÁN QUA CỔNG SANDBOX &amp; WEBHOOK BACKEND</text>
+
+  <!-- Swimlane Outer Frame & Header -->
+  <rect x="25" y="52" width="930" height="1004" fill="none" stroke="#000000" stroke-width="1.5"/>
+  <line x1="25" y1="90" x2="955" y2="90" stroke="#000000" stroke-width="1.4"/>
+  <text x="175" y="76" class="lane-header">Khách hàng</text>
+  <line x1="325" y1="52" x2="325" y2="1056" stroke="#000000" stroke-width="1.4"/>
+  <text x="520" y="76" class="lane-header">Hệ thống BrewLite (Next.js UI &amp; NestJS API)</text>
+  <line x1="715" y1="52" x2="715" y2="1056" stroke="#000000" stroke-width="1.4"/>
+  <text x="835" y="76" class="lane-header">Cổng Thanh toán Sandbox</text>
+
+  <!-- Start & Final Nodes -->
+  <circle cx="65" cy="130" r="11" fill="#000000"/>
+  <circle cx="175" cy="1025" r="12" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <circle cx="175" cy="1025" r="7.5" fill="#000000"/>
+
+  <!-- Step 1 (Khách hàng) -->
+  <rect x="87.5" y="108" width="220" height="44" class="step-box"/>
+  <text x="197.5" y="126" class="step-text">1. Đơn hàng ở trạng thái PENDING;</text>
+  <text x="197.5" y="142" class="step-text">Chọn phương thức &amp; bấm Xác nhận thanh toán</text>
+
+  <!-- Step 2 (Hệ thống BrewLite) -->
+  <rect x="385" y="108" width="270" height="44" class="step-box"/>
+  <text x="520" y="126" class="step-text">2. Tiếp nhận yêu cầu, trích xuất Idempotency-Key</text>
+  <text x="520" y="142" class="step-text">&amp; kiểm tra khóa giao dịch trong CSDL</text>
+
+  <!-- Diamond 1: Idempotency Check -->
+  <polygon points="520,185 537,202 520,219 503,202" class="diamond"/>
+
+  <!-- Step 3: Giao dịch trùng lặp (Hệ thống) -->
+  <rect x="342.5" y="240" width="185" height="44" class="step-box"/>
+  <text x="435" y="258" class="step-text">3. Trả về kết quả giao dịch cũ</text>
+  <text x="435" y="274" class="step-text">(Chống trừ tiền lần 2)</text>
+
+  <!-- Step 4: Hiển thị lại (Khách hàng) -->
+  <rect x="65" y="240" width="220" height="44" class="step-box"/>
+  <text x="175" y="258" class="step-text">4. Hiển thị lại kết quả giao dịch</text>
+  <text x="175" y="274" class="step-text">đã được xử lý trước đó</text>
+
+  <!-- Step 5: Tạo Payment PENDING (Hệ thống) -->
+  <rect x="385" y="330" width="270" height="44" class="step-box"/>
+  <text x="520" y="348" class="step-text">5. Tạo Payment PENDING &amp; gửi yêu cầu</text>
+  <text x="520" y="364" class="step-text">khởi tạo phiên sang Cổng Sandbox</text>
+
+  <!-- Step 6: Khởi tạo phiên Sandbox (Cổng Sandbox) -->
+  <rect x="732.5" y="330" width="205" height="44" class="step-box"/>
+  <text x="835" y="348" class="step-text">6. Khởi tạo phiên thử nghiệm,</text>
+  <text x="835" y="364" class="step-text">cấp URL &amp; mã QR VietQR đối soát</text>
+
+  <!-- Step 7: Quét mã QR Sandbox (Khách hàng) -->
+  <rect x="65" y="418" width="220" height="44" class="step-box"/>
+  <text x="175" y="436" class="step-text">7. Quét mã QR VietQR / nhập thông tin thẻ</text>
+  <text x="175" y="452" class="step-text">trên Cổng thanh toán Sandbox</text>
+
+  <!-- Step 8: Bắn Webhook (Cổng Sandbox) -->
+  <rect x="732.5" y="497" width="205" height="46" class="step-box"/>
+  <text x="835" y="516" class="step-text">8. Xử lý giao dịch thử nghiệm, tạo chữ ký</text>
+  <text x="835" y="532" class="step-text">số HMAC &amp; bắn Webhook JSON ngầm</text>
+
+  <!-- Step 9: Tiếp nhận Webhook (Hệ thống) -->
+  <rect x="385" y="497" width="270" height="46" class="step-box"/>
+  <text x="520" y="516" class="step-text">9. Webhook tiếp nhận bản tin JSON, xác thực</text>
+  <text x="520" y="532" class="step-text">chữ ký HMAC &amp; đối soát giao dịch</text>
+
+  <!-- Diamond 2: Kết quả Webhook -->
+  <polygon points="520,580 537,597 520,614 503,597" class="diamond"/>
+
+  <!-- Step 10: Rollback / Hủy (Hệ thống) -->
+  <rect x="342.5" y="645" width="185" height="46" class="step-box"/>
+  <text x="435" y="664" class="step-text">10. Mở DB Transaction: Payment = FAILED,</text>
+  <text x="435" y="680" class="step-text">Order = CANCELLED &amp; Hoàn kho</text>
+
+  <!-- Step 11: Thành công PAID (Hệ thống) -->
+  <rect x="522.5" y="645" width="185" height="46" class="step-box"/>
+  <text x="615" y="664" class="step-text">11. Mở DB Transaction: Payment = SUCCESS,</text>
+  <text x="615" y="680" class="step-text">Order = PAID &amp; Tích lũy điểm Loyalty</text>
+
+  <!-- Step 12: Thông báo lỗi (Khách hàng) -->
+  <rect x="65" y="645" width="220" height="46" class="step-box"/>
+  <text x="175" y="664" class="step-text">12. Hiển thị thông báo thanh toán thất bại,</text>
+  <text x="175" y="680" class="step-text">hoàn kho an toàn &amp; hướng dẫn thử lại</text>
+
+  <!-- Step 13: Biên nhận / Tiến trình đơn (Hệ thống) -->
+  <rect x="390" y="770" width="260" height="44" class="step-box"/>
+  <text x="520" y="788" class="step-text">13. Hiển thị Biên nhận &amp; cập nhật trạng thái</text>
+  <text x="520" y="804" class="step-text">đơn hàng (PAID → PREPARING → COMPLETED)</text>
+
+  <!-- Step 14: Nhận biên nhận (Khách hàng) -->
+  <rect x="65" y="770" width="220" height="44" class="step-box"/>
+  <text x="175" y="788" class="step-text">14. Nhận biên nhận đơn hàng thành công</text>
+  <text x="175" y="804" class="step-text">&amp; quan sát tiến trình quầy pha chế</text>
+
+  <!-- Directed Flows -->
+  <!-- Start -> Step 1 -->
+  <path d="M 76 130 L 87 130" class="flow"/>
+
+  <!-- Step 1 -> Step 2 -->
+  <path d="M 307.5 130 L 385 130" class="flow"/>
+
+  <!-- Step 2 -> Diamond 1 -->
+  <path d="M 520 152 L 520 185" class="flow"/>
+
+  <!-- Diamond 1 -> Step 3 [Giao dịch trùng lặp] -->
+  <path d="M 503 202 L 435 202 L 435 240" class="flow"/>
+  <text x="455" y="195" class="guard" text-anchor="middle">[Giao dịch trùng lặp]</text>
+
+  <!-- Step 3 -> Step 4 -->
+  <path d="M 342.5 262 L 285 262" class="flow"/>
+
+  <!-- Step 4 -> Final Node (along margin) -->
+  <path d="M 65 262 L 45 262 L 45 1025 L 163 1025" class="flow"/>
+
+  <!-- Diamond 1 -> Step 5 [Giao dịch mới] -->
+  <path d="M 537 202 L 670 202 L 670 300 L 520 300 L 520 330" class="flow"/>
+  <text x="590" y="195" class="guard" text-anchor="middle">[Giao dịch mới]</text>
+
+  <!-- Step 5 -> Step 6 -->
+  <path d="M 655 352 L 732.5 352" class="flow"/>
+
+  <!-- Step 6 -> Step 7 -->
+  <path d="M 835 374 L 835 440 L 285 440" class="flow"/>
+
+  <!-- Step 7 -> Step 8 -->
+  <path d="M 175 462 L 175 480 L 710 480 L 710 520 L 732.5 520" class="flow"/>
+
+  <!-- Step 8 -> Step 9 [Webhook JSON Callback] -->
+  <path d="M 732.5 520 L 655 520" class="flow"/>
+  <text x="694" y="512" class="guard" text-anchor="middle">[Webhook JSON Callback]</text>
+
+  <!-- Step 9 -> Diamond 2 -->
+  <path d="M 520 543 L 520 580" class="flow"/>
+
+  <!-- Diamond 2 -> Step 10 [FAILED / Quá hạn 15p] -->
+  <path d="M 503 597 L 435 597 L 435 645" class="flow"/>
+  <text x="445" y="590" class="guard" text-anchor="middle">[FAILED / Quá hạn 15p]</text>
+
+  <!-- Step 10 -> Step 12 -->
+  <path d="M 342.5 668 L 285 668" class="flow"/>
+
+  <!-- Step 12 -> Final Node -->
+  <path d="M 175 691 L 175 750 L 55 750 L 55 1025 L 163 1025" class="flow"/>
+
+  <!-- Diamond 2 -> Step 11 [SUCCESS] -->
+  <path d="M 537 597 L 615 597 L 615 645" class="flow"/>
+  <text x="585" y="590" class="guard" text-anchor="middle">[SUCCESS]</text>
+
+  <!-- Step 11 -> Step 13 -->
+  <path d="M 615 691 L 615 745 L 520 745 L 520 770" class="flow"/>
+
+  <!-- Step 13 -> Step 14 -->
+  <path d="M 390 792 L 285 792" class="flow"/>
+
+  <!-- Step 14 -> Final Node -->
+  <path d="M 175 814 L 175 1013" class="flow"/>
+</svg>
