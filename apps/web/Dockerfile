@@ -3,11 +3,11 @@
 # Aligns with ADR-001, ADR-006 & Component/Deployment Diagrams (brewlite-web:latest)
 # ============================================================================
 
-# Stage 1: Install clean dependencies from package-lock.json
+# Stage 1: Install dependencies
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 # Stage 2: Build Next.js App Router bundle
 FROM node:20-alpine AS builder
