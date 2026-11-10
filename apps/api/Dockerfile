@@ -3,11 +3,11 @@
 # Aligns with ADR-006 & Component/Deployment Diagrams (brewlite-api:latest)
 # ============================================================================
 
-# Stage 1: Install clean dependencies from package-lock.json
+# Stage 1: Install dependencies
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 # Stage 2: Generate Prisma Client & Build NestJS TypeScript
 FROM node:20-alpine AS builder

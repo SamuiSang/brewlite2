@@ -1,0 +1,9 @@
+{
+  "name": "BrewLite – Đặt Đồ Uống Trực Tuyến",
+  "short_name": "BrewLite",
+  "description": "Ứng dụng đặt đồ uống trực tuyến Mobile-first PWA",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf8f5",
+  "theme_color": "#78350f"
+}
