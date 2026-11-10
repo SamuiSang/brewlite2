@@ -1,0 +1,93 @@
+# ============================================================================
+# BREWLITE - DOCKER COMPOSE ORCHESTRATION (TASK 4.1 & ADR-006)
+# Mô phỏng kiến trúc phân vùng mạng doanh nghiệp:
+#   - edge_public_net: Giao tiếp giữa Client / Edge với web-frontend & api-backend
+#   - db_isolated_net: Mạng nội bộ cô lập nối riêng api-backend <-> postgres-db
+# ============================================================================
+
+services:
+  # 1. ISOLATED POSTGRESQL DATABASE NODE (Tầng Dữ liệu độc lập - Bài giảng 28/10)
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: brewlite-postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-brewlite_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-brewlite_secret_password}
+      POSTGRES_DB: ${POSTGRES_DB:-brewlite_db}
+    ports:
+      # Chỉ bind về 127.0.0.1 trên máy Local Dev để chạy Prisma Studio / migrate;
+      # trên môi trường Production cổng 5432 bị chặn hoàn toàn bởi Hardware Firewall.
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - db_isolated_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-brewlite_user} -d ${POSTGRES_DB:-brewlite_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # 2. APPLICATION SERVER NODE - NESTJS MODULAR MONOLITH (3-Tier Layered Architecture)
+  api-backend:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    image: brewlite-api:latest
+    container_name: brewlite-api-backend
+    restart: unless-stopped
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-brewlite_user}:${POSTGRES_PASSWORD:-brewlite_secret_password}@postgres-db:5432/${POSTGRES_DB:-brewlite_db}?schema=public
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_key_12345}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-dev_sandbox_webhook_hmac_secret}
+    ports:
+      - "${API_PORT:-3001}:3001"
+    networks:
+      - edge_public_net
+      - db_isolated_net
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3001/api/v1/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # 3. PRESENTATION LAYER NODE - NEXT.JS MOBILE-FIRST PWA & WEB MANAGER
+  web-frontend:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    image: brewlite-web:latest
+    container_name: brewlite-web-frontend
+    restart: unless-stopped
+    depends_on:
+      api-backend:
+        condition: service_started
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001/api/v1}
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-BrewLite}
+    ports:
+      - "3000:3000"
+    networks:
+      - edge_public_net
+
+volumes:
+  postgres_data:
+    name: brewlite_postgres_data
+
+networks:
+  edge_public_net:
+    name: brewlite_edge_public_net
+    driver: bridge
+  db_isolated_net:
+    name: brewlite_db_isolated_net
+    driver: bridge

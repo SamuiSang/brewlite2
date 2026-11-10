@@ -1,0 +1,26 @@
+{
+  "name": "brewlite-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BrewLite – Requirements to Deployment (Next.js Mobile-first PWA, NestJS 3-Tier Modular Monolith, PostgreSQL Prisma ORM & Docker)",
+  "workspaces": [
+    "apps/web",
+    "apps/api"
+  ],
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "scripts": {
+    "dev:web": "npm --workspace=apps/web run dev",
+    "dev:api": "npm --workspace=apps/api run start:dev",
+    "build": "npm --workspace=apps/api run build && npm --workspace=apps/web run build",
+    "build:api": "npm --workspace=apps/api run build",
+    "build:web": "npm --workspace=apps/web run build",
+    "lint": "npm --workspace=apps/api run lint && npm --workspace=apps/web run lint",
+    "test": "npm --workspace=apps/api run test && npm --workspace=apps/web run test",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  }
+}
