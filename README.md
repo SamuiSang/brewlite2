@@ -12,7 +12,7 @@
 
 **Luồng nghiệp vụ cốt lõi (End-to-End):**
 
-> `Xem menu` -> `Chọn tùy chọn (Size/Topping)` -> `Giỏ hàng & Khuyến mãi` -> `Đặt đơn (Khóa tồn kho đồng thời)` -> `Thanh toán mô phỏng (Idempotency-Key)` -> `Theo dõi đơn & Tích điểm thưởng`
+> `Xem menu` -> `Chọn tùy chọn (Size/Topping)` -> `Giỏ hàng & Khuyến mãi` -> `Đặt đơn (Khóa tồn kho đồng thời)` -> `Thanh toán Cổng Sandbox & Webhook Backend (Idempotency-Key)` -> `Theo dõi đơn & Tích điểm thưởng`
 
 ---
 
@@ -23,11 +23,11 @@ Mỗi thành viên phụ trách xuyên suốt **1 Module Chức năng** từ kh�
 | STT | Thành viên | Vai trò Scrum | Module Chức năng phụ trách xuyên suốt (Từ Sơ đồ -> Code -> Test) |
 | :-: | :--- | :--- | :--- |
 | **1** | **Duy** | Dev Team | **Chức năng 1 (`FR-01`, `FR-02`):** Hiển thị Menu, Tìm kiếm, Lọc theo Danh mục & Xem Chi tiết sản phẩm + E2E Test |
-| **2** | **Quỳnh** | Dev Team | **Chức năng 2 (`FR-03`):** Tùy biến Món (Size/Topping), Quản lý Giỏ hàng (`Zustand`) & Áp mã Khuyến mãi (`Promotion`) + CI Pipeline |
-| **3** | **Hiếu** | Product Owner (PO) | **Chức năng 3 (`FR-04`):** Đăng ký, Đăng nhập, Xác thực Phân quyền `JWT` & Giám sát `GET /health` + Quản lý Backlog & Truy vết |
+| **2** | **Quỳnh** | Dev Team | **Chức năng 2 (`FR-03`, `FR-09`):** Tùy biến Món (Size/Topping), Quản lý Giỏ hàng (`Zustand`) & Áp mã Khuyến mãi (`Promotion`) + CI Pipeline |
+| **3** | **Hiếu** | Product Owner (PO) | **Chức năng 3 (`FR-04`):** Đăng ký, Đăng nhập, Xác thực Phân quyền `JWT` & Giám sát `GET /api/v1/health` + Quản lý Backlog & Truy vết |
 | **4** | **Chiến** | Dev Team | **Chức năng 4 (`FR-05`):** Khởi tạo Đơn hàng (`POST /orders`), Tính tổng tiền tại Business Layer & Khóa Tồn kho Đồng thời (`Optimistic Lock`) |
-| **5** | **Quang** | Dev Team | **Chức năng 5 (`FR-06`, `NFR-01..04`):** Thanh toán Ví/Thẻ Mô phỏng (`Mock Payment`) & Chống Trừ tiền Trùng lặp (`Idempotency-Key`) + Integration Test |
-| **6** | **Sang** | Scrum Master (SM) | **Chức năng 6 (`FR-07`, `FR-08`):** Biên nhận, Lịch sử Đơn (`/orders/my-orders`), Theo dõi Trạng thái & Điểm thưởng (`LoyaltyTransaction`) + Docker & CD Pipeline |
+| **5** | **Quang** | Dev Team | **Chức năng 5 (`FR-06`, `NFR-01..05`):** Thanh toán Cổng Sandbox & Webhook Backend (`POST /payments/webhook` 2 bước) + Chống Trừ tiền Trùng lặp (`Idempotency-Key`) + Integration Test |
+| **6** | **Sang** | Scrum Master (SM) | **Chức năng 6 (`FR-07`, `FR-08`, `FR-10`):** Biên nhận, Lịch sử Đơn (`/orders/my-orders`), Theo dõi Trạng thái & Điểm thưởng (`LoyaltyTransaction`) + Docker & CD Pipeline |
 
 ---
 
@@ -89,3 +89,40 @@ Một Task hoặc User Story chỉ được nghiệm thu (`Done`) khi thỏa mã
    - Đảm bảo an toàn đồng thời (Database Transaction + Optimistic Locking chống âm kho) và chống thanh toán trùng lặp (`Idempotency-Key`).
    - Vượt qua toàn bộ bước kiểm tra tự động trên CI Pipeline (`Install -> Lint -> Unit Test -> Build`).
 4. Được cập nhật đầy đủ vào bảng truy vết `docs/traceability-matrix.md`.
+
+
+---
+
+## 5. Hướng dẫn Khởi chạy Hệ thống bằng Docker Compose & Local Dev (Task 4.1)
+
+### 5.1 Khởi chạy đồng bộ bằng Docker Compose (Khuyên dùng)
+
+1. Sao chép tệp cấu hình biến môi trường mẫu (tuyệt đối không commit tệp `.env` thật lên Git):
+   ```bash
+   cp .env.example .env
+   ```
+2. Khởi chạy đồng bộ cả 3 container (`postgres-db`, `api-backend`, `web-frontend`) qua mạng nội bộ Docker:
+   ```bash
+   docker compose up --build -d
+   ```
+3. Kiểm tra trạng thái sức khỏe hệ thống (Health Check Probe):
+   - **Frontend Next.js PWA:** `http://localhost:3000`
+   - **Backend NestJS API:** `http://localhost:3001/api/v1`
+   - **Health Check Endpoint:** `http://localhost:3001/api/v1/health` (Thực thi `SELECT 1` xuống PostgreSQL)
+
+### 5.2 Khởi chạy từng phần phục vụ phát triển (Local Development)
+
+1. Khởi chạy riêng container cơ sở dữ liệu PostgreSQL 16:
+   ```bash
+   docker compose up -d postgres-db
+   ```
+2. Cài đặt phụ thuộc sạch và chạy Migration + Seed dữ liệu mẫu (10 món đồ uống kèm nguyên liệu `Ingredient` & công thức `RecipeItem`):
+   ```bash
+   npm ci
+   cd apps/api && npx prisma migrate dev && npx prisma db seed
+   ```
+3. Chạy máy chủ phát triển:
+   ```bash
+   npm run dev:api   # Chạy NestJS API tại cổng 3001
+   npm run dev:web   # Chạy Next.js PWA tại cổng 3000
+   ```
