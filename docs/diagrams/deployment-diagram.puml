@@ -1,0 +1,78 @@
+@startuml deployment-diagram
+title SƠ ĐỒ TRIỂN KHAI HẠ TẦNG PRODUCTION (UML DEPLOYMENT DIAGRAM) - BREWLITE (RENDER CLOUD & ENTERPRISE NETWORK)
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 11
+skinparam packageStyle rectangle
+skinparam nodeStyle box
+skinparam linetype ortho
+
+package "VÙNG 1: LOCAL DEV, GITHUB ACTIONS CI/CD & CONTAINER REGISTRY (RANH GIỚI LOCAL / CI -> PROD)" as DevCIZone {
+  node "Máy trạm Lập trình viên & Admin WFH\n(Local Dev: docker-compose.yml :3000/:3001/:5432)" as DevLaptop <<device>> {
+    artifact "Git CLI + VPN Client (OpenVPN/WireGuard)\n(.env.local / .gitignore chặn node_modules)" as DevArtifact <<artifact>>
+  }
+  node "GitHub Actions CI/CD Runner\n(ubuntu-latest)" as CIRunner <<executionEnvironment>> {
+    artifact "ci.yml (npm ci, lint, test, build)\ncd.yml (Build Image, Migrate, Smoke Test /health)" as CICDWorkflows <<artifact>>
+  }
+  node "GitHub Container Registry (GHCR)\n(ghcr.io/samuisang/*)" as RegistryNode <<containerRegistry>> {
+    artifact "brewlite-web:sha & brewlite-api:sha\n(Multi-stage Docker Alpine Images)" as RegistryImages <<artifact>>
+  }
+}
+
+package "VÙNG 2: PUBLIC INTERNET & CLIENT (EXTERNAL ACCESS)" as PublicZone {
+  node "Thiết bị Người dùng & Quầy Barista\n(Mobile / Desktop Browser)" as UserDevice <<device>> {
+    artifact "Next.js Customer PWA & Web Manager UI\n(Service Worker + Zustand localStorage)" as ClientPWA <<artifact>>
+  }
+  node "Cổng Thanh toán Sandbox Đối tác\n(VNPay / MoMo / VietQR Sandbox)" as SandboxGateway <<externalSystem>> {
+    artifact "Webhook Callback Dispatcher\n(POST JSON + Chữ ký HMAC-SHA256)" as WebhookSender <<artifact>>
+  }
+}
+
+package "VÙNG 3: MÔI TRƯỜNG PRODUCTION (RENDER CLOUD PaaS / VPS DOCKER & HẠ TẦNG MẠNG BẢO MẬT)" as ProdZone {
+  node "Vành đai Biên: Edge CDN, Hardware Firewall & VPN Gateway" as PerimeterNode <<perimeterSecurity>> {
+    node "Edge CDN & TLS Termination\n(Render Global CDN - HTTPS :443)" as EdgeCDN <<cdnService>>
+    node "Hardware Firewall Chuyên dụng\n(ASIC Packet Filter: Whitelist 443, Chặn 5432)" as HWFirewall <<hardwareFirewall>>
+    node "VPN Gateway Server\n(Encrypted Tunnel UDP :1194 -> IP 10.10.20.x)" as VPNGateway <<securityAppliance>>
+  }
+
+  node "Hạ tầng Định tuyến & Chuyển mạch Nội bộ\n(Core L3 Router -> Tủ Rack L2 Switch VLAN)" as RouterSwitch <<networkFabric>>
+
+  node "Application Server Node (Render Web Service / Docker Host)" as AppServer <<cloudPlatform>> {
+    node "Container: web-frontend (Port 3000)\n[apps/web]" as WebContainer <<dockerContainer>> {
+      artifact "brewlite-web:latest\n(Next.js App Router SSR & Static Assets)" as WebImg <<artifact>>
+    }
+    node "Container: api-backend (Port 3001 / 10000)\n[apps/api]" as ApiContainer <<dockerContainer>> {
+      artifact "brewlite-api:latest\n(NestJS Modular Monolith + GET /api/v1/health)" as ApiImg <<artifact>>
+    }
+    artifact "Secrets Vault & Observability\n(ENV: DATABASE_URL, JWT_SECRET, WEBHOOK_SECRET)\n(Stdout/Stderr Log Stream & Health Probe 30s)" as SecretLog <<configuration>>
+  }
+
+  node "Isolated Database Server Node (Private VPC Subnet - No Public IP)" as DBServer <<databaseServer>> {
+    node "Container: postgres-db (Port 5432 Nội bộ)\n[apps/api/prisma/schema.prisma]" as DBContainer <<dockerContainer>> {
+      artifact "postgres:16-alpine\n(9 Bảng thực thể + Optimistic Lock version)" as DBImg <<artifact>>
+    }
+    storage "Persistent Volume Storage\n(postgres_data SSD Disk + WAL Backup)" as DBVolume
+  }
+}
+
+DevLaptop --> CIRunner : "1. git push / Pull Request\n(HTTPS / SSH)"
+CIRunner --> RegistryNode : "2. docker build & push\n(Image Tag :sha)"
+RegistryNode --> AppServer : "3. Pull Image & Deploy\n(Zero-Downtime Rollout)"
+CIRunner ..> ApiContainer : "4. Smoke Test: GET /api/v1/health\n(Lỗi 503 -> Tự động Rollback)"
+
+UserDevice --> EdgeCDN : "5. HTTPS : 443 (TLS 1.3)\nTải giao diện Next.js PWA"
+EdgeCDN --> WebContainer : "Phục vụ SSR / Static\n(Port 3000)"
+UserDevice --> HWFirewall : "6. HTTPS REST API : 443\n(Bearer JWT, Idempotency-Key)"
+SandboxGateway --> HWFirewall : "7. HTTPS Webhook : 443\n(POST /api/v1/payments/webhook)"
+DevLaptop ==> VPNGateway : "8. Encrypted VPN Tunnel\n(UDP :1194 + MFA)"
+
+HWFirewall --> RouterSwitch : "9. Gói tin sạch qua Whitelist\n(Forward 443 -> 3001)"
+VPNGateway --> RouterSwitch : "10. Cấp IP Nội bộ\n(10.10.20.x/24)"
+RouterSwitch --> ApiContainer : "LAN Nội bộ (Port 3001)"
+ApiContainer --> DBContainer : "11. TCP/SSL Nội bộ : 5432\n(Prisma $transaction & SELECT 1)"
+DBContainer --> DBVolume : "Mount /var/lib/postgresql/data"
+RouterSwitch ..> DBContainer : "12. Quản trị DB qua VPN\n(Chỉ từ IP 10.10.20.x)"
+
+@enduml
