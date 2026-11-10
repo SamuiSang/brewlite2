@@ -1,0 +1,89 @@
+@startuml component-diagram
+title SƠ ĐỒ THÀNH PHẦN HỆ THỐNG (UML COMPONENT DIAGRAM) - KIẾN TRÚC PHÂN TẦNG & LOLLIPOP INTERFACES
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam packageStyle rectangle
+skinparam componentStyle uml2
+skinparam linetype ortho
+
+package "TẦNG GIAO DIỆN NGƯỜI DÙNG (PRESENTATION LAYER - TÁCH BIỆT 2 CLIENT)" {
+  component "Client Browser\n(Customer PWA UI - Next.js)" as CustomerUI
+  component "Web Manager Server\n(Admin & Barista Portal UI)" as ManagerUI
+  artifact "brewlite-web:latest\n(Next.js Standalone Image)" as WebArtifact <<artifact>>
+  WebArtifact ..> CustomerUI : <<manifest>>
+  WebArtifact ..> ManagerUI : <<manifest>>
+}
+
+interface "IProductAPI\n(HTTPS REST)" as IProduct
+interface "IAuthAPI\n(JWT / Guard)" as IAuth
+interface "IOrderAPI\n(REST / Status)" as IOrder
+interface "IPaymentAPI\n(Checkout / Webhook)" as IPayment
+interface "ILoyaltyAPI\n(Points / History)" as ILoyalty
+
+package "TẦNG ỨNG DỤNG & NGHIỆP VỤ (APPLICATION SERVER - NESTJS MODULAR MONOLITH)" {
+  component "MenuService\n(Products & Recipe Check)" as MenuComp
+  component "AuthService\n(JWT, Bcrypt & HealthCheck)" as AuthComp
+  component "OrderService\n(Business Pricing & Optimistic Lock)" as OrderComp
+  component "PaymentService\n(Idempotency & Webhook Handler)" as PaymentComp
+  component "LoyaltyService\n(Earn/Redeem Points & History)" as LoyaltyComp
+  component "PrismaService\n(Data Access Layer - DAL)" as PrismaDAL
+
+  artifact "brewlite-api:latest\n(NestJS Alpine Container)" as ApiArtifact <<artifact>>
+  ApiArtifact ..> MenuComp : <<manifest>>
+  ApiArtifact ..> AuthComp : <<manifest>>
+  ApiArtifact ..> OrderComp : <<manifest>>
+  ApiArtifact ..> PaymentComp : <<manifest>>
+  ApiArtifact ..> LoyaltyComp : <<manifest>>
+  ApiArtifact ..> PrismaDAL : <<manifest>>
+}
+
+interface "IPrismaRepository\n(ACID Transaction & Lock)" as IDAL
+interface "ISandboxGateway\n(HTTPS JSON / HMAC)" as ISandbox
+interface "ISQLConnection\n(TCP Port 5432)" as ISQL
+
+package "TẦNG CƠ SỞ DỮ LIỆU ĐỘC LẬP & DỊCH VỤ BÊN THỨ BA (ISOLATED DB & EXTERNAL SANDBOX)" {
+  component "PostgreSQL Engine\n(Isolated Database Server)" as PostgresComp
+  artifact "postgres:16-alpine\n(Persistent Volume Data)" as DbArtifact <<artifact>>
+  DbArtifact ..> PostgresComp : <<manifest>>
+
+  component "Cổng Thanh toán Sandbox\n(VNPay / MoMo / VietQR)" as SandboxComp
+}
+
+' Provided Interfaces (Lollipop)
+MenuComp -up- IProduct
+AuthComp -up- IAuth
+OrderComp -up- IOrder
+PaymentComp -up- IPayment
+LoyaltyComp -up- ILoyalty
+
+' Required Interfaces (Socket) from Presentation Layer
+CustomerUI -down-( IProduct
+CustomerUI -down-( IAuth
+CustomerUI -down-( IOrder
+CustomerUI -down-( IPayment
+CustomerUI -down-( ILoyalty
+
+ManagerUI -down-( IAuth
+ManagerUI -down-( IOrder
+ManagerUI -down-( IProduct
+
+' Internal DAL Lollipop
+PrismaDAL -up- IDAL
+MenuComp -down-( IDAL
+AuthComp -down-( IDAL
+OrderComp -down-( IDAL
+PaymentComp -down-( IDAL
+LoyaltyComp -down-( IDAL
+
+' External & DB Lollipops
+PostgresComp -up- ISQL
+PrismaDAL -down-( ISQL
+
+SandboxComp -up- ISandbox
+PaymentComp -down-( ISandbox
+SandboxComp ..> IPayment : POST /api/v1/payments/webhook\n(JSON Message + HMAC)
+
+@enduml
