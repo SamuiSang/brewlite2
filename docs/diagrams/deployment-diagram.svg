@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 910" width="1040" height="910" font-family="Arial, Helvetica, sans-serif" fill="#000000">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#000000"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1040" height="910" fill="#ffffff"/>
+  <text x="520" y="26" text-anchor="middle" font-size="14" font-weight="bold">SƠ ĐỒ TRIỂN KHAI HẠ TẦNG (UML DEPLOYMENT DIAGRAM) - BREWLITE PRODUCTION</text>
+  <rect x="20" y="42" width="1000" height="120" fill="none" stroke="#000000" stroke-width="1.4" stroke-dasharray="6,4"/>
+  <rect x="20" y="42" width="490" height="20" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+  <text x="30" y="56" font-size="10.5" font-weight="bold">RANH GIỚI LOCAL DEV &amp; CI/CD PIPELINE (GITHUB ACTIONS -&gt; GHCR REGISTRY)</text>
+  <rect x="38" y="74" width="275" height="74" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="38,74 44,68 319,68 313,74" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="313,74 319,68 319,142 313,148" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <text x="175.5" y="90" text-anchor="middle" font-size="10" font-style="italic">&lt;&lt;device&gt;&gt;</text>
+  <text x="175.5" y="106" text-anchor="middle" font-size="11.5" font-weight="bold">Máy trạm Dev (Local) &amp; Admin WFH</text>
+  <text x="175.5" y="122" text-anchor="middle" font-size="10">docker-compose.yml (:3000/:3001/:5432)</text>
+  <text x="175.5" y="136" text-anchor="middle" font-size="10">Git CLI + VPN Client (OpenVPN / WireGuard)</text>
+  <rect x="375" y="74" width="275" height="74" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="375,74 381,68 656,68 650,74" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="650,74 656,68 656,142 650,148" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <text x="512.5" y="90" text-anchor="middle" font-size="10" font-style="italic">&lt;&lt;executionEnvironment&gt;&gt;</text>
+  <text x="512.5" y="106" text-anchor="middle" font-size="11.5" font-weight="bold">GitHub Actions CI/CD (ubuntu-latest)</text>
+  <text x="512.5" y="122" text-anchor="middle" font-size="10">ci.yml (npm ci, lint, test, build)</text>
+  <text x="512.5" y="136" text-anchor="middle" font-size="10">cd.yml (Deploy &amp; Smoke Test /health)</text>
+  <rect x="712" y="74" width="290" height="74" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="712,74 718,68 1008,68 1002,74" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="1002,74 1008,68 1008,142 1002,148" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <text x="857" y="90" text-anchor="middle" font-size="10" font-style="italic">&lt;&lt;containerRegistry&gt;&gt;</text>
+  <text x="857" y="106" text-anchor="middle" font-size="11.5" font-weight="bold">GitHub Container Registry (GHCR)</text>
+  <text x="857" y="122" text-anchor="middle" font-size="10">brewlite-web:latest (apps/web)</text>
+  <text x="857" y="136" text-anchor="middle" font-size="10">brewlite-api:latest (apps/api)</text>
+  <line x1="313" y1="111" x2="375" y2="111" stroke="#000000" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="344" y="104" text-anchor="middle" font-size="9.5" font-weight="bold">git push</text>
+  <line x1="650" y1="111" x2="712" y2="111" stroke="#000000" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="681" y="104" text-anchor="middle" font-size="9.5" font-weight="bold">Push Image</text>
+  <rect x="20" y="182" width="640" height="100" fill="none" stroke="#000000" stroke-width="1.4" stroke-dasharray="5,3"/>
+  <rect x="20" y="182" width="380" height="20" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+  <text x="30" y="196" font-size="10.5" font-weight="bold">PUBLIC INTERNET (THIẾT BỊ NGƯỜI DÙNG &amp; SANDBOX)</text>
+  <rect x="38" y="210" width="280" height="62" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="38,210 44,204 324,204 318,210" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="318,210 324,204 324,266 318,272" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <text x="178" y="226" text-anchor="middle" font-size="10" font-style="italic">&lt;&lt;device&gt;&gt;</text>
+  <text x="178" y="242" text-anchor="middle" font-size="11.5" font-weight="bold">Thiết bị Người dùng (Browser / PWA)</text>
+  <text x="178" y="258" text-anchor="middle" font-size="10">Next.js Customer PWA &amp; Web Manager UI</text>
+  <rect x="360" y="210" width="280" height="62" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="360,210 366,204 646,204 640,210" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="640,210 646,204 646,266 640,272" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <text x="500" y="226" text-anchor="middle" font-size="10" font-style="italic">&lt;&lt;externalSystem&gt;&gt;</text>
+  <text x="500" y="242" text-anchor="middle" font-size="11.5" font-weight="bold">Cổng Thanh toán Sandbox</text>
+  <text x="500" y="258" text-anchor="middle" font-size="10">VNPay / MoMo / VietQR (Webhook JSON)</text>
+  <rect x="20" y="330" width="990" height="558" fill="none" stroke="#000000" stroke-width="1.7"/>
+  <rect x="20" y="330" width="660" height="22" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+  <text x="30" y="346" font-size="11" font-weight="bold">MÔI TRƯỜNG PRODUCTION (RENDER CLOUD PaaS &amp; HẠ TẦNG MẠNG DOANH NGHIỆP)</text>
+  <rect x="38" y="372" width="280" height="76" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="38,372 44,366 324,366 318,372" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="318,372 324,366 324,442 318,448" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <text x="178" y="388" text-anchor="middle" font-size="10" font-style="italic">&lt;&lt;cdnService&gt;&gt;</text>
+  <text x="178" y="404" text-anchor="middle" font-size="11.5" font-weight="bold">Edge CDN (Phục vụ Next.js)</text>
+  <text x="178" y="420" text-anchor="middle" font-size="10">HTTPS : 443 (TLS 1.3 Static &amp; SSR)</text>
+  <text x="178" y="434" text-anchor="middle" font-size="10">Chuyển tiếp tới web-frontend:3000</text>
+  <rect x="360" y="372" width="310" height="76" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="360,372 366,366 676,366 670,372" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="670,372 676,366 676,442 670,448" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <text x="515" y="388" text-anchor="middle" font-size="10" font-style="italic">&lt;&lt;hardwareFirewall&gt;&gt;</text>
+  <text x="515" y="404" text-anchor="middle" font-size="11.5" font-weight="bold">Hardware Firewall (Tường lửa Cứng)</text>
+  <text x="515" y="420" text-anchor="middle" font-size="10">Lọc gói tin ASIC: Whitelist TCP 443</text>
+  <text x="515" y="434" text-anchor="middle" font-size="10">Chặn tuyệt đối cổng 5432 từ Internet</text>
+  <rect x="712" y="372" width="280" height="76" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="712,372 718,366 998,366 992,372" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="992,372 998,366 998,442 992,448" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <text x="852" y="388" text-anchor="middle" font-size="10" font-style="italic">&lt;&lt;securityAppliance&gt;&gt;</text>
+  <text x="852" y="404" text-anchor="middle" font-size="11.5" font-weight="bold">VPN Gateway Server</text>
+  <text x="852" y="420" text-anchor="middle" font-size="10">Đường hầm Encrypted Tunnel (:1194)</text>
+  <text x="852" y="434" text-anchor="middle" font-size="10">Cấp IP nội bộ 10.10.20.x cho WFH</text>
+  <line x1="120" y1="272" x2="120" y2="372" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="112" y="308" text-anchor="end" font-size="9.5" font-weight="bold">HTTPS : 443</text>
+  <polyline points="260,272 260,306 430,306 430,372" fill="none" stroke="#000000" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="345" y="300" text-anchor="middle" font-size="9.5" font-weight="bold">REST API : 443</text>
+  <line x1="540" y1="272" x2="540" y2="372" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="548" y="308" font-size="9.5" font-weight="bold">Webhook : 443</text>
+  <polyline points="280,148 280,172 685,172 685,310 830,310 830,372" fill="none" stroke="#000000" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
+  <text x="693" y="245" font-size="9.5" font-weight="bold">VPN Tunnel (:1194)</text>
+  <rect x="240" y="486" width="250" height="58" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="240,486 246,480 496,480 490,486" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="490,486 496,480 496,538 490,544" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <text x="365" y="502" text-anchor="middle" font-size="10" font-style="italic">&lt;&lt;router&gt;&gt;</text>
+  <text x="365" y="518" text-anchor="middle" font-size="11.5" font-weight="bold">Router Trung tâm (L3 Router)</text>
+  <text x="365" y="534" text-anchor="middle" font-size="10">Định tuyến lưu lượng sạch nội bộ</text>
+  <rect x="550" y="486" width="290" height="58" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="550,486 556,480 846,480 840,486" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="840,486 846,480 846,538 840,544" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <text x="695" y="502" text-anchor="middle" font-size="10" font-style="italic">&lt;&lt;switch&gt;&gt;</text>
+  <text x="695" y="518" text-anchor="middle" font-size="11.5" font-weight="bold">Tủ Rack Switch (L2 VLAN Switch)</text>
+  <text x="695" y="534" text-anchor="middle" font-size="10">Phân tách VLAN App &amp; VLAN Database</text>
+  <polyline points="480,448 480,464 365,464 365,486" fill="none" stroke="#000000" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <polyline points="830,448 830,464 440,464 440,486" fill="none" stroke="#000000" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <line x1="490" y1="515" x2="550" y2="515" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="38" y="598" width="560" height="270" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="38,598 46,590 606,590 598,598" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="598,598 606,590 606,860 598,868" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <text x="318" y="614" text-anchor="middle" font-size="10" font-style="italic">&lt;&lt;cloudPlatform&gt;&gt;</text>
+  <text x="318" y="630" text-anchor="middle" font-size="11.5" font-weight="bold">Application Server (Render Cloud PaaS / Docker Host)</text>
+  <rect x="56" y="640" width="245" height="120" fill="#ffffff" stroke="#000000" stroke-width="1.3"/>
+  <text x="178" y="657" text-anchor="middle" font-size="10.5" font-weight="bold">web-frontend (Port 3000)</text>
+  <text x="178" y="672" text-anchor="middle" font-size="9.5" font-style="italic">[Mã nguồn: apps/web/*]</text>
+  <rect x="68" y="682" width="221" height="66" fill="#ffffff" stroke="#000000" stroke-width="1.2" stroke-dasharray="4,2"/>
+  <text x="178.5" y="698" text-anchor="middle" font-size="10" font-weight="bold">brewlite-web:latest</text>
+  <text x="178.5" y="713" text-anchor="middle" font-size="9.5">Next.js Customer PWA &amp; Manager</text>
+  <rect x="330" y="640" width="250" height="120" fill="#ffffff" stroke="#000000" stroke-width="1.3"/>
+  <text x="455" y="657" text-anchor="middle" font-size="10.5" font-weight="bold">api-backend (Port 3001)</text>
+  <text x="455" y="672" text-anchor="middle" font-size="9.5" font-style="italic">[Mã nguồn: apps/api/src/*]</text>
+  <rect x="342" y="682" width="226" height="66" fill="#ffffff" stroke="#000000" stroke-width="1.2" stroke-dasharray="4,2"/>
+  <text x="455" y="698" text-anchor="middle" font-size="10" font-weight="bold">brewlite-api:latest (NestJS)</text>
+  <text x="455" y="713" text-anchor="middle" font-size="9.5">6 Modules + GET /api/v1/health</text>
+  <rect x="56" y="774" width="524" height="80" fill="#ffffff" stroke="#000000" stroke-width="1.2" stroke-dasharray="4,2"/>
+  <text x="318" y="792" text-anchor="middle" font-size="10.5" font-weight="bold">Quản lý Cấu hình Secret, Health Check &amp; Log (Observability)</text>
+  <text x="318" y="810" text-anchor="middle" font-size="9.5">• ENV Secrets: DATABASE_URL, JWT_SECRET, WEBHOOK_SECRET, FRONTEND_URL</text>
+  <text x="318" y="826" text-anchor="middle" font-size="9.5">• Health Check: GET /api/v1/health (SELECT 1) -&gt; Tự động Rollback nếu 503</text>
+  <text x="318" y="842" text-anchor="middle" font-size="9.5">• Logging: Stdout/Stderr JSON Log Stream &amp; Audit Log</text>
+  <rect x="640" y="598" width="352" height="270" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="640,598 648,590 1000,590 992,598" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="992,598 1000,590 1000,860 992,868" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <text x="816" y="614" text-anchor="middle" font-size="10" font-style="italic">&lt;&lt;databaseServer&gt;&gt;</text>
+  <text x="816" y="630" text-anchor="middle" font-size="11.5" font-weight="bold">Isolated PostgreSQL Server (Private VLAN)</text>
+  <rect x="658" y="640" width="316" height="120" fill="#ffffff" stroke="#000000" stroke-width="1.3"/>
+  <text x="816" y="657" text-anchor="middle" font-size="10.5" font-weight="bold">postgres-db (Port 5432 Nội bộ)</text>
+  <text x="816" y="672" text-anchor="middle" font-size="9.5" font-style="italic">[Mã nguồn: apps/api/prisma/schema.prisma]</text>
+  <rect x="672" y="682" width="288" height="66" fill="#ffffff" stroke="#000000" stroke-width="1.2" stroke-dasharray="4,2"/>
+  <text x="816" y="698" text-anchor="middle" font-size="10" font-weight="bold">postgres:16-alpine</text>
+  <text x="816" y="713" text-anchor="middle" font-size="9.5">9 Bảng + Optimistic Lock (version)</text>
+  <rect x="658" y="774" width="316" height="80" rx="6" ry="6" fill="#ffffff" stroke="#000000" stroke-width="1.3"/>
+  <text x="816" y="796" text-anchor="middle" font-size="10.5" font-weight="bold">&lt;&lt;storage&gt;&gt; Persistent Volume Storage</text>
+  <text x="816" y="814" text-anchor="middle" font-size="9.5">Mount: /var/lib/postgresql/data (SSD + WAL)</text>
+  <text x="816" y="832" text-anchor="middle" font-size="9.5">Bảo toàn dữ liệu khi Restart / Redeploy</text>
+  <line x1="816" y1="760" x2="816" y2="774" stroke="#000000" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <line x1="120" y1="448" x2="120" y2="640" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="112" y="535" text-anchor="end" font-size="9.5" font-weight="bold">Port 3000</text>
+  <polyline points="610,544 610,566 455,566 455,640" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="532" y="560" text-anchor="middle" font-size="9.5" font-weight="bold">LAN Port 3001</text>
+  <polyline points="750,544 750,598" fill="none" stroke="#000000" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <text x="758" y="574" text-anchor="start" font-size="9.5" font-weight="bold">VPN Admin (:5432)</text>
+  <line x1="955" y1="148" x2="955" y2="330" stroke="#000000" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
+  <text x="947" y="245" text-anchor="end" font-size="9.5" font-weight="bold">Pull Docker Image (CD Deploy)</text>
+  <line x1="580" y1="700" x2="658" y2="700" stroke="#000000" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="619" y="691" text-anchor="middle" font-size="9" font-weight="bold">TCP:5432</text>
+  <text x="619" y="714" text-anchor="middle" font-size="8.5">(SSL)</text>
+</svg>
