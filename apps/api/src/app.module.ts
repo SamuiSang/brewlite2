@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
+import { HealthModule } from './health/health.module';
 import { ProductsModule } from './products/products.module';
 
 @Module({
@@ -9,9 +10,10 @@ import { ProductsModule } from './products/products.module';
       isGlobal: true,
     }),
     PrismaModule,
+    HealthModule,
     ProductsModule,
     // Các module nghiệp vụ sẽ được từng thành viên đăng ký tại đây ở Task 4.2, 4.3 & Task 5:
-    // - HealthModule & AuthModule (Hiếu - Chức năng 3)
+    // - HealthModule & AuthModule (Hiếu - Chức năng 3) [HealthModule đã đăng ký]
     // - ProductsModule (Duy & Chiến - Chức năng 1) [Đã đăng ký]
     // - PromotionsModule (Quỳnh - Chức năng 2)
     // - OrdersModule (Chiến - Chức năng 4)
