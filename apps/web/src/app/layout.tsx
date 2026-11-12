@@ -1,14 +1,6 @@
 // apps/web/src/app/layout.tsx
 import type { Metadata } from 'next';
-import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ['latin', 'vietnamese'],
-  weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-plus-jakarta-sans',
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   title: 'BrewLite – Cà phê nguyên bản',
@@ -22,8 +14,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi" className={plusJakartaSans.variable}>
-      <body className="min-h-screen bg-[#FBF9F5] text-[#182B22] font-sans antialiased selection:bg-[#183B2B] selection:text-white">
+    <html lang="vi">
+      <body className="min-h-screen bg-[#F3E8D4] text-[#3F3027] font-sans antialiased selection:bg-[#7D3F32] selection:text-[#FFFAF0]">
         {children}
       </body>
     </html>
