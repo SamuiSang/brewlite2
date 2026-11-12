@@ -8,21 +8,21 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
+        serif: ['var(--font-lora)', 'Georgia', 'serif'],
         sans: ['var(--font-plus-jakarta-sans)', 'system-ui', 'sans-serif'],
       },
       colors: {
         brew: {
-          primary: '#183B2B',      // Màu xanh rêu chủ đạo chuẩn Figma
-          primaryHover: '#234D39', // Màu hover cho nút bấm xanh rêu
-          caramel: '#D98236',      // Màu vàng caramel điểm nhấn chuẩn Figma
-          caramelHover: '#C47029', // Màu hover cho nút caramel
-          linen: '#FBF9F5',        // Màu nền kem linen ấm chuẩn Figma
-          card: '#FFFFFF',         // Màu bề mặt thẻ trắng
-          text: '#182B22',         // Màu chữ chính đậm chuẩn Figma
-          subtext: '#59665F',      // Màu chữ phụ ghi xám chuẩn Figma
-          border: '#E5E8E1',       // Màu viền taupe mỏng chuẩn Figma
-          badge: '#E8EDE7',        // Màu nền huy hiệu nhạt
-          success: '#246344',      // Màu trạng thái thành công
+          primary: '#7D3F32',      // Nâu đỏ đất nung chủ đạo chuẩn Figma Cloud
+          primaryHover: '#693327', // Nâu đậm khi hover
+          linen: '#F3E8D4',        // Nền kem bơ ấm toàn trang chuẩn Figma Cloud
+          card: '#FFFAF0',         // Bề mặt thẻ kem sữa chuẩn Figma Cloud
+          text: '#3F3027',         // Màu chữ chính nâu cà phê đậm chuẩn Figma Cloud
+          subtext: '#786B5A',      // Màu chữ phụ taupe ấm chuẩn Figma Cloud
+          accent: '#D9C19B',       // Điểm nhấn be vàng chuẩn Figma Cloud
+          border: '#E8D7B8',       // Đường viền be nhạt chuẩn Figma Cloud
+          badge: '#E8D7B8',        // Nền huy hiệu và nút tạm hết
+          success: '#2E7D32',      // Màu trạng thái thành công
           error: '#B42318',        // Màu trạng thái lỗi
         },
       },
