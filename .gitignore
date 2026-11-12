@@ -10,6 +10,7 @@ dist/
 build/
 coverage/
 scratch/
+*.tsbuildinfo
 # Environment variables (Never commit secrets!)
 .env
 .env.local
