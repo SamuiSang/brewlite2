@@ -44,6 +44,17 @@ test('error offers retry without exposing internal error details', () => {
   expect(html).not.toContain('private database password');
 });
 
+test('recovery icons stay decorative so button names are not announced twice', () => {
+  for (const element of [
+    MenuEmpty({ keyword: 'Matcha', onResetFilter: () => {} }),
+    ErrorState({ onRetry: () => {} }),
+  ]) {
+    const button = React.Children.toArray(element.props.children)
+      .find((child) => child.type === 'button');
+    expect(button.props.children[0].props['aria-hidden']).toBe(true);
+  }
+});
+
 test('retry invokes the recovery callback', () => {
   let retries = 0;
   const element = ErrorState({ onRetry: () => { retries += 1; } });
