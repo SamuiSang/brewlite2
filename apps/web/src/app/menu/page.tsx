@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Search, MapPin, Check, AlertCircle, X, ShoppingBag } from 'lucide-react';
+import { Search, MapPin, Check, AlertCircle, X, ShoppingCart } from 'lucide-react';
 import { Product, CategoryFilterOption } from '../../types/product';
 import { CategoryFilter } from '../../components/CategoryFilter';
 import { ProductCard } from '../../components/ProductCard';
@@ -12,8 +12,8 @@ import { useCartStore } from '../../lib/store';
 import { FloatingCartBar } from '../../components/FloatingCartBar';
 
 /**
- * Danh sách 18 món thực đơn BrewLite 2 khớp 100% bản thiết kế Figma mới (BrewLite 2.pdf).
- * Đầy đủ 5 danh mục và 2 món Tạm hết (Bánh Sừng Bò Bơ, Trà Oolong Sen Vàng).
+ * Danh sách 18 món thực đơn BrewLite 2 khớp 100% bản thiết kế Figma Cloud (BdBtjCNyz1miLp27sp0Hzp).
+ * Đầy đủ 6 danh mục và 2 món Tạm hết (Bánh Sừng Bò Bơ, Trà Oolong Sen Vàng Đắk Lắk).
  */
 const FALLBACK_SEED_PRODUCTS: Product[] = [
   // Hàng 1
@@ -245,7 +245,7 @@ const FALLBACK_SEED_PRODUCTS: Product[] = [
 
 /**
  * Trang chính Thực đơn đồ uống BrewLite 2 (/menu) - Phụ trách: Duy (UC-01).
- * Responsive chuẩn xác 100% cả Frame 01 Desktop (1440px) và Frame 01 Mobile (390px).
+ * Responsive chuẩn xác 100% bản vẽ Figma Cloud: Node 3:2 Desktop (1440px) và Node 3:6 Mobile (390px).
  */
 export default function MenuPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -255,7 +255,7 @@ export default function MenuPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
-  // Hàng đợi thông báo (Toast Stack): Tối đa 8 cái xếp dọc, cái sau ở dưới, hiển thị 4.5s
+  // Hàng đợi thông báo (Toast Stack): Tối đa 8 cái xếp dọc, hiển thị 4.5s
   interface ToastItem {
     id: string;
     text: string;
@@ -283,19 +283,16 @@ export default function MenuPage() {
     setErrorMessage(null);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const params = new URLSearchParams();
-
       if (selectedCategory !== 'ALL') {
         params.append('category', selectedCategory);
       }
-
       if (debouncedKeyword) {
-        params.append('search', debouncedKeyword);
+        params.append('keyword', debouncedKeyword);
       }
 
       const queryString = params.toString();
-      const endpoint = `${apiUrl}/api/v1/products${queryString ? `?${queryString}` : ''}`;
+      const endpoint = queryString ? `/api/v1/products?${queryString}` : '/api/v1/products';
 
       const response = await fetch(endpoint, {
         method: 'GET',
@@ -310,7 +307,7 @@ export default function MenuPage() {
       const data: Product[] = await response.json();
       setProducts(data);
     } catch {
-      // Fallback nạp 18 món chuẩn Figma
+      // Fallback nạp 18 món chuẩn Figma Cloud
       let filtered = [...FALLBACK_SEED_PRODUCTS];
       if (selectedCategory !== 'ALL') {
         filtered = filtered.filter((p) => p.category === selectedCategory);
@@ -406,8 +403,8 @@ export default function MenuPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FBF9F5] text-[#182B22] font-sans flex flex-col justify-between overflow-x-hidden">
-      {/* Container hàng đợi thông báo (Toast Stack): Xếp dọc, tối đa 8 cái */}
+    <div className="min-h-screen bg-[#F3E8D4] text-[#3F3027] font-sans flex flex-col justify-between overflow-x-hidden">
+      {/* Container hàng đợi thông báo (Toast Stack): Tối đa 8 cái */}
       <div
         aria-live="polite"
         className="fixed top-16 sm:top-20 right-3 sm:right-6 z-50 flex flex-col gap-2 pointer-events-none max-h-[calc(100vh-5rem)] overflow-visible"
@@ -422,13 +419,13 @@ export default function MenuPage() {
                 : 'translate-x-[120%] opacity-0 scale-95'
             } ${
               toast.type === 'success'
-                ? 'bg-[#183B2B] text-white border-emerald-700 shadow-emerald-950/20'
+                ? 'bg-[#7D3F32] text-[#FFFAF0] border-[#914C3E] shadow-black/20'
                 : 'bg-[#B42318] text-white border-rose-700 shadow-rose-950/20'
             }`}
           >
             <div className="flex items-center gap-2 min-w-0">
               {toast.type === 'success' ? (
-                <Check className="w-4 h-4 text-emerald-400 shrink-0 stroke-[2.5]" />
+                <Check className="w-4 h-4 text-[#D9C19B] shrink-0 stroke-[2.5]" />
               ) : (
                 <AlertCircle className="w-4 h-4 text-rose-300 shrink-0 stroke-[2.5]" />
               )}
@@ -438,7 +435,7 @@ export default function MenuPage() {
             <button
               type="button"
               onClick={() => closeToast(toast.id)}
-              className="text-white/60 hover:text-white transition-colors p-0.5 rounded-full shrink-0"
+              className="text-[#FFFAF0]/70 hover:text-[#FFFAF0] transition-colors p-0.5 rounded-full shrink-0"
               aria-label="Đóng thông báo"
             >
               <X className="w-3.5 h-3.5 stroke-[2]" />
@@ -450,19 +447,18 @@ export default function MenuPage() {
       {/* Wrapper nội dung chính */}
       <div className="w-full">
         {/* ========================================================= */}
-        {/* 1. TOP HEADER NAVIGATION (Responsive chuẩn Figma)         */}
+        {/* 1. TOP HEADER NAVIGATION (Khớp 100% Figma Cloud)          */}
+        {/* Desktop: Logo Lora + Nav Text + Cart Icon & Avatar Q       */}
+        {/* Mobile: Logo Lora + Cart Icon & Avatar Q                   */}
         {/* ========================================================= */}
-        <header className="w-full bg-[#FBF9F5] py-3.5 sm:py-4 px-4 sm:px-10 lg:px-14">
+        <header className="w-full bg-[#F3E8D4] py-3.5 sm:py-4 px-4 sm:px-10 lg:px-14">
           <div className="max-w-[1360px] mx-auto flex items-center justify-between">
-            {/* Logo bên trái:
-                - Mobile: Chỉ chữ BrewLite (không có CÀ PHÊ NGUYÊN BẢN)
-                - Desktop: Chữ BrewLite kèm slogan CÀ PHÊ NGUYÊN BẢN
-            */}
+            {/* Logo bên trái */}
             <Link href="/menu" className="flex flex-col group">
-              <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#182B22] leading-none">
+              <span className="font-serif text-2xl sm:text-3xl font-extrabold tracking-tight text-[#3F3027] leading-none">
                 BrewLite
               </span>
-              <span className="hidden sm:block text-[10px] uppercase tracking-widest text-[#59665F] font-semibold mt-1">
+              <span className="hidden sm:block text-[10px] uppercase tracking-widest text-[#786B5A] font-semibold mt-1">
                 CÀ PHÊ NGUYÊN BẢN
               </span>
             </Link>
@@ -471,117 +467,90 @@ export default function MenuPage() {
             <nav className="hidden md:flex items-center gap-10 text-sm font-medium">
               <Link
                 href="/menu"
-                className="text-[#182B22] font-bold border-b-2 border-[#182B22] pb-0.5"
+                className="text-[#7D3F32] font-bold border-b-2 border-[#7D3F32] pb-0.5"
               >
                 Thực đơn
               </Link>
               <Link
                 href="/orders"
-                className="text-[#59665F] hover:text-[#182B22] transition-colors"
+                className="text-[#786B5A] hover:text-[#3F3027] transition-colors"
               >
                 Đơn hàng
               </Link>
               <Link
                 href="/rewards"
-                className="text-[#59665F] hover:text-[#182B22] transition-colors"
+                className="text-[#786B5A] hover:text-[#3F3027] transition-colors"
               >
                 Ưu đãi
               </Link>
               <Link
                 href="/profile"
-                className="text-[#59665F] hover:text-[#182B22] transition-colors"
+                className="text-[#786B5A] hover:text-[#3F3027] transition-colors"
               >
                 Tài khoản
               </Link>
             </nav>
 
-            {/* Nút Giỏ hàng bên phải:
-                - Desktop: Nút pill 'Giỏ hàng · X' (hoặc 'Giỏ hàng' khi chưa có món)
-                - Mobile: Icon túi xách, badge tròn cam xuất hiện khi có món (totalCartItems > 0)
-            */}
-            <div>
-              {/* Desktop Nút pill */}
+            {/* Cụm Tiện ích bên phải: Icon Giỏ hàng + Badge số lượng + Avatar Quỳnh (Q) */}
+            <div className="flex items-center gap-3 sm:gap-4">
+              {/* Icon Giỏ hàng có badge số lượng */}
               <Link
                 href="/cart"
-                className="hidden md:inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-[#183B2B] hover:bg-[#234D39] text-white text-xs sm:text-sm font-semibold transition-all shadow-2xs active:scale-95"
-              >
-                {totalCartItems > 0 ? `Giỏ hàng · ${totalCartItems}` : 'Giỏ hàng'}
-              </Link>
-
-              {/* Mobile Icon Túi xách kèm badge tròn cam chứa số lượng chuẩn 100% Figma */}
-              <Link
-                href="/cart"
-                className="relative md:hidden p-1 text-[#182B22] hover:opacity-80 transition-opacity flex items-center justify-center"
+                className="relative p-2 text-[#3F3027] hover:text-[#7D3F32] transition-colors flex items-center justify-center rounded-full hover:bg-[#E8D7B8]/40"
                 aria-label="Xem giỏ hàng"
               >
-                {/* SVG Icon túi mua hàng với quai cong nhô lên trên đỉnh chuẩn Figma */}
-                <svg
-                  className="w-[26px] h-[26px] shrink-0"
-                  viewBox="0 0 24 26"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  {/* Quai xách hình chữ U cong lên trên miệng túi */}
-                  <path
-                    d="M8 8.5V6C8 3.79 9.79 2 12 2C14.21 2 16 3.79 16 6V8.5"
-                    stroke="#182B22"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                  {/* Thân túi mua sắm đáy bo góc nhẹ */}
-                  <path
-                    d="M4.5 8.5H19.5L20.5 22.5C20.5 23.33 19.83 24 19 24H5C4.17 24 3.5 23.33 3.5 22.5L4.5 8.5Z"
-                    stroke="#182B22"
-                    strokeWidth="1.8"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-
-                {/* Badge tròn màu cam: chỉ hiện khi có món trong giỏ (totalCartItems > 0) */}
-                {totalCartItems > 0 && (
-                  <span className="absolute -top-1 -right-1 w-[18px] h-[18px] min-w-[18px] min-h-[18px] max-w-[18px] max-h-[18px] aspect-square rounded-full bg-[#D88236] text-white text-[10px] font-bold flex items-center justify-center leading-none shadow-xs shrink-0 select-none">
-                    {totalCartItems}
-                  </span>
-                )}
+                <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2]" />
+                <span className="absolute -top-0.5 -right-0.5 w-[18px] h-[18px] min-w-[18px] min-h-[18px] rounded-full bg-[#7D3F32] text-[#FFFAF0] text-[10px] font-bold flex items-center justify-center leading-none shadow-xs select-none">
+                  {totalCartItems}
+                </span>
               </Link>
+
+              {/* Avatar người dùng chữ Q (Quỳnh) chuẩn bản vẽ Figma Cloud */}
+              <div
+                title="Tài khoản: Quỳnh"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#7D3F32] text-[#FFFAF0] font-bold flex items-center justify-center text-xs sm:text-sm shadow-2xs select-none cursor-pointer hover:bg-[#693327] transition-colors"
+              >
+                Q
+              </div>
             </div>
           </div>
         </header>
 
         {/* ========================================================= */}
-        {/* 2. HERO BANNER CARD (Responsive chuẩn 100% Figma)         */}
-        {/* Mobile: 'Gu quen, ngày mới.', ẨN ẢNH RÓT CÀ PHÊ          */}
-        {/* Desktop: 'Cà phê nguyên bản. Một ngày thật an nhiên.'     */}
+        {/* 2. HERO BANNER CARD (Responsive chuẩn 100% Figma Cloud)   */}
+        {/* Tone nâu đỏ đất nung #7D3F32, font Lora tiêu đề           */}
+        {/* Mobile: 'Gu quen, ngày mới.', ẨN HOÀN TOÀN ẢNH RÓT CÀ PHÊ */}
+        {/* Desktop: 'Cà phê nguyên bản. Một ngày thật an nhiên.'      */}
         {/* ========================================================= */}
         <section className="w-full px-4 sm:px-10 lg:px-14 mt-1 sm:mt-2">
-          <div className="max-w-[1360px] mx-auto bg-[#183B2B] rounded-3xl overflow-hidden shadow-sm flex flex-col md:flex-row items-stretch justify-between">
+          <div className="max-w-[1360px] mx-auto bg-[#7D3F32] rounded-3xl overflow-hidden shadow-sm flex flex-col md:flex-row items-stretch justify-between">
             {/* Cột trái: Văn bản */}
             <div className="flex-1 p-6 sm:p-10 lg:p-12 flex flex-col justify-center">
-              <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-widest text-[#A3B8AB] mb-2 sm:mb-3">
+              <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-widest text-[#D9C19B] mb-2 sm:mb-3">
                 MỘT CHÚT CHẬM, MỘT CHÚT XANH
               </span>
 
               {/* Tiêu đề trên Mobile */}
-              <h1 className="md:hidden text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
+              <h1 className="md:hidden font-serif text-2xl sm:text-3xl font-bold text-[#FFFAF0] tracking-tight leading-tight">
                 Gu quen,
                 <br />
                 ngày mới.
               </h1>
 
               {/* Tiêu đề trên Desktop */}
-              <h1 className="hidden md:block text-3xl sm:text-4xl lg:text-[42px] font-extrabold text-white tracking-tight leading-[1.15]">
+              <h1 className="hidden md:block font-serif text-3xl sm:text-4xl lg:text-[40px] font-bold text-[#FFFAF0] tracking-tight leading-[1.18]">
                 Cà phê nguyên bản.
                 <br />
                 Một ngày thật an nhiên.
               </h1>
 
               {/* Mô tả Mobile */}
-              <p className="md:hidden text-xs text-[#D0D9D3] mt-2 leading-relaxed">
+              <p className="md:hidden text-xs text-[#E8D7B8] mt-2 leading-relaxed">
                 Pha riêng cho từng khoảnh khắc.
               </p>
 
               {/* Mô tả Desktop */}
-              <p className="hidden md:block text-xs sm:text-sm text-[#D0D9D3] mt-3 max-w-lg leading-relaxed">
+              <p className="hidden md:block text-xs sm:text-sm text-[#E8D7B8] mt-3 max-w-lg leading-relaxed">
                 Chọn món bạn yêu, để BrewLite chăm chút phần còn lại.
               </p>
             </div>
@@ -591,7 +560,7 @@ export default function MenuPage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/images/drinks/banner-khong-gian-brewlite.jpg"
-                alt="BrewLite Coffee Moment"
+                alt="Khoảnh khắc cà phê BrewLite"
                 className="w-full h-full object-cover"
                 loading="eager"
               />
@@ -604,18 +573,18 @@ export default function MenuPage() {
         {/* ========================================================= */}
         <section className="w-full px-4 sm:px-10 lg:px-14 mt-4 sm:mt-5">
           <div className="max-w-[1360px] mx-auto space-y-3 sm:space-y-4">
-            {/* Thông tin chi nhánh: Mobile xuống dòng, Desktop thẳng hàng */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-6 text-xs text-[#59665F]">
-              <span className="flex items-center gap-1.5 text-[#182B22] font-semibold">
-                <MapPin className="w-3.5 h-3.5 text-[#182B22]" />
+            {/* Thông tin chi nhánh */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-6 text-xs text-[#786B5A]">
+              <span className="flex items-center gap-1.5 text-[#3F3027] font-semibold">
+                <MapPin className="w-3.5 h-3.5 text-[#7D3F32]" />
                 <span>Chi nhánh Quận 1</span>
               </span>
               <span className="text-[11px] sm:text-xs">Nhận tại quầy trong khoảng 10 phút</span>
             </div>
 
-            {/* Ô tìm kiếm bo tròn viên thuốc chuẩn Figma */}
+            {/* Ô tìm kiếm bo góc 12px chuẩn Figma Cloud */}
             <div className="relative w-full">
-              <div className="absolute inset-y-0 left-0 pl-3.5 sm:pl-4 flex items-center pointer-events-none text-[#59665F]">
+              <div className="absolute inset-y-0 left-0 pl-3.5 sm:pl-4 flex items-center pointer-events-none text-[#786B5A]">
                 <Search className="w-4 h-4 stroke-[2]" />
               </div>
               <input
@@ -623,13 +592,13 @@ export default function MenuPage() {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Tìm cà phê, trà trái cây, bánh ngọt…"
-                className="w-full pl-10 sm:pl-11 pr-10 sm:pr-11 py-2.5 sm:py-3 text-xs sm:text-sm rounded-full bg-white border border-[#E5E8E1] text-[#182B22] placeholder-[#59665F]/60 focus:outline-none focus:ring-1 focus:ring-[#183B2B] shadow-2xs"
+                className="w-full pl-10 sm:pl-11 pr-10 sm:pr-11 py-2.5 sm:py-3 text-xs sm:text-sm rounded-xl bg-[#FFFAF0] border border-[#E8D7B8] text-[#3F3027] placeholder-[#786B5A]/70 focus:outline-none focus:ring-1 focus:ring-[#7D3F32] shadow-2xs"
               />
               {searchInput && (
                 <button
                   type="button"
                   onClick={() => setSearchInput('')}
-                  className="absolute inset-y-0 right-0 pr-3.5 sm:pr-4 flex items-center text-[#59665F] hover:text-[#182B22]"
+                  className="absolute inset-y-0 right-0 pr-3.5 sm:pr-4 flex items-center text-[#786B5A] hover:text-[#3F3027]"
                   aria-label="Xóa từ khóa tìm kiếm"
                 >
                   <X className="w-4 h-4" />
@@ -637,7 +606,7 @@ export default function MenuPage() {
               )}
             </div>
 
-            {/* Bộ lọc danh mục 6 pills */}
+            {/* Bộ lọc danh mục 6 tabs */}
             <CategoryFilter
               selectedCategory={selectedCategory}
               onSelectCategory={(cat) => setSelectedCategory(cat)}
@@ -646,17 +615,18 @@ export default function MenuPage() {
         </section>
 
         {/* ========================================================= */}
-        {/* 4. SECTION TIÊU ĐỀ & LƯỚI SẢN PHẨM 2 CỘT TRÊN MOBILE      */}
+        {/* 4. SECTION TIÊU ĐỀ & LƯỚI SẢN PHẨM                       */}
+        {/* Mobile: 2 cột | Desktop: 4 cột                            */}
         {/* ========================================================= */}
         <main className="w-full px-4 sm:px-10 lg:px-14 mt-5 sm:mt-7 pb-28 md:pb-16">
           <div className="max-w-[1360px] mx-auto">
-            {/* Section Header: Mobile chỉ có tiêu đề H2, Desktop có thêm dòng đếm món */}
+            {/* Section Header: Tiêu đề font Lora và dòng phụ Desktop */}
             <div className="flex items-baseline justify-between mb-4 sm:mb-5">
-              <h2 className="text-xl sm:text-2xl font-bold text-[#182B22] tracking-tight">
+              <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#3F3027] tracking-tight">
                 Hôm nay, bạn uống gì?
               </h2>
-              <span className="hidden sm:inline text-xs sm:text-sm text-[#59665F]">
-                18 món · Đủ vị cho mọi gu
+              <span className="hidden sm:inline text-xs sm:text-sm text-[#786B5A] font-medium">
+                Được chọn nhiều tại BrewLite
               </span>
             </div>
 
@@ -673,7 +643,7 @@ export default function MenuPage() {
               <EmptyState keyword={debouncedKeyword} onResetFilter={handleResetFilter} />
             )}
 
-            {/* Lưới sản phẩm: 2 CỘT TRÊN MOBILE CHUẨN FIGMA GỐC, 4 CỘT TRÊN DESKTOP! */}
+            {/* Lưới sản phẩm: 2 CỘT TRÊN MOBILE, 4 CỘT TRÊN DESKTOP CHUẨN FIGMA */}
             {!isLoading && !errorMessage && products.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-6">
                 {products.map((product) => (
@@ -690,14 +660,14 @@ export default function MenuPage() {
       </div>
 
       {/* ========================================================= */}
-      {/* 5. FOOTER DẢI BĂNG XANH RÊU ĐẬM (Chuẩn Figma đáy trang)  */}
+      {/* 5. FOOTER DẢI BĂNG NÂU ĐỎ ĐẤT NUNG (Chuẩn Figma Cloud)    */}
       {/* ========================================================= */}
-      <footer className="w-full bg-[#183B2B] text-white py-4 px-4 sm:px-10 lg:px-14">
+      <footer className="w-full bg-[#7D3F32] text-[#FFFAF0] py-4 px-4 sm:px-10 lg:px-14">
         <div className="max-w-[1360px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm">
-          <span className="font-medium text-white text-[11px] sm:text-xs">
+          <span className="font-medium text-[#FFFAF0] text-[11px] sm:text-xs">
             BrewLite · Chậm một nhịp, đậm một gu.
           </span>
-          <span className="text-[#A3B8AB] text-[11px] sm:text-xs">
+          <span className="text-[#D9C19B] text-[11px] sm:text-xs">
             Cà phê nguyên bản · Pha theo lựa chọn của bạn
           </span>
         </div>
