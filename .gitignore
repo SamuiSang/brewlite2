@@ -10,6 +10,7 @@ dist/
 build/
 coverage/
 scratch/
+*.tsbuildinfo
 # Environment variables (Never commit secrets!)
 .env
 .env.local
@@ -28,6 +29,7 @@ pnpm-debug.log*
 test-results/
 playwright-report/
 playwright/.cache/
+.playwright-mcp/
 
 # OS & IDE files
 .DS_Store

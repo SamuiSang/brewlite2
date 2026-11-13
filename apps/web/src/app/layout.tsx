@@ -18,7 +18,6 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   variable: '--font-plus-jakarta-sans',
   display: 'swap',
 });
-
 export const metadata: Metadata = {
   title: 'BrewLite – Cà phê nguyên bản',
   description: 'Hệ thống đặt đồ uống trực tuyến BrewLite – Phong cách Modern Botanical & Scandinavian Minimalist',

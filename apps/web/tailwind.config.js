@@ -8,8 +8,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        serif: ['var(--font-lora)', 'Georgia', 'serif'],
-        sans: ['var(--font-plus-jakarta-sans)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-lora)', 'Lora', 'Georgia', 'serif'],
+        sans: ['var(--font-plus-jakarta-sans)', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
       },
       colors: {
         brew: {
