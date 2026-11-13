@@ -5,7 +5,7 @@
 - **Trạng thái (Status):** Đã chấp thuận (Accepted)
 - **Ngày quyết định (Date):** 2026-11-08
 - **Tác giả (Author):** Quang (Dev Team – Phụ trách Lõi Backend, Concurrency & Module Thanh toán)
-- **Người xem xét & Phê duyệt (Reviewers):** Trần Trung Hiếu (Product Owner), Sang (Scrum Master)
+- **Người xem xét & Phê duyệt (Reviewers):** Hàn Minh Hiếu (Product Owner), Sang (Scrum Master)
 - **Phân hệ phụ trách:** Chức năng 5 (`FR-06`), Yêu cầu phi chức năng (`NFR-01`, `NFR-02`, `NFR-03`), phối hợp chặt chẽ với Chức năng 4 (`FR-05`)
 - **Tài liệu liên quan:**
   - [Đặc tả Yêu cầu SRS Summary (docs/requirements/srs-summary.md)](../../requirements/srs-summary.md)
