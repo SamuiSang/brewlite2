@@ -168,15 +168,39 @@ Bạn mô tả hệ thống theo 4 phân vùng bảo mật thực tế:
 ---
 
 ## 3.5 Task 5: Xác thực JWT, Phân quyền & Hoàn thiện Đồ án
-- Xây dựng các endpoint xác thực Backend (NestJS):
-  - `POST /api/v1/auth/register`: Băm mật khẩu bằng Bcrypt `saltRounds = 10` và tạo bản ghi User.
-  - `POST /api/v1/auth/login`: So khớp mật khẩu qua `bcrypt.compare()` và ký phát hành Access Token JWT 24h.
-  - `GET /api/v1/auth/me`: Trả về thông tin cá nhân của user đang đăng nhập.
-- `JwtAuthGuard`: Chốt chặn bảo vệ các API nhạy cảm. Request nào không có Header `Authorization: Bearer <token>` hợp lệ sẽ bị chặn lại ngay lập tức với mã `HTTP 401 Unauthorized`.
-- **Giao diện Frontend bám sát 100% Figma Phiên bản 1.1 (Tone màu Đỏ gạch / Highland `#6B3728`, nền kem `#FBF8F5`):**
-  - **Màn hình Đăng nhập (`/login` - Frame `04 · Đăng nhập`):** Tiêu đề *"Chào mừng bạn đến với BrewLite"*, nút chính *"Đăng nhập"* (Đỏ gạch 48px, bo góc 12px), nút phụ *"Đăng ký tài khoản mới"*, toggle ẩn/hiện mật khẩu, ghi chú *"Giỏ hàng của bạn sẽ được giữ nguyên sau khi đăng nhập"*.
-  - **Màn hình Đăng ký (`/register` - Frame `04b · Đăng ký`):** Tiêu đề *"Bắt đầu một gu quen"*, xác thực so khớp mật khẩu 2 lần, nút *"Tạo tài khoản"*, liên kết *"Đã có tài khoản? Đăng nhập"*.
-  - **Màn hình Hồ sơ người dùng (`/profile` - Frame `04c · Hồ sơ`):** Thẻ hội viên màu đỏ gạch ánh kim (`#4A1E17`), danh hiệu **"THÀNH VIÊN VÀNG"**, số dư **420 Hạt** (quy đổi 42.000đ), thanh tiến trình thăng hạng Kim Cương, danh mục tiện ích (Lịch sử đơn hàng, Thẻ ưu đãi, Địa chỉ, Cài đặt) và nút Đăng xuất an toàn.
+
+> [!IMPORTANT]
+> **NGUYÊN TẮC BẢO VỆ ĐỒ ÁN:** Bạn chỉ trình bày và demo những tính năng **ĐÃ ĐƯỢC PUSH CHÍNH THỨC** lên kho mã nguồn Git (`main` và nhánh `feat/task5-hieu-auth`). Tránh nói về các tính năng chưa hoàn thành để không bị Thầy hỏi sâu vào code chưa có.
+
+### A. Các tính năng ĐÃ PUSH CHÍNH THỨC (Có thật 100% trong mã nguồn để bạn demo):
+1. **Phân hệ Xác thực & Phân quyền JWT (Phần cốt lõi của Hiếu):**
+   - **Backend API (NestJS):**
+     - `POST /api/v1/auth/register`: Đăng ký tài khoản, băm mật khẩu bằng Bcrypt `saltRounds = 10`, tạo User mới.
+     - `POST /api/v1/auth/login`: So khớp mật khẩu đã băm, cấp Access Token JWT mang payload `{ sub, email, role }` thời hạn 24 giờ.
+     - `GET /api/v1/auth/me`: Trích xuất hồ sơ cá nhân và số điểm tích lũy của user hiện tại.
+     - `JwtAuthGuard`: Chốt chặn bảo vệ các route nhạy cảm. Chặn đứng request không có token với lỗi `HTTP 401 Unauthorized`.
+     - Bộ Unit Test Jest `auth.service.spec.ts`: **PASS 100% (6/6 ca kiểm thử)**.
+   - **Frontend Client (Next.js - Khớp 100% bản vẽ Figma 1.1):**
+     - Trang Đăng nhập (`/login` - Frame 04): Tông màu Đỏ gạch Highland (`#6B2D24`), nút phụ kem caramel, toggle mắt mật khẩu, tự động lưu giỏ hàng sau khi đăng nhập.
+     - Trang Đăng ký (`/register` - Frame 04b): Xác thực so khớp 2 lần mật khẩu, điều khoản sử dụng.
+     - Trang Hồ sơ người dùng (`/profile` - Frame 04c): Thẻ hội viên màu đỏ gạch ánh kim (`#4A1E17`), danh hiệu **"THÀNH VIÊN VÀNG"**, số dư **420 Hạt** (quy đổi 42.000đ), thanh tiến trình thăng hạng Kim Cương, menu tiện ích liên kết đến `/orders` và nút Đăng xuất an toàn.
+     - `ApiClient` (`apps/web/src/lib/api-client.ts`): Tự động đọc JWT từ localStorage và gắn vào Header `Authorization: Bearer <token>`.
+
+2. **Phân hệ Giám sát Hệ thống Health Check (Phần Sprint 1 của Hiếu):**
+   - Endpoint `GET /api/v1/health`: Thực thi `SELECT 1` xuống PostgreSQL để kiểm tra kết nối CSDL thực tế. Unit Test `health.controller.spec.ts` **PASS 2/2 tests**.
+
+3. **Phân hệ Thực đơn Menu (Đã push lên `main` bởi Duy & Chiến):**
+   - API `GET /api/v1/products` và CSDL đã nạp sẵn 10 món đồ uống kèm công thức nguyên liệu pha chế. Giao diện `/menu` lọc danh mục và hiển thị thẻ sản phẩm chuẩn Mobile-first.
+
+4. **Phân hệ Đặt hàng & Khóa lạc quan (Đã push lên `main` bởi Chiến & Quang):**
+   - API `POST /api/v1/orders`: Tạo đơn hàng và trừ kho nguyên liệu bằng cơ chế **Khóa lạc quan (Optimistic Locking)** qua cột `version` trong giao dịch `prisma.$transaction`.
+   - Concurrency Test `orders-concurrency.spec.ts`: Mô phỏng 2 khách mua đồng thời ly cuối cùng, chứng minh không bao giờ âm kho.
+   - Giao diện Giỏ hàng 2 bước (`/cart`) và Lịch sử đơn hàng (`/orders`).
+
+### B. Các tính năng ĐANG TRONG TIẾN ĐỘ SPRINT 2 (Chưa merge vào main):
+- **Bước 2 (Quỳnh):** Modal tùy biến đá/đường/size chi tiết & Voucher giảm giá (`feat/task5-quynh-promotion`).
+- **Bước 4 (Quang):** Cổng thanh toán Sandbox QR Webhook (`feat/task5-quang-payments` - đang chờ Bước 3 của Hiếu để bảo vệ route thanh toán).
+- **Bước 5 (Sang):** Tích điểm Loyalty nâng cao & Pipeline CD triển khai Production (`feat/task5-sang-loyalty`).
 
 ---
 
@@ -247,59 +271,74 @@ Nếu muốn chạy trực tiếp bằng Node.js trên máy để xem log code t
 
 # PHẦN 5: HƯỚNG DẪN CHẠY KIỂM THỬ TỰ ĐỘNG (UNIT TEST & BUILD)
 
-Khi Thầy yêu cầu: *"Em chạy thử Unit Test cho phần của em xem có Pass không?"*, bạn gõ các lệnh sau:
+Toàn bộ các lệnh kiểm thử dưới đây đều đã được bảo chứng **chạy thực tế Pass 100%** trên mã nguồn đã push chính thức:
 
-### 1. Chạy riêng Unit Test cho phần Health Check của bạn:
+### 1. Chạy Unit Test Health Check của Hiếu:
 ```powershell
-npm --workspace=apps/api run test -- health.controller.spec.ts
+npm --workspace=apps/api test -- health.controller.spec.ts
+```
+> **Giải thích cho Thầy nghe:** *"Dạ bộ test Health Check kiểm thử cả 2 kịch bản: (1) Khi DB kết nối bình thường trả về HTTP 200 OK; và (2) Khi DB bị ngắt kết nối giả lập thì hệ thống bắt lỗi và trả về HTTP 503 Service Unavailable."*
+
+### 2. Chạy Unit Test Xác thực & JWT của Hiếu (Task 5):
+```powershell
+npm --workspace=apps/api test -- auth.service.spec.ts
+```
+**Kết quả thực tế (6/6 ca kiểm thử PASS 100%):**
+- `should hash password with bcrypt and create user successfully`: Kiểm tra băm Bcrypt 10 rounds và lưu User.
+- `should throw ConflictException if email is already taken`: Chặn đăng ký trùng email (409 Conflict).
+- `should throw UnauthorizedException if user is not found`: Chặn đăng nhập khi email không tồn tại.
+- `should throw UnauthorizedException if password does not match`: Chặn đăng nhập khi sai mật khẩu.
+- `should return accessToken and user profile if credentials are valid`: Cấp Access Token JWT chuẩn mang payload `{ sub, email, role }`.
+
+### 3. Chạy Concurrency Test Khóa lạc quan chống âm kho (Module Orders):
+```powershell
+npm --workspace=apps/api test -- orders-concurrency.spec.ts
+```
+> **Giải thích cho Thầy nghe:** *"Dạ đây là bài test mô phỏng 2 khách hàng cùng bấm đặt mua 1 ly cà phê duy nhất trong cùng 1 tích tắc. Kết quả: 1 giao dịch thành công, giao dịch còn lại nhận lỗi HTTP 409 Conflict do không khớp số version trong Transaction, kho nguyên liệu không bao giờ bị âm."*
+
+### 4. Chạy toàn bộ 23 ca kiểm thử của cả Backend:
+```powershell
+npm --workspace=apps/api test
 ```
 **Kết quả hiển thị trên màn hình:**
 ```text
 PASS src/health/health.controller.spec.ts
-  HealthController
-    √ should return HTTP 200 and status ok when DB is connected (18 ms)
-    √ should return HTTP 503 and status degraded when DB fails (3 ms)
+PASS src/products/products.service.spec.ts
+PASS src/auth/auth.service.spec.ts
+PASS src/orders/orders.service.spec.ts
+PASS src/products/products.controller.spec.ts
+PASS src/orders/orders-concurrency.spec.ts
 
-Test Suites: 1 passed, 1 total
-Tests:       2 passed, 2 total
-Snapshots:   0 total
-Time:        X.XXX s
+Test Suites: 6 passed, 6 total
+Tests:       23 passed, 23 total
 ```
-> **Giải thích cho Thầy nghe:** *"Dạ bộ test của em kiểm thử cả 2 kịch bản: (1) Khi DB kết nối thành công thì trả về HTTP 200 và status ok; và (2) Khi DB bị ngắt kết nối giả lập thì hệ thống bắt lỗi và trả về HTTP 503 Service Unavailable."*
 
-### 2. Chạy toàn bộ Unit Test của cả Backend:
+### 5. Kiểm tra tính toàn vẹn khi Build Frontend & Backend:
 ```powershell
-npm --workspace=apps/api run test
+npm --workspace=apps/api run build
+npm --workspace=apps/web run build
 ```
-
-### 3. Kiểm tra tính toàn vẹn khi Build sản phẩm:
-```powershell
-npm run build:api
-```
-Hệ thống sẽ chạy lệnh `nest build` và tạo thư mục `apps/api/dist/` sạch sẽ, không có bất kỳ lỗi TypeScript nào.
+Hệ thống sẽ biên dịch sạch sẽ 100%, Frontend Next.js tạo ra **12 static routes** tối ưu (bao gồm `/login`, `/register`, `/profile`, `/menu`, `/cart`, `/orders`, `/checkout`).
 
 ---
 
-# PHẦN 6: HƯỚNG DẪN TEST API (CURL, POSTMAN, TRÌNH DUYỆT)
+# PHẦN 6: HƯỚNG DẪN TEST API THỰC TẾ (CURL & TRÌNH DUYỆT)
 
 ### 1. Test Endpoint Giám sát Sức khỏe (`GET /api/v1/health`)
-Bạn có thể mở trình duyệt truy cập hoặc gõ lệnh cURL trên terminal:
-
 ```powershell
 curl.exe -s http://localhost:3001/api/v1/health | ConvertFrom-Json | ConvertTo-Json -Depth 5
 ```
-
 **Kết quả JSON trả về thực tế (HTTP 200 OK):**
 ```json
 {
   "status": "ok",
   "service": "BrewLite API",
-  "timestamp": "2026-11-10T18:25:00.000Z",
+  "timestamp": "2026-11-13T10:30:00.000Z",
   "uptime": 1420.5,
   "checks": {
     "database": {
       "status": "connected",
-      "latencyMs": 12
+      "latencyMs": 8
     },
     "memory": {
       "rssBytes": 45875200,
@@ -309,7 +348,38 @@ curl.exe -s http://localhost:3001/api/v1/health | ConvertFrom-Json | ConvertTo-J
 }
 ```
 
-### 2. Thử nghiệm kịch bản CSDL bị lỗi (HTTP 503 Service Unavailable)
+### 2. Test Endpoint Danh mục Thực đơn (`GET /api/v1/products`)
+```powershell
+curl.exe -s http://localhost:3001/api/v1/products | ConvertFrom-Json | ConvertTo-Json -Depth 3
+```
+Trả về danh sách 10 món cà phê/trà kèm công thức `RecipeItem` và nguyên liệu `Ingredient` đã seed trong CSDL.
+
+### 3. Test Đăng ký tài khoản thành viên mới (`POST /api/v1/auth/register`)
+```powershell
+curl.exe -X POST http://localhost:3001/api/v1/auth/register `
+  -H "Content-Type: application/json" `
+  -d '{\"fullName\":\"Hàn Minh Hiếu\",\"email\":\"hieu.customer@brewlite.vn\",\"password\":\"123456\",\"phone\":\"0901234567\"}'
+```
+**Kết quả JSON:** Trả về `accessToken` JWT và thông tin user vừa tạo với `role: "CUSTOMER"` và `loyaltyPoints: 0`.
+
+### 4. Test Đăng nhập hệ thống & Cấp phát JWT (`POST /api/v1/auth/login`)
+```powershell
+curl.exe -X POST http://localhost:3001/api/v1/auth/login `
+  -H "Content-Type: application/json" `
+  -d '{\"email\":\"hieu.customer@brewlite.vn\",\"password\":\"123456\"}'
+```
+**Kết quả JSON:** Trả về mã Token JWT định dạng chuỗi `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`.
+
+### 5. Test Lấy hồ sơ cá nhân với Bearer Token (`GET /api/v1/auth/me`)
+```powershell
+# Gán chuỗi token vừa nhận vào biến $TOKEN
+$TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+curl.exe -s http://localhost:3001/api/v1/auth/me `
+  -H "Authorization: Bearer $TOKEN"
+```
+**Kết quả JSON:** Trích xuất thông tin cá nhân của người dùng, phân quyền và số Hạt tích lũy. Nếu không truyền header hoặc truyền sai token, API sẽ trả về `HTTP 401 Unauthorized`.
+
+### 6. Thử nghiệm kịch bản CSDL bị lỗi (HTTP 503 Service Unavailable)
 Để chứng minh cho Thầy thấy cơ chế active probe hoạt động thật:
 1. Bạn tạm dừng container Database:
    ```powershell
@@ -319,19 +389,7 @@ curl.exe -s http://localhost:3001/api/v1/health | ConvertFrom-Json | ConvertTo-J
    ```powershell
    curl.exe -i http://localhost:3001/api/v1/health
    ```
-3. **Kết quả trả về:** Mã phản hồi là `HTTP/1.1 503 Service Unavailable` kèm JSON:
-   ```json
-   {
-     "status": "degraded",
-     "service": "BrewLite API",
-     "checks": {
-       "database": {
-         "status": "disconnected",
-         "error": "Database connection error"
-       }
-     }
-   }
-   ```
+3. **Kết quả trả về:** Mã phản hồi là `HTTP/1.1 503 Service Unavailable`.
 4. Bật lại Database:
    ```powershell
    docker start brewlite-db

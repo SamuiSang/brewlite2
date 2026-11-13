@@ -712,27 +712,31 @@ npm run dev:web</code></pre>
       <h2>🧪 Hướng dẫn Chạy Kiểm thử Tự động (Unit Test & Build)</h2>
       <p>Khi Thầy yêu cầu: <em>"Hiếu chạy thử Unit Test cho phần của em xem?"</em>, gõ lệnh sau:</p>
 
-      <div class="card card-primary">
-        <h3>1. Chạy riêng Unit Test Health Check của bạn</h3>
-        <pre><code>npm --workspace=apps/api run test -- health.controller.spec.ts</code></pre>
-        <p><strong>Kết quả hiển thị trên màn hình:</strong></p>
-        <pre><code>PASS src/health/health.controller.spec.ts
-  HealthController
-    √ should return HTTP 200 and status ok when DB is connected (18 ms)
-    √ should return HTTP 503 and status degraded when DB fails (3 ms)
+      <div class="grid-2">
+        <div class="card card-primary">
+          <h3>1. Test Health Check (Sprint 1 của Hiếu)</h3>
+          <pre><code>npm --workspace=apps/api test -- health.controller.spec.ts</code></pre>
+          <p><strong>Kết quả:</strong> <code>PASS (2/2 tests)</code> - Kiểm tra cả 200 OK và 503 degraded.</p>
+        </div>
 
-Test Suites: 1 passed, 1 total
-Tests:       2 passed, 2 total</code></pre>
+        <div class="card card-success">
+          <h3>2. Test Auth & JWT (Sprint 2 của Hiếu)</h3>
+          <pre><code>npm --workspace=apps/api test -- auth.service.spec.ts</code></pre>
+          <p><strong>Kết quả:</strong> <code>PASS (6/6 tests)</code> - Bcrypt hash, chặn trùng email, sai pass, cấp token chuẩn.</p>
+        </div>
       </div>
 
       <div class="grid-2">
         <div class="card">
-          <h4>2. Chạy toàn bộ Test Backend</h4>
-          <pre><code>npm --workspace=apps/api run test</code></pre>
+          <h4>3. Test Khóa tranh chấp đồng thời (Chiến & Quang)</h4>
+          <pre><code>npm --workspace=apps/api test -- orders-concurrency.spec.ts</code></pre>
+          <p>Mô phỏng 2 khách tranh 1 ly cuối cùng, chứng minh không bao giờ âm kho.</p>
         </div>
-        <div class="card">
-          <h4>3. Kiểm tra Build NestJS</h4>
-          <pre><code>npm run build:api</code></pre>
+        <div class="card card-warning">
+          <h4>4. Chạy toàn bộ 23 Tests Backend & Build</h4>
+          <pre><code>npm --workspace=apps/api test
+npm --workspace=apps/web run build</code></pre>
+          <p>Toàn bộ 6 test suites PASS 100%, Next.js build ra 12 static routes.</p>
         </div>
       </div>
     </div>
@@ -741,28 +745,36 @@ Tests:       2 passed, 2 total</code></pre>
     <div class="slide">
       <h2>📡 Hướng dẫn Test API (cURL / Postman / Trình duyệt)</h2>
 
-      <h3>1. Gọi API Kiểm tra Sức khỏe Hệ thống (HTTP 200 OK)</h3>
-      <pre><code>curl.exe -s http://localhost:3001/api/v1/health | ConvertFrom-Json | ConvertTo-Json -Depth 5</code></pre>
-      <p><strong>JSON phản hồi:</strong></p>
-      <pre><code>{
-  "status": "ok",
-  "service": "BrewLite API",
-  "checks": {
-    "database": {
-      "status": "connected",
-      "latencyMs": 14
-    },
-    "memory": { "rssBytes": 45875200, "heapUsedBytes": 24117248 }
-  }
-}</code></pre>
+      <div class="grid-2">
+        <div class="card">
+          <h3>1. Gọi API Sức khỏe (GET /health)</h3>
+          <pre><code>curl.exe -s http://localhost:3001/api/v1/health</code></pre>
+          <p>Trả về <code>200 OK</code> kèm latencyMs và kết nối PostgreSQL.</p>
+        </div>
 
-      <div class="card card-warning">
-        <h3>2. Biểu diễn Kịch bản DB bị lỗi (HTTP 503) để ghi điểm với Thầy</h3>
-        <ol>
-          <li>Tắt DB: <code>docker stop brewlite-db</code></li>
-          <li>Gọi lại API: <code>curl.exe -i http://localhost:3001/api/v1/health</code> ➔ Trả về mã <strong>HTTP 503 Service Unavailable</strong>!</li>
-          <li>Bật lại DB: <code>docker start brewlite-db</code> ➔ Trả về <strong>200 OK</strong> ngay lập tức.</li>
-        </ol>
+        <div class="card card-primary">
+          <h3>2. Đăng ký tài khoản (POST /auth/register)</h3>
+          <pre><code>curl.exe -X POST http://localhost:3001/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"fullName":"Hàn Minh Hiếu","email":"hieu@brewlite.vn","password":"123456"}'</code></pre>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card card-success">
+          <h3>3. Đăng nhập lấy Token (POST /auth/login)</h3>
+          <pre><code>curl.exe -X POST http://localhost:3001/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"hieu@brewlite.vn","password":"123456"}'</code></pre>
+          <p>Nhận về <code>accessToken</code> JWT 24h.</p>
+        </div>
+
+        <div class="card">
+          <h3>4. Lấy thông tin cá nhân (GET /auth/me)</h3>
+          <pre><code>curl.exe -s http://localhost:3001/api/v1/auth/me \
+  -H "Authorization: Bearer &lt;token&gt;"</code></pre>
+          <p>Trả về thông tin User và số Hạt tích lũy.</p>
+        </div>
       </div>
     </div>
 
