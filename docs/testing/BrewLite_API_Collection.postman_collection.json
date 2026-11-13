@@ -1,0 +1,436 @@
+{
+  "info": {
+    "_postman_id": "brewlite2-api-collection-hieu",
+    "name": "BrewLite 2 – API Testing Collection (Hàn Minh Hiếu)",
+    "description": "Bộ sưu tập kiểm thử API toàn diện cho Đồ án BrewLite 2 (Assignment 2 - Thầy Phiêu).\nBao gồm đầy đủ 10 endpoint đã được push chính thức: Health Check, Xác thực JWT & Profile (Module 3 - Hiếu), Danh mục Thực đơn (Module 1 - Duy/Chiến), và Khởi tạo Đơn hàng (Module 4 - Chiến/Quang).\n\nCó tích hợp sẵn Test Script tự động lưu AccessToken JWT vào biến môi trường để gọi tiếp các API bảo mật mà không cần copy/paste thủ công.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sampleOrderId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01. Giám sát Hệ thống (Health Check)",
+      "item": [
+        {
+          "name": "GET Health Check (Active Probe DB)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Hệ thống và Database đều hoạt động (status = ok)\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.status).to.eql(\"ok\");",
+                  "    pm.expect(json.checks.database.status).to.eql(\"connected\");",
+                  "    pm.expect(json.checks.database.latencyMs).to.be.a(\"number\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Endpoint kiểm tra sống còn và tính sẵn sàng của hệ thống (Task 4.3 của Hiếu). Thực hiện câu lệnh SELECT 1 xuống PostgreSQL."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02. Xác thực & Hồ sơ Hội viên (Module 3 - Hàn Minh Hiếu)",
+      "item": [
+        {
+          "name": "POST Đăng ký tài khoản (Register)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Trả về Token JWT và lưu tự động vào biến môi trường\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"accessToken\");",
+                  "    pm.expect(json.user.email).to.be.a(\"string\");",
+                  "    pm.collectionVariables.set(\"accessToken\", json.accessToken);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Hàn Minh Hiếu\",\n  \"email\": \"hieu.customer@brewlite.vn\",\n  \"password\": \"123456\",\n  \"phone\": \"0901234567\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Đăng ký tài khoản thành viên mới. Mật khẩu được băm Bcrypt 10 rounds."
+          },
+          "response": []
+        },
+        {
+          "name": "POST Đăng nhập lấy Token (Login Success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Cấp phát Access Token JWT 24h hợp lệ\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"accessToken\");",
+                  "    pm.collectionVariables.set(\"accessToken\", json.accessToken);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hieu.customer@brewlite.vn\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Đăng nhập hệ thống, so khớp Bcrypt hash và phát hành JWT Access Token."
+          },
+          "response": []
+        },
+        {
+          "name": "POST Đăng nhập thất bại (Sai mật khẩu - 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "pm.test(\"Thông báo lỗi bảo mật chung\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.message).to.include(\"không chính xác\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hieu.customer@brewlite.vn\",\n  \"password\": \"wrong_password_999\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Kiểm tra ca kiểm thử tiêu cực (Negative Test Case): Khi nhập sai mật khẩu, hệ thống chặn 401 Unauthorized và trả về thông báo lỗi chung để chống rò rỉ thông tin người dùng."
+          },
+          "response": []
+        },
+        {
+          "name": "GET Hồ sơ cá nhân (/auth/me - Cần Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Trích xuất đúng thông tin người dùng và Hạt tích lũy\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"email\");",
+                  "    pm.expect(json).to.have.property(\"role\");",
+                  "    pm.expect(json).to.have.property(\"loyaltyPoints\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Endpoint lấy thông tin cá nhân và điểm thưởng. Được bảo vệ bởi JwtAuthGuard. Tự động đọc {{accessToken}} vừa lấy từ bước Login."
+          },
+          "response": []
+        },
+        {
+          "name": "GET Kiểm tra Token (/auth/verify)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Trạng thái Token là valid\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.status).to.eql(\"valid\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "verify"]
+            },
+            "description": "Endpoint xác nhận hiệu lực của Token JWT phục vụ cho các service nội bộ."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03. Thực đơn & Sản phẩm (Module 1 - Duy & Chiến)",
+      "item": [
+        {
+          "name": "GET Danh sách Món (All Products)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Danh sách trả về tối thiểu 10 món\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.be.an(\"array\");",
+                  "    pm.expect(json.length).to.be.at.least(10);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"]
+            },
+            "description": "Lấy toàn bộ thực đơn 10 món kèm định mức tồn kho nguyên liệu pha chế."
+          },
+          "response": []
+        },
+        {
+          "name": "GET Lọc theo Danh mục (Category = COFFEE)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Tất cả sản phẩm trả về thuộc COFFEE hoặc ESPRESSO\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?category=COFFEE",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "COFFEE"
+                }
+              ]
+            },
+            "description": "Lọc thực đơn theo danh mục cà phê."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04. Đặt hàng & Giao dịch (Module 4 - Chiến & Quang)",
+      "item": [
+        {
+          "name": "POST Tạo đơn hàng (Create Order & Khóa kho)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Đơn hàng khởi tạo thành công với mã orderCode BL-XXXX\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.order).to.have.property(\"id\");",
+                  "    pm.expect(json.order).to.have.property(\"orderCode\");",
+                  "    pm.expect(json.order.status).to.eql(\"PENDING\");",
+                  "    pm.collectionVariables.set(\"sampleOrderId\", json.order.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"00000000-0000-0000-0000-000000000001\",\n      \"size\": \"M\",\n      \"sugarLevel\": \"50%\",\n      \"iceLevel\": \"100%\",\n      \"quantity\": 1\n    }\n  ],\n  \"deliveryMethod\": \"PICKUP\",\n  \"note\": \"Uống ít đường, xin thêm đá riêng\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"]
+            },
+            "description": "Tạo đơn hàng mới, tính toán lại tổng tiền tại Business Layer và trừ kho nguyên liệu bằng Optimistic Locking trong Database Transaction."
+          },
+          "response": []
+        },
+        {
+          "name": "GET Tra cứu Đơn theo Mã (Order BL-8924)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK hoặc 404 nếu chưa nạp mã\", function () {",
+                  "    pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/code/BL-8924",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "code", "BL-8924"]
+            },
+            "description": "Tra cứu thông tin đơn hàng theo mã công khai BL-8924 khớp Figma 07c."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
