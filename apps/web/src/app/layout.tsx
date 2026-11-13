@@ -5,8 +5,7 @@ import './globals.css';
 
 // Font tiêu đề cổ điển, sang trọng chuẩn bản vẽ Figma Cloud BrewLite 2
 const lora = Lora({
-  subsets: ['latin', 'vietnamese'],
-  weight: ['400', '500', '600', '700'],
+  subsets: ['latin'],
   variable: '--font-lora',
   display: 'swap',
 });

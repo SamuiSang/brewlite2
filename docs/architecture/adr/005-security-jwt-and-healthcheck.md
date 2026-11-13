@@ -4,7 +4,7 @@
 
 - **Trạng thái (Status):** Đã chấp thuận (Accepted)
 - **Ngày quyết định (Date):** 2026-11-08
-- **Tác giả (Author):** Trần Trung Hiếu (Product Owner / Fullstack Dev – Phụ trách Module 3: Xác thực Người dùng & Giám sát Hệ thống)
+- **Tác giả (Author):** Hàn Minh Hiếu (Product Owner / Fullstack Dev – Phụ trách Module 3: Xác thực Người dùng & Giám sát Hệ thống)
 - **Người xem xét & Phê duyệt (Reviewers):** Sang (Scrum Master), Quang (Backend Lead), Duy (Frontend Lead)
 - **Phân hệ phụ trách:** Chức năng 3 (`FR-04`), Yêu cầu phi chức năng (`NFR-02`, `NFR-03`, `NFR-05`), Task 3.1 & Task 5.2
 - **Tài liệu liên quan:**
