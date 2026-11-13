@@ -10,6 +10,7 @@ import { ProductCard } from '../../components/ProductCard';
 import { SkeletonLoading, EmptyState, ErrorState } from '../../components/UIStates';
 import { useCartStore } from '../../lib/store';
 import { FloatingCartBar } from '../../components/FloatingCartBar';
+import ProductCustomizationModal from '../../components/ProductCustomizationModal';
 
 /**
  * Danh sách 18 món thực đơn BrewLite 2 khớp 100% bản thiết kế Figma Cloud (BdBtjCNyz1miLp27sp0Hzp).
@@ -266,7 +267,8 @@ export default function MenuPage() {
 
   // Zustand Store kết nối giỏ hàng
   const totalCartItems = useCartStore((state) => state.getTotalItems());
-  const addItem = useCartStore((state) => state.addItem);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  useEffect(() => { void useCartStore.persist.rehydrate(); }, []);
 
   // Debounce 300ms cho ô tìm kiếm
   useEffect(() => {
@@ -389,21 +391,12 @@ export default function MenuPage() {
       return;
     }
 
-    addItem({
-      productId: product.id,
-      name: product.name,
-      category: product.category,
-      imageUrl: product.imageUrl,
-      size: 'S',
-      unitPrice: product.basePrice,
-      quantity: 1,
-    });
-
-    showToast(`Đã thêm 1 "${product.name}" vào giỏ hàng!`, 'success');
+    setSelectedProduct(product);
   };
 
   return (
     <div className="min-h-screen bg-[#F3E8D4] text-[#3F3027] font-sans flex flex-col justify-between overflow-x-hidden">
+      {selectedProduct && <ProductCustomizationModal product={selectedProduct} toppings={[]} onClose={() => setSelectedProduct(null)} />}
       {/* Container hàng đợi thông báo (Toast Stack): Tối đa 8 cái */}
       <div
         aria-live="polite"
