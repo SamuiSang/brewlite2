@@ -20,12 +20,11 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: process.env.JWT_SECRET || 'brewlite_jwt_secret_dev_key',
-      });
+      const payload = await this.jwtService.verifyAsync(token);
       // Gắn payload người dùng vào request để các controller phía sau sử dụng (req.user)
       request['user'] = payload;
-    } catch {
+    } catch (err: any) {
+      console.error('[JwtAuthGuard Error]:', err?.message);
       throw new UnauthorizedException('Token không hợp lệ hoặc đã hết hạn.');
     }
 
