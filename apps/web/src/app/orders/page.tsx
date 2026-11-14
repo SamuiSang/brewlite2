@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Check, Clock, QrCode, Store, ChevronRight, RotateCcw } from 'lucide-react';
 import { useCartStore } from '../../lib/store';
+import { UserNav } from '../../components/UserNav';
 
 export default function OrdersPage() {
   const [activeTab, setActiveTab] = useState<'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'>('IN_PROGRESS');
@@ -66,11 +67,12 @@ export default function OrdersPage() {
           <Link href="/menu" className="font-serif text-[24px] lg:text-[30px] font-bold text-[#7D3F32] tracking-tight">
             BrewLite
           </Link>
-          <nav className="hidden lg:flex gap-8 text-[14px] text-[#786B5A] font-medium">
+          <nav className="hidden lg:flex items-center gap-7 text-[14px] text-[#786B5A] font-medium">
             <Link href="/menu" className="hover:text-[#7D3F32] transition-colors">Thực đơn</Link>
             <Link href="/orders" className="font-semibold text-[#7D3F32]">Đơn hàng</Link>
-            <span className="hover:text-[#7D3F32] cursor-pointer transition-colors">Ưu đãi</span>
-            <span className="hover:text-[#7D3F32] cursor-pointer transition-colors">Tài khoản</span>
+            <Link href="/profile?tab=vouchers" className="hover:text-[#7D3F32] transition-colors">Ưu đãi</Link>
+            <Link href="/profile" className="hover:text-[#7D3F32] transition-colors">Tài khoản</Link>
+            <UserNav />
           </nav>
         </div>
 
