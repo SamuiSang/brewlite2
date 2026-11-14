@@ -11,6 +11,7 @@ import { SkeletonLoading, EmptyState, ErrorState } from '../../components/UIStat
 import { useCartStore } from '../../lib/store';
 import { FloatingCartBar } from '../../components/FloatingCartBar';
 import ProductCustomizationModal from '../../components/ProductCustomizationModal';
+import { UserNav } from '../../components/UserNav';
 
 /**
  * Danh sách 18 món thực đơn BrewLite 2 khớp 100% bản thiết kế Figma Cloud (BdBtjCNyz1miLp27sp0Hzp).
@@ -499,13 +500,8 @@ export default function MenuPage() {
                 </span>
               </Link>
 
-              {/* Avatar người dùng chữ Q (Quỳnh) chuẩn bản vẽ Figma Cloud */}
-              <div
-                title="Tài khoản: Quỳnh"
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#7D3F32] text-[#FFFAF0] font-bold flex items-center justify-center text-xs sm:text-sm shadow-2xs select-none cursor-pointer hover:bg-[#693327] transition-colors"
-              >
-                Q
-              </div>
+              {/* Avatar người dùng có Dropdown Menu tương tác chuẩn Figma */}
+              <UserNav />
             </div>
           </div>
         </header>

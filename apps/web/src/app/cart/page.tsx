@@ -25,6 +25,7 @@ import { useCartStore, CartItem, cartItemKey, getMaxQuantity } from '../../lib/s
 import VoucherInput from '../../components/VoucherInput';
 import ProductCustomizationModal from '../../components/ProductCustomizationModal';
 import type { Product } from '../../types/product';
+import { UserNav } from '../../components/UserNav';
 
 export default function CartPage() {
   const router = useRouter();
@@ -142,11 +143,12 @@ export default function CartPage() {
             <Link href="/menu" className="font-serif text-[24px] sm:text-[30px] font-bold text-[#7D3F32] tracking-tight">
               BrewLite
             </Link>
-            <nav className="hidden sm:flex gap-8 text-[14px] text-[#786B5A] font-medium">
+            <nav className="hidden sm:flex items-center gap-7 text-[14px] text-[#786B5A] font-medium">
               <Link href="/menu" className="hover:text-[#7D3F32] transition-colors">Thực đơn</Link>
               <Link href="/orders" className="hover:text-[#7D3F32] transition-colors">Đơn hàng</Link>
-              <span className="hover:text-[#7D3F32] cursor-pointer transition-colors">Ưu đãi</span>
-              <span className="hover:text-[#7D3F32] cursor-pointer transition-colors">Tài khoản</span>
+              <Link href="/profile?tab=vouchers" className="hover:text-[#7D3F32] transition-colors">Ưu đãi</Link>
+              <Link href="/profile" className="hover:text-[#7D3F32] transition-colors">Tài khoản</Link>
+              <UserNav />
             </nav>
           </header>
 
@@ -264,11 +266,12 @@ export default function CartPage() {
             <Link href="/menu" className="font-serif text-[24px] lg:text-[30px] font-bold text-[#7D3F32] tracking-tight">
               BrewLite
             </Link>
-            <nav className="hidden lg:flex gap-8 text-[14px] text-[#786B5A] font-medium">
+            <nav className="hidden lg:flex items-center gap-7 text-[14px] text-[#786B5A] font-medium">
               <Link href="/menu" className="hover:text-[#7D3F32] transition-colors">Thực đơn</Link>
               <Link href="/orders" className="hover:text-[#7D3F32] transition-colors">Đơn hàng</Link>
-              <span className="hover:text-[#7D3F32] cursor-pointer transition-colors">Ưu đãi</span>
-              <span className="hover:text-[#7D3F32] cursor-pointer transition-colors">Tài khoản</span>
+              <Link href="/profile?tab=vouchers" className="hover:text-[#7D3F32] transition-colors">Ưu đãi</Link>
+              <Link href="/profile" className="hover:text-[#7D3F32] transition-colors">Tài khoản</Link>
+              <UserNav />
             </nav>
           </div>
 
@@ -498,11 +501,12 @@ export default function CartPage() {
           <Link href="/menu" className="font-serif text-[24px] lg:text-[30px] font-bold text-[#7D3F32] tracking-tight">
             BrewLite
           </Link>
-          <nav className="hidden lg:flex gap-8 text-[14px] text-[#786B5A] font-medium">
+          <nav className="hidden lg:flex items-center gap-7 text-[14px] text-[#786B5A] font-medium">
             <Link href="/menu" className="hover:text-[#7D3F32] transition-colors">Thực đơn</Link>
             <Link href="/orders" className="hover:text-[#7D3F32] transition-colors">Đơn hàng</Link>
-            <span className="hover:text-[#7D3F32] cursor-pointer transition-colors">Ưu đãi</span>
-            <span className="hover:text-[#7D3F32] cursor-pointer transition-colors">Tài khoản</span>
+            <Link href="/profile?tab=vouchers" className="hover:text-[#7D3F32] transition-colors">Ưu đãi</Link>
+            <Link href="/profile" className="hover:text-[#7D3F32] transition-colors">Tài khoản</Link>
+            <UserNav />
           </nav>
         </div>
 
