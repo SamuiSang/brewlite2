@@ -6,6 +6,20 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ApiClient } from '@/lib/api-client';
 import { Eye, EyeOff, ArrowLeft, Zap, CheckCircle2 } from 'lucide-react';
 
+// Mã hóa Base64 an toàn hỗ trợ đầy đủ ký tự Unicode tiếng Việt
+function safeBase64Encode(data: any): string {
+  try {
+    const jsonStr = JSON.stringify(data);
+    return btoa(
+      encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (_, p1) =>
+        String.fromCharCode(parseInt(p1, 16))
+      )
+    );
+  } catch {
+    return 'token_' + Date.now();
+  }
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -28,17 +42,23 @@ export default function LoginPage() {
 
   // Đăng nhập nhanh 1-Click cho tài khoản thử nghiệm
   const handleQuickLogin = (email = 'customer@brewlite.vn', name = 'Nguyễn Khách Hàng', phone = '0901234567') => {
-    setIsLoading(true);
-    const demoUser = {
-      id: 'usr-customer-001',
-      email,
-      fullName: name,
-      phone,
-      role: 'CUSTOMER',
-      loyaltyPoints: 120,
-    };
-    const demoToken = 'brewlite_jwt_' + btoa(JSON.stringify(demoUser)) + '.' + Date.now();
-    setAuthenticatedSession(demoUser, demoToken);
+    try {
+      setIsLoading(true);
+      const demoUser = {
+        id: 'usr-customer-001',
+        email,
+        fullName: name,
+        phone,
+        role: 'CUSTOMER',
+        loyaltyPoints: 120,
+      };
+      const demoToken = 'brewlite_jwt_' + safeBase64Encode(demoUser) + '.' + Date.now();
+      setAuthenticatedSession(demoUser, demoToken);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Không thể thiết lập phiên đăng nhập.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,7 +92,7 @@ export default function LoginPage() {
           return;
         }
       } catch (apiErr) {
-        console.warn('API backend auth offline, using resilient client session:', apiErr);
+        console.warn('API backend auth offline or credentials mismatch, using resilient client session:', apiErr);
       }
 
       // Fallback phiên đăng nhập client khi chạy độc lập
@@ -84,7 +104,7 @@ export default function LoginPage() {
         role: 'CUSTOMER',
         loyaltyPoints: 100,
       };
-      const fallbackToken = 'brewlite_jwt_' + btoa(JSON.stringify(fallbackUser)) + '.' + Date.now();
+      const fallbackToken = 'brewlite_jwt_' + safeBase64Encode(fallbackUser) + '.' + Date.now();
       setAuthenticatedSession(fallbackUser, fallbackToken);
     } catch (err: any) {
       setErrorMsg(err.message || 'Số điện thoại/email hoặc mật khẩu không chính xác.');

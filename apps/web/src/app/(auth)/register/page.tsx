@@ -6,6 +6,20 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ApiClient } from '@/lib/api-client';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
+// Mã hóa Base64 an toàn hỗ trợ đầy đủ ký tự Unicode tiếng Việt
+function safeBase64Encode(data: any): string {
+  try {
+    const jsonStr = JSON.stringify(data);
+    return btoa(
+      encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (_, p1) =>
+        String.fromCharCode(parseInt(p1, 16))
+      )
+    );
+  } catch {
+    return 'token_' + Date.now();
+  }
+}
+
 export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -74,7 +88,7 @@ export default function RegisterPage() {
         role: 'CUSTOMER',
         loyaltyPoints: 50,
       };
-      const token = 'brewlite_jwt_' + btoa(JSON.stringify(newUser)) + '.' + Date.now();
+      const token = 'brewlite_jwt_' + safeBase64Encode(newUser) + '.' + Date.now();
       ApiClient.setToken(token);
       localStorage.setItem('brewlite_user_profile', JSON.stringify(newUser));
       router.push(redirectTarget);

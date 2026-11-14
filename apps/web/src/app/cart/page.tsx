@@ -43,6 +43,10 @@ export default function CartPage() {
     addItem,
   } = useCartStore();
 
+  const subtotal = getSubtotal();
+  const discount = appliedVoucher?.discountAmount || 0;
+  const finalTotal = getFinalTotal();
+
   // Tránh hydration mismatch
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
