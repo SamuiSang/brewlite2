@@ -7,7 +7,7 @@
 - **Nhóm thực hiện (6 Thành viên – Mô hình Vertical Slice):**
   1. **Phương Duy (Dev Team):** Phụ trách **Mục 1 – `UC-01`:** Duyệt Thực đơn, Tìm kiếm, Lọc Danh mục & Kiểm tra Tồn kho Nguyên liệu (`FR-01`, `FR-02`).
   2. **Quỳnh (Dev Team):** Phụ trách **Mục 2 – `UC-02`:** Tùy biến Đồ uống, Quản lý Giỏ hàng (`Zustand`) & Thẩm định Mã Khuyến mãi (`FR-03`, `FR-09`).
-  3. **Trần Trung Hiếu (Product Owner):** Phụ trách **Mục 3 – `UC-03`:** Đăng ký, Đăng nhập, Hồ sơ cá nhân, Xác thực Phân quyền `JWT`/`Bcrypt` & Giám sát `GET /api/v1/health` (`FR-04`).
+  3. **Hàn Minh Hiếu (Product Owner):** Phụ trách **Mục 3 – `UC-03`:** Đăng ký, Đăng nhập, Hồ sơ cá nhân, Xác thực Phân quyền `JWT`/`Bcrypt` & Giám sát `GET /api/v1/health` (`FR-04`).
   4. **Chiến (Dev Team):** Chủ trì **Nửa đầu Use Case Trọng tâm (Mục 4 – `UC-04`):** Khởi tạo Đơn hàng, Tính lại 100% Tiền tại Business Layer & Khóa Tồn kho Nguyên liệu Đồng thời (`Optimistic Lock` trên `Ingredient` & `RecipeItem`, `FR-05`).
   5. **Quang (Dev Team):** Chủ trì **Nửa sau Use Case Trọng tâm (Mục 5 – `UC-05`):** Thanh toán Sandbox/Webhook 2 Bước, Chống Trừ tiền Trùng lặp (`Idempotency-Key`) & Hoàn trả Tồn kho Tự động (`Restock Rollback`, `FR-06`).
   6. **Sang (Scrum Master):** Phụ trách **Mục 6 – `UC-06`:** Biên nhận Điện tử, Lịch sử Đơn hàng, Theo dõi & Cập nhật Trạng thái Đơn (`OrderStatusStepper`) & Tích lũy / Quy đổi Điểm thưởng (`LoyaltyTransaction`, `FR-07`, `FR-08`, `FR-10`).
@@ -735,7 +735,7 @@ model Promotion {
      "user": {
        "id": "user-uuid-1234",
        "email": "customer@brewlite.com",
-       "fullName": "Trần Trung Hiếu",
+       "fullName": "Hàn Minh Hiếu",
        "role": "CUSTOMER"
      }
    }

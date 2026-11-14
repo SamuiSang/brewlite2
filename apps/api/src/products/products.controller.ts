@@ -19,7 +19,7 @@ import {
  * Tuân thủ chuẩn RESTful API v1: GET /api/v1/products & GET /api/v1/products/:id.
  * Thuộc Presentation Layer trong kiến trúc 3 tầng (ADR-003).
  */
-@Controller('api/v1/products')
+@Controller(['products', 'api/v1/products'])
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 

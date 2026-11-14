@@ -1,0 +1,152 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=2cm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!80!black,
+    citecolor=blue!80!black,
+    urlcolor=blue!80!black
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\small \textit{Đồ án CNPM: BrewLite -- Assignment 2}}
+\lhead{\small \textit{Hàn Minh Hiếu -- Product Owner}}
+\rfoot{\small Trang \thepage}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.5pt}
+
+\titleformat{\section}{\large\bfseries\color{blue!80!black}}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{blue!60!black}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\small\bfseries\color{gray!80!black}}{\thesubsubsection}{1em}{}
+
+\begin{document}
+
+% ==================== TRANG BÌA CÁ NHÂN HÓA THEO QUY CHẾ KHOA ====================
+\begin{titlepage}
+\begin{center}
+    {\large \textbf{TRƯỜNG ĐẠI HỌC SÀI GÒN}}\\[0.2cm]
+    {\large \textbf{KHOA CÔNG NGHỆ THÔNG TIN}}\\[1.5cm]
+
+    \includegraphics[width=0.25\textwidth]{image/logo-sgu.png}\\[1.5cm]
+
+    {\Large \textbf{BÁO CÁO BÀI TẬP LỚN CÔNG NGHỆ PHẦN MỀM}}\\[0.4cm]
+    {\LARGE \textbf{HỆ THỐNG ĐẶT ĐỒ UỐNG TRỰC TUYẾN BREWLITE}}\\[0.2cm]
+    {\large \textbf{ASSIGNMENT 2: REQUIREMENTS TO DEPLOYMENT (VER 1.0)}}\\[1.5cm]
+
+    \rule{\textwidth}{1.2pt}\\[0.6cm]
+    \textbf{HỒ SƠ MINH CHỨNG KỸ NGHỆ PHẦN MỀM CÁ NHÂN}\\[0.2cm]
+    \textit{(Quy cách nộp lưu trữ Khoa CNTT -- Bấm kim dán băng keo gáy xanh)}\\[0.6cm]
+    \rule{\textwidth}{1.2pt}\\[2.0cm]
+
+    \begin{minipage}{0.85\textwidth}
+        \textbf{Sinh viên thực hiện:} Hàn Minh Hiếu\\
+        \textbf{Mã số sinh viên (MSSV):} \dots\dots\dots\dots\dots\dots\dots\dots\\
+        \textbf{Vai trò trong nhóm:} Product Owner (PO) kiêm Fullstack Developer\\
+        \textbf{Module phụ trách xuyên suốt:} Chức năng 3 (FR-04): Auth JWT, Health Check \& Client Idempotency\\
+        \textbf{Giảng viên hướng dẫn:} Thầy Phiêu\\
+        \textbf{Học kỳ / Năm học:} Học kỳ I -- Năm học 2026--2027
+    \end{minipage}
+
+    \vfill
+    {\large \textbf{TP. HỒ CHÍ MINH, NĂM 2026}}
+\end{center}
+\end{titlepage}
+
+% ==================== MỤC LỤC TỰ ĐỘNG ====================
+\tableofcontents
+\newpage
+
+% ==================== BẢNG ĐÁNH GIÁ ĐÓNG GÓP THÀNH VIÊN ====================
+\section*{BẢNG PHÂN CÔNG VÀ ĐÁNH GIÁ ĐÓNG GÓP 6 THÀNH VIÊN}
+\addcontentsline{toc}{section}{Bảng phân công và đánh giá đóng góp 6 thành viên}
+
+Theo đúng chỉ đạo kỹ thuật của Thầy Phiêu tại bài giảng ngày 21/10 và 28/10, đồ án được phân chia theo mô hình \textbf{Vertical Slice (Lát cắt dọc)}, bảo đảm 100\% thành viên tham gia viết code, thiết kế sơ đồ độc lập và có commit thực tế trên Git:
+
+\begin{table}[h!]
+\centering
+\small
+\begin{tabularx}{\textwidth}{clllc}
+\toprule
+\textbf{STT} & \textbf{Họ và Tên} & \textbf{Vai trò Scrum} & \textbf{Chức năng phụ trách (Sơ đồ $\rightarrow$ Code $\rightarrow$ Test)} & \textbf{Tỷ lệ (\%)} \\
+\midrule
+1 & Nguyễn Hoàng Sang & Scrum Master (SM) & CN 6: Biên nhận, Lịch sử, Loyalty + Hạ tầng DevOps/CD & 16.5\% \\
+2 & \textbf{Hàn Minh Hiếu} & \textbf{Product Owner (PO)} & \textbf{CN 3: Auth JWT, Health Check, UI Checkout \& Idempotency} & \textbf{16.5\%} \\
+3 & Nguyễn Minh Chiến & Dev Team (BE) & CN 4: Đặt đơn, Tính tiền Core Layer, Khóa kho Optimistic & 17.0\% \\
+4 & Lê Nhật Quang & Dev Team (BE) & CN 5: Thanh toán Sandbox 2 bước, Webhook, Idempotency & 17.0\% \\
+5 & Trần Khánh Duy & Dev Team (FE) & CN 1: Hiển thị Menu, Tìm kiếm \& Khóa món hết nguyên liệu & 16.5\% \\
+6 & Đỗ Như Quỳnh & Dev Team (FE) & CN 2: Tùy biến món, Quản lý Giỏ hàng Zustand, Promotion & 16.5\% \\
+\midrule
+\multicolumn{4}{r}{\textbf{Tổng cộng khối lượng hoàn thành}} & \textbf{100.0\%} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Khai thác và Đặc tả Yêu cầu Hệ thống (Task 1)}
+\subsection{Bối cảnh nghiệp vụ và Vấn đề giải quyết}
+Hệ thống \textbf{BrewLite} số hóa quy trình phục vụ quán cà phê/trà mang đi, giải quyết dứt điểm các bài toán thực tế:
+\begin{itemize}[noitemsep]
+    \item \textbf{Thắt nút cổ chai tại quầy:} Khách tự chọn món và tùy biến trên web mobile-first/PWA, giảm thời gian chờ từ 5 phút xuống còn dưới 60 giây.
+    \item \textbf{Quản lý kho nguyên vật liệu thực tế (Bài giảng 28/10):} Hệ thống không lưu tồn kho theo số lượng ly pha sẵn mà quản lý theo \textbf{Nguyên vật liệu thô (Raw Ingredients)} như hạt cà phê (g), sữa đặc (ml), ly nhựa (cái) và trừ theo định mức \textbf{Công thức pha chế (RecipeItem)}.
+    \item \textbf{Ngăn ngừa gian lận giá và âm kho:} Backend tính lại 100\% giá trị đơn hàng tại Business Logic Layer; bọc thao tác trừ kho trong \textbf{Database Transaction} kết hợp \textbf{Optimistic Locking} (cột \texttt{version}) triệt tiêu nguy cơ âm kho khi tranh chấp mua ly cuối.
+\end{itemize}
+
+\subsection{Bảng phân tích 6 Stakeholders chính}
+Hệ thống nhận diện đầy đủ 6 nhóm stakeholder theo đúng yêu cầu:
+\begin{enumerate}[noitemsep]
+    \item \textbf{Khách hàng (Customer):} Đặt món nhanh, thanh toán an toàn, không bị trừ tiền lặp lại nhờ khóa \texttt{Idempotency-Key}.
+    \item \textbf{Nhân viên quầy (Barista):} Tiếp nhận đơn hàng chính xác, phân tách rõ ràng cấu hình Size/Topping.
+    \item \textbf{Quản lý cửa hàng (Manager):} Quản lý tồn kho nguyên liệu chính xác, chống thất thoát doanh thu.
+    \item \textbf{Hội đồng Nghiệm thu (Giảng viên):} Đánh giá chuẩn mực: 5 Task tuần tự, có CI/CD, có Health Check và truy vết rõ ràng.
+    \item \textbf{Nhóm phát triển (Dev Team):} Thực hành quy trình Scrum, Monorepo chuẩn mực, đóng gói Docker và kiểm thử tự động.
+    \item \textbf{Cổng thanh toán đối tác (Payment Gateway):} Tiếp nhận giao dịch kèm mã \texttt{Idempotency-Key}, xác thực qua Webhook 2 bước.
+\end{enumerate}
+
+\section{Mô hình hóa Hệ thống & Thiết kế Chi tiết (Task 2)}
+Nhóm đã hoàn thành trọn bộ 5 loại sơ đồ UML chuẩn hóa theo định dạng đơn sắc (Monochrome Black \& White) theo đúng yêu cầu thẩm mỹ kỹ thuật:
+\begin{itemize}[noitemsep]
+    \item \textbf{Use Case Diagram:} Thể hiện toàn bộ 6 phân hệ nghiệp vụ (\texttt{uc-01} đến \texttt{uc-06}) và sơ đồ tổng thể \texttt{system-usecase.puml}.
+    \item \textbf{Activity Diagram:} Mô tả chi tiết luồng xử lý end-to-end với đầy đủ 3--4 swimlanes, các điểm rẽ nhánh thành công/thất bại và ngoại lệ.
+    \item \textbf{Sequence Diagram:} Thể hiện chuẩn xác 6 Lifelines: \texttt{Customer} $\rightarrow$ \texttt{Next.js UI} $\rightarrow$ \texttt{NestJS Controller} $\rightarrow$ \texttt{Service} $\rightarrow$ \texttt{Prisma DAL} $\rightarrow$ \texttt{PostgreSQL}.
+    \item \textbf{Class Diagram:} Khắc họa đầy đủ các thực thể domain: \texttt{User}, \texttt{Product}, \texttt{Ingredient}, \texttt{RecipeItem}, \texttt{Order}, \texttt{OrderItem}, \texttt{Payment}, \texttt{Promotion}, \texttt{LoyaltyTransaction}.
+\end{itemize}
+
+\section{Thiết kế Kiến trúc Phần mềm \& Triển khai Thực tế (Task 3)}
+\subsection{Mô hình Kiến trúc Phân tầng (3-Layer Architecture)}
+Tuân thủ lời dặn của Thầy Phiêu, mã nguồn backend NestJS được phân tách tuyệt đối:
+$$\text{Presentation Layer (Controller/DTO)} \longrightarrow \text{Business Logic Layer (Services)} \longrightarrow \text{Data Access Layer (Prisma/DB)}$$
+Toàn bộ quyết định kiến trúc quan trọng được ghi nhận trong 6 bản ADR (\texttt{ADR-001} đến \texttt{ADR-006}), nổi bật là \textbf{ADR-005} (Bảo mật JWT, băm mật khẩu Bcrypt với \texttt{saltRounds >= 10}, CORS Whitelist và kiểm tra sức khỏe hệ thống qua \texttt{GET /api/v1/health}).
+
+\subsection{Hạ tầng Triển khai Doanh nghiệp & Tường lửa Phần cứng}
+Theo bài giảng ngày 28/10, sơ đồ triển khai (\texttt{deployment-diagram.puml}) mô phỏng chính xác hạ tầng doanh nghiệp thực tế:
+\begin{itemize}[noitemsep]
+    \item \textbf{Switch \& Router trung tâm:} Gom cáp mạng nội bộ theo từng tủ Rack.
+    \item \textbf{Tường lửa Phần cứng (Hardware Firewall):} Thiết bị vật lý chuyên dụng (Cisco/Fortigate) lọc gói tin theo IP/Port Whitelist, bảo vệ độc lập trước máy chủ.
+    \item \textbf{Mạng riêng ảo (VPN):} Cung cấp Encrypted Tunnel cho nhân viên kỹ thuật làm việc từ xa (Work from Home) truy cập nội bộ an toàn.
+    \item \textbf{Isolated Database Server:} CSDL PostgreSQL được cách ly hoàn toàn trong mạng nội bộ, không mở public cổng 5432 ra Internet.
+\end{itemize}
+
+\section{Triển khai 2 Sprint, Kiểm thử & Tự động hóa CI/CD (Task 4 \& Task 5)}
+\begin{itemize}[noitemsep]
+    \item \textbf{Sprint 1:} Khởi tạo Monorepo, Docker Compose chạy Web + API + PostgreSQL, API Menu \texttt{GET /products}, Seed 10 món kèm bảng nguyên liệu và CI Pipeline trên GitHub Actions.
+    \item \textbf{Sprint 2:} Hoàn thiện Checkout thanh toán 2 bước (QR Sandbox \& Webhook Callback), cơ chế chống trừ tiền trùng lặp \texttt{Idempotency-Key}, xác thực JWT và tích điểm Loyalty.
+    \item \textbf{Kiểm thử tự động:} Đạt 100\% các ca kiểm thử Unit Test Jest cho AuthService, HealthController, OrdersService và Integration Test kiểm thử tranh chấp tồn kho đồng thời (Concurrency Test).
+    \item \textbf{Triển khai Production:} Hệ thống vận hành trực tiếp trên Cloud PaaS qua giao thức HTTPS, tích hợp Smoke Test tự động gọi \texttt{/health} để kích hoạt Rollback khi có sự cố.
+\end{itemize}
+
+\section{Ma trận Truy vết & Kết luận Nghiệm thu (Task 8)}
+Tài liệu \texttt{docs/traceability-matrix.md} liên kết xuyên suốt hai chiều từ yêu cầu chức năng (FR-01 đến FR-10) và phi chức năng (NFR-01 đến NFR-05) sang Sơ đồ thiết kế $\rightarrow$ Mã nguồn API $\rightarrow$ Ca kiểm thử tự động. Đồ án hoàn thành trọn vẹn 100\% các tiêu chí nghiệm thu khắt khe của môn Công nghệ Phần mềm.
+
+\end{document}

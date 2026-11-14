@@ -7,7 +7,7 @@
 - **Nhóm thực hiện (6 Thành viên – Mô hình Vertical Slice):**
   1. **Phương Duy (Dev Team):** Chức năng 1 (`FR-01`, `FR-02` – Thực đơn, Tìm kiếm, Lọc danh mục & Tồn kho nguyên liệu `Ingredient`/`RecipeItem`).
   2. **Quỳnh (Dev Team):** Chức năng 2 (`FR-03`, `FR-09` – Tùy biến đồ uống Size/Topping, Giỏ hàng `Zustand` & Thẩm định Khuyến mãi `Promotion`).
-  3. **Trần Trung Hiếu (Product Owner):** Chức năng 3 (`FR-04` – Đăng ký, Đăng nhập, Hồ sơ, Xác thực `JWT`/`Bcrypt` & Giám sát `GET /api/v1/health`).
+  3. **Hàn Minh Hiếu (Product Owner):** Chức năng 3 (`FR-04` – Đăng ký, Đăng nhập, Hồ sơ, Xác thực `JWT`/`Bcrypt` & Giám sát `GET /api/v1/health`).
   4. **Chiến (Dev Team):** Chức năng 4 (`FR-05` – Khởi tạo đơn hàng, Tính tiền tại Business Layer & Khóa kho nguyên liệu đồng thời `Optimistic Lock`).
   5. **Quang (Dev Team):** Chức năng 5 (`FR-06` & `NFR-01..05` – Thanh toán Sandbox/Webhook 2 bước, Chống trừ tiền trùng lặp `Idempotency-Key` & Hoàn kho tự động).
   6. **Sang (Scrum Master):** Chức năng 6 (`FR-07`, `FR-08`, `FR-10` – Biên nhận điện tử, Lịch sử đơn, `OrderStatusStepper`, Điểm thưởng `LoyaltyTransaction` & Sơ đồ Use Case Tổng quát `system-usecase`).

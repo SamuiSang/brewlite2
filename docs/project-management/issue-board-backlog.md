@@ -3,7 +3,7 @@
 - **Dự án:** BrewLite – Hệ thống Đặt đồ uống Trực tuyến (Mobile-first / PWA)
 - **Tài liệu:** `docs/project-management/issue-board-backlog.md`
 - **Giai đoạn:** Task 4.1 & Task 4.2 – Quản lý Kho mã nguồn, Tài liệu & Kế hoạch Sprint
-- **Chủ trì thực hiện:** **Trần Trung Hiếu (Product Owner - PO)**
+- **Chủ trì thực hiện:** **Hàn Minh Hiếu (Product Owner - PO)**
 - **Phối hợp:** **Sang (Scrum Master - SM)** & Toàn bộ Dev Team (Duy, Quỳnh, Chiến, Quang)
 - **Trạng thái:** Đã chấp thuận (Accepted)
 - **Liên kết yêu cầu:** `Task 4.1`, `Task 4.2`, `Task 4.3`, `Task 5.1`, `SRS Summary`, `DoD`
@@ -91,7 +91,7 @@ Nhóm áp dụng khung làm việc Agile/Scrum với bảng điều phối công
 
 ## 5. Quy trình Kiểm soát Tài liệu & Phê duyệt Pull Request (PO Responsibilities - Task 4.2)
 
-Với vai trò **Product Owner**, **Trần Trung Hiếu** thiết lập quy chuẩn kiểm soát tài liệu:
+Với vai trò **Product Owner**, **Hàn Minh Hiếu** thiết lập quy chuẩn kiểm soát tài liệu:
 1. **Nguyên tắc bảo toàn tạo phẩm:** Toàn bộ tài liệu Yêu cầu (`docs/requirements/*`), Sơ đồ UML (`docs/diagrams/*`), Kiến trúc (`docs/architecture/*`), và Triển khai (`docs/deployment.md`) là căn cứ pháp lý để nghiệm thu đồ án.
 2. **Quy tắc Duyệt Pull Request (PR Review):**
    - Không thành viên nào được tự ý merge PR của chính mình.
