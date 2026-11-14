@@ -105,6 +105,23 @@ export default function CartPage() {
     router.push('/checkout');
   };
 
+  // Thêm nhanh món gợi ý khi giỏ hàng trống (Frame 03b)
+  const handleQuickAdd = (name: string, price: number, img: string, prodId: string) => {
+    addItem({
+      productId: prodId,
+      name,
+      category: 'COFFEE',
+      imageUrl: img,
+      size: 'M',
+      unitPrice: price,
+      quantity: 1,
+      optionsDesc: 'Tiêu chuẩn · 70% đường · 100% đá',
+      sugarLevel: '70%',
+      iceLevel: '100%',
+      toppings: [],
+    });
+  };
+
   if (!mounted) {
     return (
       <div className="min-h-screen bg-[#F3E8D4] flex items-center justify-center">

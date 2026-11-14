@@ -294,7 +294,8 @@ export default function MenuPage() {
       }
 
       const queryString = params.toString();
-      const endpoint = queryString ? `/api/v1/products?${queryString}` : '/api/v1/products';
+      const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1').replace(/\/$/, '');
+      const endpoint = queryString ? `${apiBase}/products?${queryString}` : `${apiBase}/products`;
 
       const response = await fetch(endpoint, {
         method: 'GET',
