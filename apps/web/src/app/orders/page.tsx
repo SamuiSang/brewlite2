@@ -21,6 +21,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { useCartStore } from '../../lib/store';
+import { UserNav } from '../../components/UserNav';
 
 /**
  * Định nghĩa cấu trúc từng món trong đơn hàng
@@ -367,12 +368,7 @@ export default function OrdersPage() {
                 </span>
               </Link>
 
-              <div
-                title="Tài khoản: Quỳnh"
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#7D3F32] text-[#FFFAF0] flex items-center justify-center font-bold text-xs sm:text-sm shadow-xs select-none cursor-pointer border border-[#914C3E]"
-              >
-                Q
-              </div>
+              <UserNav />
             </div>
           </div>
         </header>
