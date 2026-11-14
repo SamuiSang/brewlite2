@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ApiClient } from '@/lib/api-client';
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 
 // Mã hóa Base64 an toàn hỗ trợ đầy đủ ký tự Unicode tiếng Việt
 function safeBase64Encode(data: any): string {
@@ -100,149 +100,180 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FBF8F5] flex flex-col justify-center px-4 py-8 sm:px-6 lg:px-8 text-[#2B1111]">
-      {/* Nút quay lại Menu */}
-      <div className="sm:mx-auto sm:w-full sm:max-w-md mb-4">
+    <div className="min-h-screen bg-[#F3E8D4] text-[#3F3027] px-4 py-6 sm:px-10 sm:py-8 lg:px-14 flex flex-col justify-between">
+      {/* 1. TOP HEADER: LOGO BREWLITE CHUẨN FIGMA */}
+      <header className="max-w-[1120px] w-full mx-auto">
         <Link
           href="/menu"
-          className="inline-flex items-center gap-2 text-xs font-medium text-[#735A56] hover:text-[#6B2D24] transition-colors"
+          className="font-serif text-[24px] sm:text-[28px] font-bold text-[#7D3F32] tracking-tight hover:opacity-90 transition inline-block"
         >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Quay lại Thực đơn</span>
+          BrewLite
         </Link>
-      </div>
+      </header>
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#6B2D24] text-white shadow-md shadow-[#6B2D24]/20 mb-3">
-            <span className="text-xl">☕</span>
+      {/* 2. KHỐI NỘI DUNG CHÍNH (FRAME 04b · ĐĂNG KÝ CHUẨN 100% FIGMA) */}
+      <main className="max-w-[1040px] w-full mx-auto my-auto py-6 sm:py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-stretch">
+          {/* CỘT TRÁI: CARD BANNER ẢNH CÀ PHÊ (Ẩn trên Mobile, hiện từ md:flex) */}
+          <div className="hidden md:flex flex-col justify-between relative rounded-3xl overflow-hidden p-8 lg:p-10 shadow-sm min-h-[540px] border border-[#DDCCAE] bg-[#4A1E17]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/drinks/banner-khong-gian-brewlite.jpg"
+              alt="Khoảnh khắc cà phê BrewLite"
+              className="absolute inset-0 w-full h-full object-cover opacity-85"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/30 pointer-events-none" />
+
+            {/* Thông điệp chào mừng */}
+            <div className="relative z-10 pt-4">
+              <h2 className="font-serif text-2xl lg:text-3xl font-bold text-[#FFFAF0] leading-snug drop-shadow-sm">
+                Bắt đầu một gu quen.<br />
+                Khoảnh khắc của riêng bạn.
+              </h2>
+            </div>
+
+            <div className="relative z-10">
+              <p className="text-xs lg:text-sm text-[#FFFAF0]/90 drop-shadow-xs font-medium">
+                Tạo tài khoản để lưu đơn và tích lũy Hạt BrewLite.
+              </p>
+            </div>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight text-[#2B1111]">
-            Bắt đầu một gu quen.
-          </h2>
-          <p className="mt-2 text-xs sm:text-sm text-[#735A56]">
-            Tạo tài khoản để lưu đơn và lựa chọn yêu thích.
-          </p>
-        </div>
-      </div>
 
-      <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-6 sm:px-8 shadow-sm rounded-3xl border border-[#EFE8DE]">
-          {errorMsg && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-[#B42318] text-xs sm:text-sm rounded-xl flex items-center gap-2">
-              <span className="text-base">⚠️</span>
-              <span>{errorMsg}</span>
-            </div>
-          )}
-
-          <form className="space-y-3.5" onSubmit={handleSubmit}>
+          {/* CỘT PHẢI: FORM ĐĂNG KÝ CHUẨN FIGMA */}
+          <div className="bg-white rounded-3xl p-7 sm:p-10 border border-[#E8D7B8] shadow-sm flex flex-col justify-center">
             <div>
-              <label className="block text-xs font-semibold text-[#593E2B] uppercase tracking-wider mb-1.5">
-                Họ và tên
-              </label>
-              <input
-                type="text"
-                required
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Nguyễn Duy"
-                className="w-full px-4 py-2.5 rounded-xl border border-[#E5E0D8] bg-[#FBF8F5]/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#6B2D24] text-sm text-[#2B1111] placeholder-[#A08F87] transition-all"
-              />
+              <h1 className="font-serif text-2xl lg:text-3xl font-bold text-[#3F3027] tracking-tight leading-tight">
+                Tạo tài khoản mới
+              </h1>
+              <p className="text-xs sm:text-sm text-[#786B5A] mt-2 mb-5">
+                Một ly cho gu cà phê quen thuộc của bạn.
+              </p>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-[#593E2B] uppercase tracking-wider mb-1.5">
-                Số điện thoại hoặc email
-              </label>
-              <input
-                type="text"
-                required
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="Nhập số điện thoại hoặc email"
-                className="w-full px-4 py-2.5 rounded-xl border border-[#E5E0D8] bg-[#FBF8F5]/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#6B2D24] text-sm text-[#2B1111] placeholder-[#A08F87] transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-[#593E2B] uppercase tracking-wider mb-1.5">
-                Mật khẩu
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Tạo mật khẩu"
-                  className="w-full px-4 py-2.5 pr-11 rounded-xl border border-[#E5E0D8] bg-[#FBF8F5]/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#6B2D24] text-sm text-[#2B1111] placeholder-[#A08F87] transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#735A56] hover:text-[#2B1111]"
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+            {errorMsg && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-[#B42318] text-xs sm:text-sm rounded-xl flex items-center gap-2">
+                <span className="text-base">⚠️</span>
+                <span>{errorMsg}</span>
               </div>
-            </div>
+            )}
 
-            <div>
-              <label className="block text-xs font-semibold text-[#593E2B] uppercase tracking-wider mb-1.5">
-                Nhập lại mật khẩu
-              </label>
-              <div className="relative">
+            <form className="space-y-3.5" onSubmit={handleSubmit}>
+              {/* Họ và tên */}
+              <div>
+                <label className="block text-xs font-semibold text-[#593E2B] mb-1">
+                  Họ và tên
+                </label>
                 <input
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type="text"
                   required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Nhập lại mật khẩu"
-                  className="w-full px-4 py-2.5 pr-11 rounded-xl border border-[#E5E0D8] bg-[#FBF8F5]/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#6B2D24] text-sm text-[#2B1111] placeholder-[#A08F87] transition-all"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Nhập họ và tên của bạn"
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#E5E0D8] bg-[#FBF8F5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#6B2D24] text-sm text-[#3F3027] placeholder-[#A08F87] transition-all"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#735A56] hover:text-[#2B1111]"
-                  tabIndex={-1}
-                >
-                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
               </div>
-            </div>
 
-            {/* Nút Tạo tài khoản chính (Primary Button: 48px, rounded-xl, #6B2D24) */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full h-12 mt-2 rounded-xl bg-[#6B2D24] hover:bg-[#58251E] text-white font-medium text-sm transition shadow-sm hover:shadow-md disabled:opacity-60 flex justify-center items-center gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <span className="inline-block animate-spin">⏳</span>
-                  <span>Đang đăng ký...</span>
-                </>
-              ) : (
-                'Tạo tài khoản'
-              )}
-            </button>
+              {/* Số điện thoại hoặc email */}
+              <div>
+                <label className="block text-xs font-semibold text-[#593E2B] mb-1">
+                  Số điện thoại hoặc email
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  placeholder="Nhập số điện thoại hoặc email"
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#E5E0D8] bg-[#FBF8F5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#6B2D24] text-sm text-[#3F3027] placeholder-[#A08F87] transition-all"
+                />
+              </div>
 
-            {/* Nút Đã có tài khoản? Đăng nhập (Secondary Button: 48px, rounded-xl, #EADDC7) */}
-            <Link
-              href={`/login?redirect=${encodeURIComponent(redirectTarget)}`}
-              className="w-full h-12 rounded-xl bg-[#EADDC7] hover:bg-[#DECDB3] text-[#593E2B] font-medium text-sm transition flex justify-center items-center"
-            >
-              Đã có tài khoản? Đăng nhập
-            </Link>
-          </form>
+              {/* Mật khẩu */}
+              <div>
+                <label className="block text-xs font-semibold text-[#593E2B] mb-1">
+                  Mật khẩu
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Tạo mật khẩu (tối thiểu 6 ký tự)"
+                    className="w-full px-4 py-2.5 pr-11 rounded-xl border border-[#E5E0D8] bg-[#FBF8F5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#6B2D24] text-sm text-[#3F3027] placeholder-[#A08F87] transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#786B5A] hover:text-[#3F3027] cursor-pointer"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
 
-          {/* Dòng ghi chú chân form khớp Figma 1.1 */}
-          <p className="mt-5 text-center text-xs text-[#735A56] leading-relaxed">
-            Bằng việc tạo tài khoản, bạn đồng ý với điều khoản sử dụng và chính sách bảo mật.
-          </p>
+              {/* Nhập lại mật khẩu */}
+              <div>
+                <label className="block text-xs font-semibold text-[#593E2B] mb-1">
+                  Nhập lại mật khẩu
+                </label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Xác nhận lại mật khẩu"
+                    className="w-full px-4 py-2.5 pr-11 rounded-xl border border-[#E5E0D8] bg-[#FBF8F5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#6B2D24] text-sm text-[#3F3027] placeholder-[#A08F87] transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#786B5A] hover:text-[#3F3027] cursor-pointer"
+                    tabIndex={-1}
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Nút 1: Tạo tài khoản (Primary #6B2D24) */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-12 mt-2 rounded-xl bg-[#6B2D24] hover:bg-[#58251E] text-white font-semibold text-sm transition shadow-xs hover:shadow-sm disabled:opacity-60 flex justify-center items-center gap-2 cursor-pointer"
+              >
+                {isLoading ? (
+                  <>
+                    <span className="inline-block animate-spin">⏳</span>
+                    <span>Đang tạo tài khoản...</span>
+                  </>
+                ) : (
+                  'Tạo tài khoản'
+                )}
+              </button>
+
+              {/* Nút 2: Đã có tài khoản? Đăng nhập (Secondary #EADDC7) */}
+              <Link
+                href={`/login?redirect=${encodeURIComponent(redirectTarget)}`}
+                className="w-full h-12 rounded-xl bg-[#EADDC7] hover:bg-[#dfd0b6] text-[#593E2B] font-semibold text-sm transition flex justify-center items-center cursor-pointer"
+              >
+                Đã có tài khoản? Đăng nhập
+              </Link>
+            </form>
+
+            <p className="mt-5 text-center text-[11px] text-[#A08F87]">
+              Bằng việc tiếp tục, bạn đồng ý với Điều khoản &amp; Chính sách của BrewLite.
+            </p>
+          </div>
         </div>
-      </div>
+      </main>
+
+      {/* 3. FOOTER CHUẨN FIGMA */}
+      <footer className="text-center text-xs text-[#8C7A6B] py-3">
+        BrewLite · Cà phê nguyên bản.
+      </footer>
     </div>
   );
 }

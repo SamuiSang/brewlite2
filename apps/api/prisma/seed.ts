@@ -245,13 +245,25 @@ async function main() {
   // 5. KHỞI TẠO TÀI KHOẢN NGƯỜI DÙNG MẪU (USERS VỚI MẬT KHẨU BĂM BCRYPT)
   console.log('5. Đang nạp tài khoản người dùng mẫu (Khách hàng, Barista, Admin)...');
   // Mật khẩu chung đã băm bcrypt (saltRounds = 10) cho chuỗi "Password123@":
-  const defaultPasswordHash = '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW';
+  const defaultPasswordHash = '$2b$10$u/UzH0Pxm8d4afGjL/jzeeODLRjIX5DmueCz00MVgpQ3otAKQqgc.';
+
+  // Tài khoản chính chủ Hàn Minh Hiếu chuẩn 100% Figma 04c (420 Hạt)
+  await prisma.user.create({
+    data: {
+      email: 'hieu@brewlite.vn',
+      fullName: 'Hàn Minh Hiếu',
+      phone: '0901234567',
+      passwordHash: defaultPasswordHash,
+      role: UserRole.CUSTOMER,
+      loyaltyPoints: 420,
+    },
+  });
 
   await prisma.user.create({
     data: {
       email: 'customer@brewlite.vn',
       fullName: 'Nguyễn Văn Khách Hàng',
-      phone: '0901234567',
+      phone: '0909999888',
       passwordHash: defaultPasswordHash,
       role: UserRole.CUSTOMER,
       loyaltyPoints: 120, // Đã tích lũy sẵn 120 điểm
