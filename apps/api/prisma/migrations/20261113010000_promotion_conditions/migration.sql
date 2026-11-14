@@ -1,0 +1,2 @@
+ALTER TABLE "Promotion" ADD COLUMN "firstOrderOnly" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN "deliveryOnly" BOOLEAN NOT NULL DEFAULT false;

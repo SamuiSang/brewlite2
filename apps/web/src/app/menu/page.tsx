@@ -10,6 +10,7 @@ import { ProductCard } from '../../components/ProductCard';
 import { SkeletonLoading, EmptyState, ErrorState } from '../../components/UIStates';
 import { useCartStore } from '../../lib/store';
 import { FloatingCartBar } from '../../components/FloatingCartBar';
+import ProductCustomizationModal from '../../components/ProductCustomizationModal';
 import { UserNav } from '../../components/UserNav';
 
 /**
@@ -267,7 +268,8 @@ export default function MenuPage() {
 
   // Zustand Store kết nối giỏ hàng
   const totalCartItems = useCartStore((state) => state.getTotalItems());
-  const addItem = useCartStore((state) => state.addItem);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  useEffect(() => { void useCartStore.persist.rehydrate(); }, []);
 
   // Debounce 300ms cho ô tìm kiếm
   useEffect(() => {
@@ -293,7 +295,8 @@ export default function MenuPage() {
       }
 
       const queryString = params.toString();
-      const endpoint = queryString ? `/api/v1/products?${queryString}` : '/api/v1/products';
+      const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1').replace(/\/$/, '');
+      const endpoint = queryString ? `${apiBase}/products?${queryString}` : `${apiBase}/products`;
 
       const response = await fetch(endpoint, {
         method: 'GET',
@@ -390,21 +393,12 @@ export default function MenuPage() {
       return;
     }
 
-    addItem({
-      productId: product.id,
-      name: product.name,
-      category: product.category,
-      imageUrl: product.imageUrl,
-      size: 'S',
-      unitPrice: product.basePrice,
-      quantity: 1,
-    });
-
-    showToast(`Đã thêm 1 "${product.name}" vào giỏ hàng!`, 'success');
+    setSelectedProduct(product);
   };
 
   return (
     <div className="min-h-screen bg-[#F3E8D4] text-[#3F3027] font-sans flex flex-col justify-between overflow-x-hidden">
+      {selectedProduct && <ProductCustomizationModal product={selectedProduct} toppings={[]} onClose={() => setSelectedProduct(null)} />}
       {/* Container hàng đợi thông báo (Toast Stack): Tối đa 8 cái */}
       <div
         aria-live="polite"

@@ -215,7 +215,7 @@ async function main() {
   const promotionsData = [
     {
       code: 'BREWNEW',
-      description: 'Giảm 20% cho khách hàng mới trải nghiệm đơn hàng đầu tiên (tối đa 30k)',
+      description: 'Dành cho khách hàng mới',
       discountType: DiscountType.PERCENTAGE,
       discountValue: 20.0,
       minOrderValue: 50000.0,
@@ -226,7 +226,7 @@ async function main() {
     },
     {
       code: 'BREW20K',
-      description: 'Giảm ngay 20.000đ cho đơn hàng có giá trị từ 80.000đ trở lên',
+      description: 'Áp dụng toàn thực đơn',
       discountType: DiscountType.FIXED_AMOUNT,
       discountValue: 20000.0,
       minOrderValue: 80000.0,
@@ -234,17 +234,6 @@ async function main() {
       usageLimit: 500,
       startsAt: new Date(),
       expiresAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
-    },
-    {
-      code: 'FREESHIP',
-      description: 'Miễn phí giao hàng / Giảm 15.000đ đơn từ 60.000đ',
-      discountType: DiscountType.FIXED_AMOUNT,
-      discountValue: 15000.0,
-      minOrderValue: 60000.0,
-      maxDiscountAmount: null,
-      usageLimit: 200,
-      startsAt: new Date(),
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     },
   ];
 

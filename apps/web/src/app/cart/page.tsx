@@ -21,7 +21,10 @@ import {
   Banknote,
   Smartphone,
 } from 'lucide-react';
-import { useCartStore, CartItem } from '../../lib/store';
+import { useCartStore, CartItem, cartItemKey, getMaxQuantity } from '../../lib/store';
+import VoucherInput from '../../components/VoucherInput';
+import ProductCustomizationModal from '../../components/ProductCustomizationModal';
+import type { Product } from '../../types/product';
 import { UserNav } from '../../components/UserNav';
 
 export default function CartPage() {
@@ -29,6 +32,9 @@ export default function CartPage() {
   const {
     items,
     appliedVoucher,
+    notice,
+    storageError,
+    clearNotice,
     removeItem,
     updateQuantity,
     setAppliedVoucher,
@@ -38,18 +44,48 @@ export default function CartPage() {
     addItem,
   } = useCartStore();
 
+  const subtotal = getSubtotal();
+  const discount = appliedVoucher?.discountAmount || 0;
+  const finalTotal = getFinalTotal();
+
   // Tránh hydration mismatch
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    void useCartStore.persist.rehydrate();
     setMounted(true);
   }, []);
 
   // Bước hiển thị: 'cart' (Frame 03) hoặc 'checkout' (Frame 05)
   const [currentStep, setCurrentStep] = useState<'cart' | 'checkout'>('cart');
 
+  const [quantityError, setQuantityError] = useState('');
+  const [editingItem, setEditingItem] = useState<CartItem | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const editOptions = (item: CartItem) => {
+    if (!item.product && item.toppings?.length) {
+      setQuantityError('Món cũ thiếu dữ liệu topping. Vui lòng chọn lại món từ thực đơn.');
+      return;
+    }
+    // ponytail: legacy cart lacks product snapshot; infer base price only for items without toppings.
+    setEditingProduct(item.product || {
+      id: item.productId, name: item.name, slug: '', description: null,
+      category: item.category as Product['category'], imageUrl: item.imageUrl,
+      basePrice: item.unitPrice - ({ S: 0, M: 6000, L: 10000 }[item.size]),
+      availableStock: item.availableStock ?? 100, isActive: true, isSoldOut: false,
+    });
+    setEditingItem(item);
+  };
+  const changeQuantity = (item: CartItem, quantity: number) => {
+    if (quantity === 0 && !window.confirm('Xóa món này khỏi giỏ hàng?')) return;
+    try {
+      updateQuantity(item.productId, item.size, quantity, cartItemKey(item));
+      setQuantityError('');
+    } catch (error) {
+      setQuantityError(error instanceof Error ? error.message : 'Số lượng không hợp lệ');
+    }
+  };
+
   // Input mã giảm giá
-  const [promoInput, setPromoInput] = useState('');
-  const [promoError, setPromoError] = useState<string | null>(null);
 
   // Form xác nhận đặt hàng (Frame 05)
   const [deliveryMethod, setDeliveryMethod] = useState<'PICKUP' | 'DELIVERY'>('PICKUP');
@@ -64,73 +100,10 @@ export default function CartPage() {
     ingredientName?: string;
   } | null>(null);
 
-  // Modal thanh toán (Frame 06 & Frame 06h)
-  const [activePaymentOrder, setActivePaymentOrder] = useState<any | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'QR' | 'WALLET' | 'CARD' | 'CASH'>('QR');
-  const [isPaidSuccess, setIsPaidSuccess] = useState(false);
-  const [isCheckingPayment, setIsCheckingPayment] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(582); // 09:42 đếm ngược
-
-  // Đếm ngược thời gian thanh toán 10 phút
-  useEffect(() => {
-    if (!activePaymentOrder || isPaidSuccess) return;
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [activePaymentOrder, isPaidSuccess]);
-
-  const formatCountdown = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
-
-  const subtotal = getSubtotal();
-  const discount = appliedVoucher ? appliedVoucher.discountAmount : 0;
-  const finalTotal = getFinalTotal();
-
-  // Xử lý áp dụng mã khuyến mãi chuẩn Figma (BANMOI10, BREW20K)
-  const handleApplyPromo = () => {
-    setPromoError(null);
-    const code = promoInput.trim().toUpperCase();
-    if (!code) {
-      setPromoError('Vui lòng nhập mã ưu đãi.');
-      return;
-    }
-
-    if (code === 'BANMOI10' || code === 'BREW20K') {
-      if (subtotal < 50000) {
-        setPromoError('Đơn hàng cần đạt tối thiểu 50.000 đ để áp dụng mã này.');
-        return;
-      }
-      setAppliedVoucher({
-        code,
-        discountAmount: 20000,
-        description: 'Giảm 20.000 đ',
-      });
-      setPromoInput('');
-    } else if (code === 'BREWNEW') {
-      if (subtotal < 50000) {
-        setPromoError('Đơn hàng cần đạt tối thiểu 50.000 đ để áp dụng mã này.');
-        return;
-      }
-      const rawDiscount = Math.round(subtotal * 0.2);
-      const actualDiscount = Math.min(rawDiscount, 30000);
-      setAppliedVoucher({
-        code,
-        discountAmount: actualDiscount,
-        description: `Giảm 20% (${actualDiscount.toLocaleString('vi-VN')} đ)`,
-      });
-      setPromoInput('');
-    } else {
-      setPromoError(`Mã ưu đãi "${code}" không hợp lệ hoặc đã hết lượt.`);
-    }
-  };
-
-  const handleRemovePromo = () => {
-    setAppliedVoucher(null);
-    setPromoError(null);
+  // Chuyển hướng sang cổng thanh toán VNPay Sandbox chính thức
+  const handleProceedToVNPay = () => {
+    if (items.length === 0) return;
+    router.push('/checkout');
   };
 
   // Thêm nhanh món gợi ý khi giỏ hàng trống (Frame 03b)
@@ -144,84 +117,10 @@ export default function CartPage() {
       unitPrice: price,
       quantity: 1,
       optionsDesc: 'Tiêu chuẩn · 70% đường · 100% đá',
+      sugarLevel: '70%',
+      iceLevel: '100%',
+      toppings: [],
     });
-  };
-
-  // Tạo đơn hàng (gọi Backend NestJS API POST /api/v1/orders)
-  const handleCreateOrder = async () => {
-    if (items.length === 0) return;
-
-    setIsSubmitting(true);
-    setConflictError(null);
-
-    const payload = {
-      items: items.map((item) => ({
-        productId: item.productId,
-        size: item.size,
-        quantity: item.quantity,
-        sugarLevel: item.sugarLevel || '50%',
-        iceLevel: item.iceLevel || '100%',
-        toppings: item.toppings || [],
-      })),
-      promoCode: appliedVoucher ? appliedVoucher.code : undefined,
-      note: `${deliveryMethod === 'PICKUP' ? 'Nhận tại quầy Quận 1' : 'Giao tận nơi'} · ${recipientName} (${recipientPhone})`,
-      deliveryMethod,
-    };
-
-    try {
-      const response = await fetch('/api/v1/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 409) {
-          // Xung đột tồn kho hoặc va chạm đồng thời Optimistic Locking (Frame 02b Figma)
-          setConflictError({
-            message: data.message || 'Quầy pha chế vừa hết nguyên liệu hoặc có đơn khác chốt trước.',
-            ingredientName: data.error === 'INSUFFICIENT_INGREDIENT' ? 'Kem Macchiato' : undefined,
-          });
-          return;
-        }
-        throw new Error(data.message || 'Không thể tạo đơn hàng, vui lòng thử lại.');
-      }
-
-      // Mở Popup thanh toán (Frame 06)
-      const order = data.order || {
-        orderCode: `BL-${Math.floor(1000 + Math.random() * 9000)}`,
-        subtotalAmount: subtotal,
-        discountAmount: discount,
-        finalAmount: finalTotal,
-        items: [...items],
-      };
-      setActivePaymentOrder(order);
-      clearCart();
-    } catch {
-      // Giả lập đơn cho môi trường demo / offline
-      const mockOrder = {
-        orderCode: `BL-${Math.floor(1000 + Math.random() * 9000)}`,
-        subtotalAmount: subtotal,
-        discountAmount: discount,
-        finalAmount: finalTotal,
-        items: [...items],
-      };
-      setActivePaymentOrder(mockOrder);
-      clearCart();
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Xác nhận thanh toán thành công (Chuyển sang Frame 06h)
-  const handleConfirmPayment = () => {
-    setIsCheckingPayment(true);
-    setTimeout(() => {
-      setIsCheckingPayment(false);
-      setIsPaidSuccess(true);
-    }, 700);
   };
 
   if (!mounted) {
@@ -235,7 +134,7 @@ export default function CartPage() {
   // ==========================================================================
   // 1. TRƯỜNG HỢP: GIỎ HÀNG TRỐNG (FRAME 03b FIGMA)
   // ==========================================================================
-  if (items.length === 0 && !activePaymentOrder) {
+  if (items.length === 0) {
     return (
       <main className="min-h-screen bg-[#F3E8D4] text-[#3F3027] px-4 py-6 sm:px-8 sm:py-10">
         <div className="max-w-4xl mx-auto">
@@ -253,6 +152,8 @@ export default function CartPage() {
             </nav>
           </header>
 
+          {storageError && <p role="alert" className="mb-4 text-sm text-red-800">{storageError}</p>}
+          {notice && <div role="status" className="mb-4 text-sm">{notice} <button type="button" onClick={clearNotice} className="min-h-11 underline">Đóng thông báo</button></div>}
           {/* Minh họa Ly cà phê thảnh thơi (Frame 03b) */}
           <div className="bg-[#FFFAF0] rounded-[24px] p-8 sm:p-12 border border-[#DDCCAE] text-center max-w-xl mx-auto mb-10 shadow-sm">
             <div className="w-24 h-24 bg-[#F3E8D4] rounded-full flex items-center justify-center mx-auto mb-6 border border-[#DDCCAE]">
@@ -357,7 +258,7 @@ export default function CartPage() {
   // ==========================================================================
   // 2. TRƯỜNG HỢP: BƯỚC 2 - KIỂM TRA VÀ ĐẶT HÀNG (FRAME 05 FIGMA)
   // ==========================================================================
-  if (currentStep === 'checkout' && !activePaymentOrder) {
+  if (currentStep === 'checkout') {
     return (
       <main className="min-h-screen bg-[#F3E8D4] text-[#3F3027] pb-32 lg:pb-16">
         <header className="px-5 sm:px-12 lg:px-20 pt-5 pb-3">
@@ -406,7 +307,7 @@ export default function CartPage() {
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <button
                     type="button"
-                    onClick={() => setDeliveryMethod('PICKUP')}
+                    onClick={() => { setDeliveryMethod('PICKUP'); setAppliedVoucher(null); }}
                     className={`h-[48px] rounded-[12px] font-bold text-[14px] transition-all flex items-center justify-center ${
                       deliveryMethod === 'PICKUP'
                         ? 'bg-[#7D3F32] text-[#FFFAF0] shadow-sm'
@@ -417,7 +318,7 @@ export default function CartPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setDeliveryMethod('DELIVERY')}
+                    onClick={() => { setDeliveryMethod('DELIVERY'); setAppliedVoucher(null); }}
                     className={`h-[48px] rounded-[12px] font-bold text-[14px] transition-all flex items-center justify-center ${
                       deliveryMethod === 'DELIVERY'
                         ? 'bg-[#7D3F32] text-[#FFFAF0] shadow-sm'
@@ -513,7 +414,7 @@ export default function CartPage() {
 
                 <div className="space-y-3 pb-4 border-b border-[#F3E8D4]">
                   {items.map((item) => (
-                    <div key={`${item.productId}-${item.size}`} className="flex justify-between items-start text-[12px]">
+                    <div key={cartItemKey(item)} className="flex justify-between items-start text-[12px]">
                       <div>
                         <p className="font-medium text-[#3F3027]">
                           {item.quantity} × {item.name}
@@ -554,18 +455,10 @@ export default function CartPage() {
 
                 <div className="mt-6">
                   <button
-                    onClick={handleCreateOrder}
-                    disabled={isSubmitting}
-                    className="w-full h-[48px] bg-[#7D3F32] hover:bg-[#6A3328] disabled:bg-[#786B5A] text-[#FFFAF0] rounded-[12px] font-bold text-[14px] flex items-center justify-center transition-colors shadow-sm"
+                    onClick={handleProceedToVNPay}
+                    className="w-full h-[48px] bg-[#7D3F32] hover:bg-[#6A3328] text-[#FFFAF0] rounded-[12px] font-bold text-[14px] flex items-center justify-center transition-colors shadow-sm"
                   >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                        Đang tạo đơn...
-                      </>
-                    ) : (
-                      'Tạo đơn và chọn thanh toán'
-                    )}
+                    Tiến hành thanh toán qua VNPay Sandbox
                   </button>
                 </div>
               </div>
@@ -583,18 +476,10 @@ export default function CartPage() {
               </span>
             </div>
             <button
-              onClick={handleCreateOrder}
-              disabled={isSubmitting}
-              className="w-full h-[48px] bg-[#7D3F32] hover:bg-[#6A3328] disabled:bg-[#786B5A] text-[#FFFAF0] rounded-[12px] font-bold text-[14px] flex items-center justify-center transition-colors shadow-sm"
+              onClick={handleProceedToVNPay}
+              className="w-full h-[48px] bg-[#7D3F32] hover:bg-[#6A3328] text-[#FFFAF0] rounded-[12px] font-bold text-[14px] flex items-center justify-center transition-colors shadow-sm"
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  Đang tạo đơn...
-                </>
-              ) : (
-                'Tạo đơn và chọn thanh toán'
-              )}
+              Thanh toán VNPay Sandbox · {finalTotal.toLocaleString('vi-VN')} đ
             </button>
           </div>
         </div>
@@ -607,6 +492,9 @@ export default function CartPage() {
   // ==========================================================================
   return (
     <main className="min-h-screen bg-[#F3E8D4] text-[#3F3027] pb-36 lg:pb-16">
+      {editingItem && editingProduct && <ProductCustomizationModal
+        product={editingProduct} toppings={editingItem.toppingOptions || []} editingItem={editingItem}
+        onClose={() => { setEditingItem(null); setEditingProduct(null); }} />}
       {/* Top Header */}
       <header className="px-5 sm:px-12 lg:px-20 pt-5 pb-3">
         <div className="flex items-center justify-between">
@@ -654,7 +542,7 @@ export default function CartPage() {
             {/* Danh sách thẻ món (Frame 03) */}
             {items.map((item) => (
               <div
-                key={`${item.productId}-${item.size}`}
+                key={cartItemKey(item)}
                 className="bg-[#FFFAF0] rounded-[16px] p-4 border border-[#DDCCAE] shadow-sm flex flex-col justify-between"
               >
                 <div className="flex gap-3 sm:gap-4 items-start">
@@ -684,15 +572,16 @@ export default function CartPage() {
                         `Size ${item.size} · ${item.sugarLevel || '50%'} đường · ${item.iceLevel || '100%'} đá`}
                     </p>
 
-                    <Link
-                      href="/menu"
-                      className="inline-block text-[11px] font-semibold text-[#A95619] hover:underline mt-1.5"
+                    <button
+                      type="button" onClick={() => editOptions(item)}
+                      className="inline-block min-h-11 text-[11px] font-semibold text-[#A95619] hover:underline mt-1.5"
                     >
                       Sửa tùy chọn
-                    </Link>
+                    </button>
                   </div>
                 </div>
 
+                <p className="mt-2 text-xs text-[#786B5A]">Tối đa {getMaxQuantity(items, item)} ly cho dòng này (theo tồn kho và giới hạn giỏ 100 ly).</p>
                 {/* Thanh điều khiển số lượng, giá và xóa */}
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#F3E8D4]">
                   {/* Giá trên Mobile */}
@@ -705,21 +594,32 @@ export default function CartPage() {
                     <div className="flex items-center bg-[#EADBC2] rounded-[10px] h-[36px] w-[116px] justify-between px-3">
                       <button
                         onClick={() =>
-                          updateQuantity(item.productId, item.size, item.quantity - 1)
+                          changeQuantity(item, item.quantity - 1)
                         }
                         className="text-[#3F3027] font-bold text-[16px] px-1 hover:opacity-70 transition-opacity"
                         aria-label="Giảm số lượng"
                       >
                         −
                       </button>
-                      <span className="text-[#3F3027] font-bold text-[13px]">
-                        {item.quantity}
-                      </span>
+                      <input
+                        key={`${cartItemKey(item)}-${item.quantity}`}
+                        type="number" min={1} max={getMaxQuantity(items, item)} step={1}
+                        aria-label={`Số lượng ${item.name}`}
+                        defaultValue={item.quantity}
+                        onBlur={event => {
+                          changeQuantity(item, event.currentTarget.value === '' ? NaN : Number(event.currentTarget.value));
+                          event.currentTarget.value = String(useCartStore.getState().items.find(i => cartItemKey(i) === cartItemKey(item))?.quantity ?? item.quantity);
+                        }}
+                        onKeyDown={event => { if (event.key === 'Enter') event.currentTarget.blur(); }}
+                        className="w-12 bg-transparent text-center text-[#3F3027] font-bold text-[13px]"
+                      />
                       <button
                         onClick={() =>
-                          updateQuantity(item.productId, item.size, item.quantity + 1)
+                          changeQuantity(item, item.quantity + 1)
                         }
                         className="text-[#3F3027] font-bold text-[16px] px-1 hover:opacity-70 transition-opacity"
+                        disabled={item.quantity >= getMaxQuantity(items, item)}
+                        title={`Tối đa ${getMaxQuantity(items, item)} ly cho dòng này`}
                         aria-label="Tăng số lượng"
                       >
                         +
@@ -728,7 +628,7 @@ export default function CartPage() {
 
                     {/* Nút Xóa món */}
                     <button
-                      onClick={() => removeItem(item.productId, item.size)}
+                      onClick={() => { if (window.confirm('Xóa món này khỏi giỏ hàng?')) removeItem(item.productId, item.size, cartItemKey(item)); }}
                       className="w-[36px] h-[36px] flex items-center justify-center text-[#786B5A] hover:text-[#B42318] transition-colors"
                       title="Xóa món"
                     >
@@ -739,61 +639,16 @@ export default function CartPage() {
               </div>
             ))}
 
+            {storageError && <p role="alert" className="text-sm text-red-800">{storageError}</p>}
+            {notice && <div role="status" className="text-sm text-[#7D3F32]">{notice} <button type="button" onClick={clearNotice} className="min-h-11 underline">Đóng thông báo</button></div>}
+            {quantityError && <p role="alert" className="text-sm text-red-800">{quantityError}</p>}
             {/* HỘP MÃ ƯU ĐÃI (VOUCHER BOX - Frame 03) */}
             <div className="bg-[#FFFAF0] rounded-[16px] p-4 lg:p-5 border border-[#DDCCAE] shadow-sm">
               <h2 className="text-[16px] font-bold text-[#3F3027] mb-3">
                 Ưu đãi cho một ngày vui
               </h2>
 
-              {!appliedVoucher ? (
-                <div className="flex gap-2">
-                  <div className="flex-1">
-                    <input
-                      type="text"
-                      value={promoInput}
-                      onChange={(e) => setPromoInput(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleApplyPromo()}
-                      placeholder="Nhập mã (ví dụ: BANMOI10)"
-                      className="w-full h-[44px] bg-[#F3E8D4] rounded-[10px] px-3.5 text-[13px] font-medium text-[#3F3027] border border-[#DDCCAE] focus:outline-none focus:border-[#7D3F32] transition-colors"
-                    />
-                  </div>
-                  <button
-                    onClick={handleApplyPromo}
-                    className="h-[44px] px-5 bg-[#7D3F32] hover:bg-[#6A3328] text-[#FFFAF0] rounded-[12px] font-bold text-[12px] transition-colors flex items-center justify-center flex-shrink-0"
-                  >
-                    Áp dụng
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between bg-[#EADBC2] rounded-[10px] h-[44px] px-3.5 border border-[#DDCCAE]">
-                    <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-[#7D3F32] text-[#FFFAF0] flex items-center justify-center text-[11px] font-bold">
-                        ✓
-                      </span>
-                      <span className="text-[12px] font-semibold text-[#7D3F32]">
-                        {appliedVoucher.code} · Giảm {appliedVoucher.discountAmount.toLocaleString('vi-VN')} đ
-                      </span>
-                    </div>
-                    <button
-                      onClick={handleRemovePromo}
-                      className="text-[#786B5A] hover:text-[#B42318] text-[20px] font-normal leading-none"
-                      title="Gỡ mã ưu đãi"
-                    >
-                      ×
-                    </button>
-                  </div>
-                  <p className="text-[11px] text-[#786B5A]">
-                    Đã áp dụng cho đơn hàng này.
-                  </p>
-                </div>
-              )}
-
-              {promoError && (
-                <p className="text-[12px] text-[#B42318] mt-2 font-medium">
-                  {promoError}
-                </p>
-              )}
+              <VoucherInput />
             </div>
           </div>
 
@@ -838,15 +693,15 @@ export default function CartPage() {
 
               <div className="mt-6">
                 <button
-                  onClick={() => setCurrentStep('checkout')}
+                  onClick={handleProceedToVNPay}
                   className="w-full h-[48px] bg-[#7D3F32] hover:bg-[#6A3328] text-[#FFFAF0] rounded-[12px] font-bold text-[14px] flex items-center justify-center transition-colors shadow-sm"
                 >
-                  Tiến hành đặt hàng
+                  Tiến hành thanh toán VNPay Sandbox
                 </button>
               </div>
 
               <p className="text-[12px] text-[#786B5A] text-center mt-3 leading-relaxed">
-                Món được pha mới khi đơn được xác nhận.
+                Chuyển thẳng sang cổng thanh toán VNPay Sandbox chính thức.
               </p>
             </div>
           </div>
@@ -872,228 +727,13 @@ export default function CartPage() {
           </p>
 
           <button
-            onClick={() => setCurrentStep('checkout')}
+            onClick={handleProceedToVNPay}
             className="w-full h-[48px] bg-[#7D3F32] hover:bg-[#6A3328] text-[#FFFAF0] rounded-[12px] font-bold text-[14px] flex items-center justify-center transition-colors shadow-sm"
           >
-            Tiến hành đặt hàng · {finalTotal.toLocaleString('vi-VN')} đ
+            Thanh toán VNPay Sandbox · {finalTotal.toLocaleString('vi-VN')} đ
           </button>
         </div>
       </div>
-
-      {/* ======================================================================
-          4. POPUP THANH TOÁN QR (FRAME 06 FIGMA)
-          ====================================================================== */}
-      {activePaymentOrder && !isPaidSuccess && (
-        <div className="fixed inset-0 bg-[#2E211B]/50 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-[#FFFAF0] rounded-[20px] max-w-sm sm:max-w-md w-full p-5 sm:p-6 border border-[#C8AF87] shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            {/* Header Popup */}
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-serif text-[16px] font-semibold text-[#7D3F32]">BrewLite</span>
-              <button
-                onClick={() => setActivePaymentOrder(null)}
-                className="w-8 h-8 rounded-[10px] bg-[#EADBC2] text-[#3F3027] font-bold text-[15px] flex items-center justify-center hover:opacity-80 transition-opacity"
-              >
-                ×
-              </button>
-            </div>
-
-            <h3 className="font-serif text-[22px] font-semibold text-[#3F3027] mb-0.5">
-              Thanh toán đơn hàng
-            </h3>
-            <p className="text-[12px] text-[#786B5A] mb-4">
-              {activePaymentOrder.orderCode} · Nhận tại quầy · Quận 1
-            </p>
-
-            {/* 4 Phương thức thanh toán (Frame 06) */}
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              <button
-                onClick={() => setPaymentMethod('QR')}
-                className={`h-[44px] rounded-[10px] text-[11px] font-bold px-2.5 flex items-center justify-start gap-1.5 transition-all border ${
-                  paymentMethod === 'QR'
-                    ? 'bg-[#EADBC2] border-[#7D3F32] text-[#7D3F32]'
-                    : 'bg-[#F3E8D4] border-[#DDCCAE] text-[#3F3027]'
-                }`}
-              >
-                <span className="text-[10px]">{paymentMethod === 'QR' ? '●' : '○'}</span>
-                <span>Quét mã QR</span>
-              </button>
-
-              <button
-                onClick={() => setPaymentMethod('WALLET')}
-                className={`h-[44px] rounded-[10px] text-[11px] font-bold px-2.5 flex items-center justify-start gap-1.5 transition-all border ${
-                  paymentMethod === 'WALLET'
-                    ? 'bg-[#EADBC2] border-[#7D3F32] text-[#7D3F32]'
-                    : 'bg-[#F3E8D4] border-[#DDCCAE] text-[#3F3027]'
-                }`}
-              >
-                <span className="text-[10px]">{paymentMethod === 'WALLET' ? '●' : '○'}</span>
-                <span>Ví điện tử mô phỏng</span>
-              </button>
-
-              <button
-                onClick={() => setPaymentMethod('CARD')}
-                className={`h-[44px] rounded-[10px] text-[11px] font-bold px-2.5 flex items-center justify-start gap-1.5 transition-all border ${
-                  paymentMethod === 'CARD'
-                    ? 'bg-[#EADBC2] border-[#7D3F32] text-[#7D3F32]'
-                    : 'bg-[#F3E8D4] border-[#DDCCAE] text-[#3F3027]'
-                }`}
-              >
-                <span className="text-[10px]">{paymentMethod === 'CARD' ? '●' : '○'}</span>
-                <span>Thẻ thử nghiệm</span>
-              </button>
-
-              <button
-                onClick={() => setPaymentMethod('CASH')}
-                className={`h-[44px] rounded-[10px] text-[11px] font-bold px-2.5 flex items-center justify-start gap-1.5 transition-all border ${
-                  paymentMethod === 'CASH'
-                    ? 'bg-[#EADBC2] border-[#7D3F32] text-[#7D3F32]'
-                    : 'bg-[#F3E8D4] border-[#DDCCAE] text-[#3F3027]'
-                }`}
-              >
-                <span className="text-[10px]">{paymentMethod === 'CASH' ? '●' : '○'}</span>
-                <span>Tiền mặt tại quầy</span>
-              </button>
-            </div>
-
-            {/* Khung Mã Thanh toán QR (Frame 06) */}
-            <div className="bg-[#F3E8D4] rounded-[12px] p-4 text-center mb-4">
-              <p className="text-[10px] font-bold text-[#786B5A] uppercase tracking-wider mb-1">
-                TỔNG THANH TOÁN
-              </p>
-              <p className="font-serif text-[26px] font-semibold text-[#7D3F32] mb-3">
-                {activePaymentOrder.finalAmount?.toLocaleString('vi-VN')} đ
-              </p>
-
-              {/* Graphic QR */}
-              <div className="w-[160px] h-[160px] bg-white rounded-[12px] p-3 mx-auto mb-3 shadow-inner flex items-center justify-center border border-[#DDCCAE]">
-                <QrCode className="w-full h-full text-[#3F3027]" />
-              </div>
-
-              <p className="text-[9px] text-[#786B5A] font-semibold uppercase tracking-wider">
-                QR MINH HỌA · KHÔNG CHUYỂN TIỀN
-              </p>
-              <p className="text-[9px] font-bold text-[#3F3027] mt-0.5">
-                CÔNG TY TNHH BREWLITE VIETNAM
-              </p>
-              <p className="text-[10px] text-[#786B5A] mt-0.5">
-                Nội dung: {activePaymentOrder.orderCode}
-              </p>
-              <p className="text-[12px] font-bold text-[#7D3F32] mt-2">
-                Mã hết hiệu lực sau {formatCountdown(timeLeft)}
-              </p>
-            </div>
-
-            {/* Thông báo môi trường thử nghiệm */}
-            <p className="text-[11px] font-bold text-[#7D3F32] mb-0.5">
-              Môi trường thử nghiệm
-            </p>
-            <p className="text-[10px] text-[#786B5A] mb-4 leading-relaxed">
-              Không dùng tài khoản hoặc tiền thật. Chỉ ghi nhận thanh toán khi cổng thử nghiệm xác nhận.
-            </p>
-
-            {/* Nút hành động */}
-            <div className="space-y-2">
-              <button
-                onClick={handleConfirmPayment}
-                disabled={isCheckingPayment}
-                className="w-full h-[48px] bg-[#7D3F32] hover:bg-[#6A3328] text-[#FFFAF0] rounded-[12px] font-bold text-[14px] flex items-center justify-center transition-colors shadow-sm"
-              >
-                {isCheckingPayment ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    Đang kiểm tra cổng thanh toán...
-                  </>
-                ) : (
-                  'Kiểm tra trạng thái'
-                )}
-              </button>
-
-              <button
-                onClick={() => setActivePaymentOrder(null)}
-                className="w-full text-center text-[11px] text-[#7D3F32] hover:underline py-1 font-medium"
-              >
-                Hủy đơn đang chờ thanh toán
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ======================================================================
-          5. POPUP THANH TOÁN THÀNH CÔNG (FRAME 06h FIGMA)
-          ====================================================================== */}
-      {isPaidSuccess && activePaymentOrder && (
-        <div className="fixed inset-0 bg-[#2E211B]/50 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-[#FFFAF0] rounded-[20px] max-w-sm sm:max-w-md w-full p-5 sm:p-6 border border-[#C8AF87] shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            {/* Header Popup */}
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-serif text-[16px] font-semibold text-[#7D3F32]">BrewLite</span>
-              <button
-                onClick={() => {
-                  setActivePaymentOrder(null);
-                  setIsPaidSuccess(false);
-                }}
-                className="w-8 h-8 rounded-[10px] bg-[#EADBC2] text-[#3F3027] font-bold text-[15px] flex items-center justify-center hover:opacity-80 transition-opacity"
-              >
-                ×
-              </button>
-            </div>
-
-            <h3 className="font-serif text-[24px] font-semibold text-[#3F3027] mb-1">
-              Thanh toán thành công
-            </h3>
-            <p className="text-[12px] text-[#786B5A] mb-4 leading-relaxed">
-              Cảm ơn bạn! Đơn {activePaymentOrder.orderCode} đã được thanh toán và chuyển đến quầy pha chế.
-            </p>
-
-            {/* Banner xanh đã thanh toán */}
-            <div className="bg-[#E6E8D5] rounded-[12px] p-3.5 mb-3 border border-[#D5E0D2]">
-              <p className="text-[10px] font-bold text-[#246344] uppercase tracking-wider">
-                ĐÃ THANH TOÁN · QR THỬ NGHIỆM
-              </p>
-              <p className="font-serif text-[28px] font-semibold text-[#7D3F32] mt-0.5">
-                {activePaymentOrder.finalAmount?.toLocaleString('vi-VN')} đ
-              </p>
-            </div>
-
-            {/* Thông tin đơn */}
-            <div className="bg-[#F3E8D4] rounded-[12px] p-3.5 text-[12px] mb-5 space-y-1">
-              <p className="font-bold text-[#3F3027]">
-                Nhận tại BrewLite · Chi nhánh Quận 1
-              </p>
-              {activePaymentOrder.items?.map((item: any, idx: number) => (
-                <p key={idx} className="text-[#3F3027]">
-                  {item.quantity} × {item.name}
-                </p>
-              ))}
-              <p className="text-[11px] text-[#786B5A] pt-1">
-                Dự kiến sẵn sàng trong khoảng 8 phút.
-              </p>
-            </div>
-
-            {/* Nút hành động */}
-            <div className="space-y-2">
-              <Link
-                href="/orders"
-                className="w-full h-[48px] bg-[#7D3F32] hover:bg-[#6A3328] text-[#FFFAF0] rounded-[12px] font-bold text-[14px] flex items-center justify-center transition-colors shadow-sm"
-              >
-                Theo dõi đơn hàng
-              </Link>
-
-              <button
-                onClick={() => {
-                  setActivePaymentOrder(null);
-                  setIsPaidSuccess(false);
-                  router.push('/menu');
-                }}
-                className="w-full h-[48px] bg-[#EADBC2] hover:bg-[#DFCFB4] text-[#3F3027] rounded-[12px] font-bold text-[14px] flex items-center justify-center transition-colors"
-              >
-                Đóng
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ======================================================================
           6. MODAL CẢNH BÁO TỒN KHO / OPTIMISTIC LOCKING (FRAME 02b FIGMA)

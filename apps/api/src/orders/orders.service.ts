@@ -191,8 +191,12 @@ export class OrdersService {
           );
         }
 
+        if (promo.firstOrderOnly) throw new BadRequestException('Mã đơn đầu tiên cần tài khoản đã xác thực; chức năng xác thực chưa khả dụng');
+        if (promo.deliveryOnly && dto.deliveryMethod !== 'DELIVERY') {
+          throw new BadRequestException('Chỉ áp dụng cho đơn giao hàng');
+        }
         const now = new Date();
-        if (promo.expiresAt < now) {
+        if (promo.expiresAt !== null && promo.expiresAt < now) {
           throw new BadRequestException(`Mã ưu đãi "${promo.code}" đã hết hạn sử dụng.`);
         }
         if (promo.startsAt > now) {
