@@ -65,8 +65,7 @@ export interface ClientVnpayParams {
 export async function calculateHmacSha512(data: string, secret: string): Promise<string> {
   if (typeof window === 'undefined') {
     // Môi trường Node.js
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const nodeCrypto = require('crypto');
+    const nodeCrypto = await import('crypto');
     return nodeCrypto.createHmac('sha512', secret).update(data, 'utf-8').digest('hex');
   }
 

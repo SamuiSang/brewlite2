@@ -20,6 +20,16 @@ const nextConfig = {
     };
     return config;
   },
+  async rewrites() {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const destinationBase = apiUrl.endsWith('/api/v1') ? apiUrl : `${apiUrl.replace(/\/$/, '')}/api/v1`;
+    return [
+      {
+        source: '/api/v1/:path*',
+        destination: `${destinationBase}/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

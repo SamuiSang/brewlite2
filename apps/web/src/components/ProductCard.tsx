@@ -72,6 +72,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <img
           src={product.imageUrl || '/images/drinks/ca-phe-muoi-con-dao.jpg'}
           alt={product.name}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = '/images/drinks/ca-phe-muoi-con-dao.jpg';
+          }}
           className={`h-full w-full object-cover transition-all duration-500 ${
             isOutOfStock ? 'grayscale-[90%] opacity-70 contrast-[0.92]' : 'group-hover:scale-105'
           }`}

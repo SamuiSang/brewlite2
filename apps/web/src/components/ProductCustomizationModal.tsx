@@ -28,7 +28,14 @@ export default function ProductCustomizationModal({ product, toppings, onClose, 
     <div className="grid gap-6 sm:grid-cols-2">
       <div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={product.imageUrl || '/images/drinks/ca-phe-muoi-con-dao.jpg'} alt={product.name} className="aspect-square w-full rounded-xl object-cover" />
+        <img
+          src={product.imageUrl || '/images/drinks/ca-phe-muoi-con-dao.jpg'}
+          alt={product.name}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = '/images/drinks/ca-phe-muoi-con-dao.jpg';
+          }}
+          className="aspect-square w-full rounded-xl object-cover"
+        />
         <h2 id="customize-title" className="mt-4 text-xl font-bold">{product.name}</h2>
         <p className="mt-2 font-semibold text-[#7D4435]">{money(product.basePrice)}</p>
         <p className="mt-3 text-sm">{product.description}</p>
