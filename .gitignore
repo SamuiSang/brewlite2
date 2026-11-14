@@ -46,3 +46,5 @@ next-env.d.ts
 # Local scratch / handoff files
 CONTEXT_HANDOFF*
 scratch/
+
+report_mau/
