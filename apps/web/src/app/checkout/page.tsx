@@ -7,22 +7,15 @@ import { ApiClient } from '@/lib/api-client';
 import { createVnpayPaymentUrl, VNPAY_CONFIG } from '@/lib/vnpay';
 import { useCartStore } from '@/lib/store';
 import {
-  ShieldCheck,
-  CreditCard,
   ArrowRight,
   AlertCircle,
-  ExternalLink,
   Loader2,
   Lock,
   UserCheck,
   Zap,
-  CheckCircle2,
   Clock,
   MapPin,
-  X,
-  QrCode,
-  Smartphone,
-  Wallet,
+  ExternalLink,
 } from 'lucide-react';
 
 function generateUUID(): string {
@@ -58,7 +51,7 @@ export default function CheckoutPage() {
 
   // Form thông tin nhận món (Frame 05)
   const [pickupMethod, setPickupMethod] = useState<'PICKUP' | 'DELIVERY'>('PICKUP');
-  const [recipientName, setRecipientName] = useState<string>('Nguyễn Duy');
+  const [recipientName, setRecipientName] = useState<string>('Nguyễn Khách Hàng');
   const [recipientPhone, setRecipientPhone] = useState<string>('090 123 4524');
   const [pickupTime, setPickupTime] = useState<'NOW' | 'SCHEDULED'>('NOW');
 
@@ -70,7 +63,7 @@ export default function CheckoutPage() {
   const [showPaymentModal, setShowPaymentModal] = useState<boolean>(false);
   const [paymentStep, setPaymentStep] = useState<'PAYING' | 'SUCCESS'>('PAYING');
   const [selectedMethod, setSelectedMethod] = useState<'QR' | 'WALLET' | 'CARD'>('QR');
-  const [orderCode, setOrderCode] = useState<string>('');
+  const [orderCode, setOrderCode] = useState<string>('BL-8924');
   const [createdOrderId, setCreatedOrderId] = useState<string>('');
   const [countdown, setCountdown] = useState<number>(582); // 09:42 đếm ngược theo chuẩn Figma Frame 06
 
@@ -119,7 +112,6 @@ export default function CheckoutPage() {
           setDiscountAmount(discount);
           setFinalTotal(Math.max(0, subtotal - discount));
         } else {
-          // Fallback đúng 2 món mẫu chuẩn bản vẽ Figma Cloud Frame 05 nếu giỏ hàng chưa có món
           setDefaultFigmaItems();
         }
       } catch (e) {
@@ -315,7 +307,7 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-[#F3E8D4] text-[#3F3027] font-sans flex flex-col justify-between selection:bg-[#7D3F32] selection:text-[#FFFAF0]">
       {/* HEADER KHỚP BẢN VẼ FIGMA (FRAME 05) */}
-      <header className="bg-[#FFFAF0] border-b border-[#E8D7B8] px-4 sm:px-8 py-4 shadow-xs sticky top-0 z-30">
+      <header className="bg-[#FFFAF0] border-b border-[#E8D7B8] px-4 sm:px-8 py-3.5 shadow-xs sticky top-0 z-30">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link href="/menu" className="font-serif text-2xl sm:text-3xl font-bold text-[#7D3F32] tracking-tight">
             BrewLite
@@ -332,50 +324,52 @@ export default function CheckoutPage() {
 
       {/* NỘI DUNG CHÍNH (FRAME 05 · XÁC NHẬN ĐƠN) */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-        <div className="mb-6">
-          <h1 className="font-serif text-2xl sm:text-4xl font-semibold text-[#3F3027] tracking-tight">
+        <div className="mb-5">
+          <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-[#3F3027] tracking-tight">
             Kiểm tra và đặt hàng
           </h1>
-          <p className="text-sm text-[#786B5A] mt-1">
+          <p className="text-xs sm:text-sm text-[#786B5A] mt-0.5">
             Chỉ còn một bước để món ngon đến tay bạn.
           </p>
         </div>
 
-        {/* Thông báo xác thực người dùng */}
+        {/* Thông báo xác thực người dùng - Thiết kế gọn gàng */}
         {!isLoggedIn ? (
-          <div className="mb-6 p-4 bg-[#FFFAF0] border border-[#F0D58C] rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-[#D97706]/15 text-[#D97706] flex items-center justify-center shrink-0">
-                <Zap className="w-5 h-5 fill-[#D97706]" />
+          <div className="mb-5 p-3.5 bg-[#FFFAF0] border border-[#F0D58C] rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-[#D97706]/15 text-[#D97706] flex items-center justify-center shrink-0">
+                <Zap className="w-4 h-4 fill-[#D97706]" />
               </div>
               <div>
-                <p className="text-sm font-bold text-[#3F3027]">Bạn đang đặt hàng với tư cách Khách</p>
-                <p className="text-xs text-[#786B5A]">Đăng nhập nhanh để tích lũy điểm thưởng thành viên BrewLite.</p>
+                <p className="text-xs sm:text-sm font-bold text-[#3F3027]">Bạn đang đặt hàng với tư cách Khách</p>
+                <p className="text-[11px] text-[#786B5A]">Đăng nhập nhanh để tích lũy điểm thưởng thành viên BrewLite.</p>
               </div>
             </div>
             <button
               type="button"
               onClick={handleQuickLoginAtCheckout}
-              className="px-4 py-2 bg-[#7D3F32] hover:bg-[#6A3328] text-white rounded-xl text-xs font-bold transition shadow-xs shrink-0 cursor-pointer"
+              className="px-3.5 py-1.5 bg-[#7D3F32] hover:bg-[#6A3328] text-white rounded-xl text-xs font-bold transition shadow-xs shrink-0 cursor-pointer"
             >
               Đăng nhập nhanh (1-Click)
             </button>
           </div>
         ) : (
-          <div className="mb-6 p-3.5 bg-[#FFFAF0] border border-[#A7D7B5] rounded-2xl flex items-center justify-between text-xs text-[#246344] shadow-xs">
-            <div className="flex items-center gap-2">
-              <UserCheck className="w-4 h-4 text-[#246344]" />
-              <span>Đã xác thực: <b>{currentUser?.fullName || recipientName}</b> ({currentUser?.email || 'customer@brewlite.vn'})</span>
+          <div className="mb-5 p-3 bg-[#FFFAF0] border border-[#A7D7B5] rounded-2xl flex flex-wrap items-center justify-between gap-2 text-xs text-[#246344] shadow-xs">
+            <div className="flex items-center gap-2 min-w-0">
+              <UserCheck className="w-4 h-4 text-[#246344] shrink-0" />
+              <span className="truncate">
+                Đã xác thực: <b>{currentUser?.fullName || recipientName}</b> ({currentUser?.email || 'customer@brewlite.vn'})
+              </span>
             </div>
-            <span className="font-bold bg-[#246344] text-white px-2.5 py-0.5 rounded-full text-[10px]">
+            <span className="font-bold bg-[#246344] text-white px-2.5 py-0.5 rounded-full text-[10px] shrink-0">
               {currentUser?.loyaltyPoints || 120} điểm thưởng
             </span>
           </div>
         )}
 
         {errorMessage && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-600" />
+          <div className="mb-5 p-3.5 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs sm:text-sm flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-600" />
             <div>
               <p className="font-bold">Không thể tiếp tục</p>
               <p>{errorMessage}</p>
@@ -383,20 +377,20 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* CỘT TRÁI (COL-7): VÙNG CUỘN XÁC NHẬN */}
-          <div className="lg:col-span-7 space-y-6">
+          <div className="lg:col-span-7 space-y-5">
             {/* THẺ 1: HÌNH THỨC NHẬN MÓN */}
-            <div className="bg-[#FFFAF0] border border-[#E8D7B8] rounded-2xl p-5 sm:p-6 shadow-xs">
-              <h2 className="text-base sm:text-lg font-bold text-[#3F3027] mb-4">
+            <div className="bg-[#FFFAF0] border border-[#E8D7B8] rounded-2xl p-4 sm:p-5 shadow-xs">
+              <h2 className="text-base font-bold text-[#3F3027] mb-3">
                 Bạn muốn nhận món thế nào?
               </h2>
 
-              <div className="flex gap-3">
+              <div className="flex gap-2.5">
                 <button
                   type="button"
                   onClick={() => setPickupMethod('PICKUP')}
-                  className={`flex-1 h-12 rounded-xl text-sm font-bold transition flex items-center justify-center cursor-pointer ${
+                  className={`flex-1 h-11 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center cursor-pointer ${
                     pickupMethod === 'PICKUP'
                       ? 'bg-[#7D3F32] text-[#FFFAF0] shadow-xs'
                       : 'bg-[#F3E8D4] text-[#786B5A] hover:text-[#3F3027]'
@@ -407,7 +401,7 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setPickupMethod('DELIVERY')}
-                  className={`flex-1 h-12 rounded-xl text-sm font-bold transition flex items-center justify-center cursor-pointer ${
+                  className={`flex-1 h-11 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center cursor-pointer ${
                     pickupMethod === 'DELIVERY'
                       ? 'bg-[#7D3F32] text-[#FFFAF0] shadow-xs'
                       : 'bg-[#F3E8D4] text-[#786B5A] hover:text-[#3F3027]'
@@ -417,30 +411,30 @@ export default function CheckoutPage() {
                 </button>
               </div>
 
-              <div className="mt-5 pt-4 border-t border-[#E8D7B8]/60 space-y-1.5">
-                <div className="flex items-center gap-2 text-sm font-bold text-[#3F3027]">
-                  <MapPin className="w-4 h-4 text-[#7D3F32]" />
+              <div className="mt-4 pt-3 border-t border-[#E8D7B8]/60 space-y-1">
+                <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#3F3027]">
+                  <MapPin className="w-3.5 h-3.5 text-[#7D3F32]" />
                   <span>BrewLite · Chi nhánh Quận 1</span>
                 </div>
-                <p className="text-xs text-[#786B5A] pl-6">
+                <p className="text-[11px] text-[#786B5A] pl-5">
                   123 Đường Cà Phê, Quận 1, TP. Hồ Chí Minh
                 </p>
-                <div className="flex items-center gap-2 text-xs font-medium text-[#A95619] pl-6 pt-1">
-                  <Clock className="w-3.5 h-3.5 text-[#A95619]" />
+                <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#A95619] pl-5 pt-0.5">
+                  <Clock className="w-3 h-3 text-[#A95619]" />
                   <span>Chuẩn bị trong khoảng 10–15 phút</span>
                 </div>
               </div>
             </div>
 
             {/* THẺ 2: THÔNG TIN NGƯỜI NHẬN */}
-            <div className="bg-[#FFFAF0] border border-[#E8D7B8] rounded-2xl p-5 sm:p-6 shadow-xs">
-              <h2 className="text-base sm:text-lg font-bold text-[#3F3027] mb-4">
+            <div className="bg-[#FFFAF0] border border-[#E8D7B8] rounded-2xl p-4 sm:p-5 shadow-xs">
+              <h2 className="text-base font-bold text-[#3F3027] mb-3">
                 Thông tin người nhận
               </h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-semibold text-[#3F3027] mb-1.5">
+                  <label className="block text-[11px] font-semibold text-[#3F3027] mb-1">
                     Họ và tên
                   </label>
                   <input
@@ -448,11 +442,11 @@ export default function CheckoutPage() {
                     value={recipientName}
                     onChange={(e) => setRecipientName(e.target.value)}
                     placeholder="Nhập họ và tên..."
-                    className="w-full h-12 bg-[#F3E8D4]/60 border border-[#DDCCAE] rounded-xl px-4 text-sm text-[#3F3027] focus:outline-none focus:border-[#7D3F32] transition"
+                    className="w-full h-11 bg-[#F3E8D4]/60 border border-[#DDCCAE] rounded-xl px-3.5 text-xs sm:text-sm text-[#3F3027] focus:outline-none focus:border-[#7D3F32] transition"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-[#3F3027] mb-1.5">
+                  <label className="block text-[11px] font-semibold text-[#3F3027] mb-1">
                     Số điện thoại
                   </label>
                   <input
@@ -460,63 +454,63 @@ export default function CheckoutPage() {
                     value={recipientPhone}
                     onChange={(e) => setRecipientPhone(e.target.value)}
                     placeholder="Nhập số điện thoại..."
-                    className="w-full h-12 bg-[#F3E8D4]/60 border border-[#DDCCAE] rounded-xl px-4 text-sm text-[#3F3027] focus:outline-none focus:border-[#7D3F32] transition"
+                    className="w-full h-11 bg-[#F3E8D4]/60 border border-[#DDCCAE] rounded-xl px-3.5 text-xs sm:text-sm text-[#3F3027] focus:outline-none focus:border-[#7D3F32] transition"
                   />
                 </div>
               </div>
             </div>
 
             {/* THẺ 3: THỜI GIAN NHẬN MÓN */}
-            <div className="bg-[#FFFAF0] border border-[#E8D7B8] rounded-2xl p-5 sm:p-6 shadow-xs">
-              <h2 className="text-base sm:text-lg font-bold text-[#3F3027] mb-4">
+            <div className="bg-[#FFFAF0] border border-[#E8D7B8] rounded-2xl p-4 sm:p-5 shadow-xs">
+              <h2 className="text-base font-bold text-[#3F3027] mb-3">
                 Thời gian nhận món
               </h2>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div
                   onClick={() => setPickupTime('NOW')}
-                  className={`p-3.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2.5 cursor-pointer ${
+                  className={`p-3 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 cursor-pointer ${
                     pickupTime === 'NOW'
                       ? 'bg-[#EADBC2] text-[#3F3027] border border-[#C8AF87]'
                       : 'bg-[#F3E8D4]/40 text-[#786B5A] hover:bg-[#F3E8D4]'
                   }`}
                 >
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#7D3F32]" />
+                  <span className="w-2 h-2 rounded-full bg-[#7D3F32]" />
                   <span>Lấy ngay · Sau khoảng 10 phút</span>
                 </div>
 
                 <div
                   onClick={() => setPickupTime('SCHEDULED')}
-                  className={`p-3.5 rounded-xl text-xs sm:text-sm transition flex items-center gap-2.5 cursor-pointer ${
+                  className={`p-3 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer ${
                     pickupTime === 'SCHEDULED'
                       ? 'bg-[#EADBC2] text-[#3F3027] font-semibold border border-[#C8AF87]'
                       : 'bg-transparent text-[#786B5A] hover:text-[#3F3027]'
                   }`}
                 >
-                  <span className="w-2.5 h-2.5 rounded-full border border-[#786B5A]" />
+                  <span className="w-2 h-2 rounded-full border border-[#786B5A]" />
                   <span>Hẹn giờ nhận món</span>
                 </div>
               </div>
             </div>
 
             {/* Ghi chú bảo mật thanh toán */}
-            <div className="p-4 bg-[#FFFAF0] border border-[#E8D7B8] rounded-2xl flex items-center gap-3 text-xs text-[#786B5A]">
-              <Lock className="w-4 h-4 text-[#2E7D32] shrink-0" />
+            <div className="p-3.5 bg-[#FFFAF0] border border-[#E8D7B8] rounded-2xl flex items-center gap-2.5 text-[11px] text-[#786B5A]">
+              <Lock className="w-3.5 h-3.5 text-[#2E7D32] shrink-0" />
               <span>
-                Thông tin thanh toán được bảo vệ và mã hóa trực tiếp qua Cổng <b>VNPay Sandbox</b> chính thức.
+                Thanh toán an toàn qua Cổng <b>VNPay Sandbox</b> chính thức (Chữ ký HMAC SHA-512, Idempotency bảo vệ đơn).
               </span>
             </div>
           </div>
 
           {/* CỘT PHẢI (COL-5): KIỂM TRA ĐƠN CUỐI */}
           <div className="lg:col-span-5">
-            <div className="bg-[#FFFAF0] border border-[#E8D7B8] rounded-2xl p-6 shadow-sm sticky top-24">
-              <h2 className="text-lg font-bold text-[#3F3027] mb-5">
+            <div className="bg-[#FFFAF0] border border-[#E8D7B8] rounded-2xl p-5 shadow-sm sticky top-20">
+              <h2 className="text-base sm:text-lg font-bold text-[#3F3027] mb-4">
                 Đơn hàng của bạn
               </h2>
 
               {/* Danh sách món */}
-              <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
+              <div className="space-y-3.5 max-h-[260px] overflow-y-auto pr-1">
                 {items.map((item, idx) => {
                   const linePrice = item.lineTotal || (item.unitPrice || 0) * (item.quantity || 1);
                   const optionSummary = [
@@ -539,7 +533,7 @@ export default function CheckoutPage() {
                           {linePrice.toLocaleString('vi-VN')} đ
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#786B5A] mt-0.5 leading-relaxed">
+                      <p className="text-[11px] text-[#786B5A] mt-0.5 leading-snug">
                         {optionSummary || 'Tiêu chuẩn'}
                       </p>
                     </div>
@@ -548,10 +542,10 @@ export default function CheckoutPage() {
               </div>
 
               {/* Phân cách */}
-              <div className="border-t border-[#DDCCAE] my-5" />
+              <div className="border-t border-[#DDCCAE] my-4" />
 
               {/* Chi tiết chi phí */}
-              <div className="space-y-2.5 text-xs sm:text-sm">
+              <div className="space-y-2 text-xs">
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-[#246344]">
                     <span>Ưu đãi {appliedVoucher?.code || 'BANMOI10'}:</span>
@@ -565,15 +559,15 @@ export default function CheckoutPage() {
               </div>
 
               {/* Tổng thanh toán */}
-              <div className="pt-4 mt-3 border-t border-[#E8D7B8] flex justify-between items-baseline">
-                <span className="font-bold text-sm sm:text-base text-[#3F3027]">
+              <div className="pt-3.5 mt-2.5 border-t border-[#E8D7B8] flex justify-between items-baseline">
+                <span className="font-bold text-sm text-[#3F3027]">
                   Tổng thanh toán
                 </span>
-                <span className="font-serif text-2xl sm:text-3xl font-bold text-[#7D3F32]">
+                <span className="font-serif text-2xl font-bold text-[#7D3F32]">
                   {finalTotal.toLocaleString('vi-VN')} đ
                 </span>
               </div>
-              <p className="text-[11px] text-[#786B5A] mt-1">
+              <p className="text-[10px] text-[#786B5A] mt-0.5">
                 Giá đã bao gồm VAT
               </p>
 
@@ -582,11 +576,11 @@ export default function CheckoutPage() {
                 type="button"
                 onClick={handleCreateOrderAndOpenModal}
                 disabled={isSubmitting}
-                className="w-full h-12 bg-[#7D3F32] hover:bg-[#6A3328] disabled:bg-[#BCA99B] text-[#FFFAF0] font-bold text-sm rounded-xl transition shadow-md mt-6 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+                className="w-full h-11 bg-[#7D3F32] hover:bg-[#6A3328] disabled:bg-[#BCA99B] text-[#FFFAF0] font-bold text-xs sm:text-sm rounded-xl transition shadow-sm mt-5 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     <span>Đang khởi tạo đơn hàng...</span>
                   </>
                 ) : (
@@ -594,7 +588,7 @@ export default function CheckoutPage() {
                 )}
               </button>
 
-              <p className="text-[11px] text-[#786B5A] text-center mt-3 leading-relaxed">
+              <p className="text-[10px] text-[#786B5A] text-center mt-2.5 leading-relaxed">
                 Thông tin đơn hàng và giá được kiểm tra lại trước khi thanh toán.
               </p>
             </div>
@@ -603,26 +597,26 @@ export default function CheckoutPage() {
       </main>
 
       {/* FOOTER */}
-      <footer className="mt-12 py-4 border-t border-[#E8D7B8] text-center text-xs text-[#786B5A]">
+      <footer className="mt-8 py-3.5 border-t border-[#E8D7B8] text-center text-xs text-[#786B5A]">
         BrewLite © 2026 · Tích hợp Cổng VNPay Sandbox chính thức
       </footer>
 
       {/* ========================================================================= */}
-      {/* POPUP MODAL THANH TOÁN QR & VNPAY SANDBOX KHỚP BẢN VẼ FIGMA (FRAME 06 & 06H) */}
+      {/* POPUP MODAL THANH TOÁN QR & VNPAY SANDBOX - THIẾT KẾ GỌN GÀNG, SANG TRỌNG */}
       {/* ========================================================================= */}
       {showPaymentModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[rgba(46,33,27,0.36)] backdrop-blur-xs overflow-y-auto animate-in fade-in duration-200">
-          <div className="max-w-3xl w-full bg-[#FFFAF0] border border-[#C8AF87] rounded-3xl p-5 sm:p-8 shadow-2xl relative my-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[rgba(46,33,27,0.45)] backdrop-blur-xs overflow-y-auto animate-in fade-in duration-200">
+          <div className="max-w-[760px] w-full bg-[#FFFAF0] border border-[#C8AF87] rounded-3xl p-5 sm:p-6 shadow-2xl relative my-auto max-h-[92vh] flex flex-col justify-between overflow-y-auto">
             {/* HÀNG TRÊN CÙNG: BRAND & NÚT ĐÓNG */}
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-serif text-base font-semibold text-[#7D3F32]">
+            <div className="flex items-center justify-between mb-1">
+              <span className="font-serif text-sm font-bold text-[#7D3F32] tracking-wide">
                 BrewLite
               </span>
               <button
                 type="button"
                 onClick={() => setShowPaymentModal(false)}
                 aria-label="Đóng"
-                className="w-10 h-10 sm:w-11 sm:h-11 bg-[#EADBC2] hover:bg-[#dfceb0] text-[#3F3027] rounded-xl flex items-center justify-center font-bold text-xl transition cursor-pointer"
+                className="w-8 h-8 bg-[#EADBC2] hover:bg-[#dfceb0] text-[#3F3027] rounded-xl flex items-center justify-center font-bold text-lg transition cursor-pointer"
               >
                 ×
               </button>
@@ -631,125 +625,121 @@ export default function CheckoutPage() {
             {/* TRƯỜNG HỢP 1: TRẠNG THÁI THANH TOÁN (FRAME 06) */}
             {paymentStep === 'PAYING' && (
               <>
-                <div className="mb-6">
-                  <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#3F3027]">
+                <div className="mb-4">
+                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#3F3027]">
                     Thanh toán đơn hàng
                   </h2>
-                  <p className="text-xs text-[#786B5A] mt-1">
+                  <p className="text-xs text-[#786B5A] mt-0.5">
                     {orderCode || 'BL-8924'} · Nhận tại quầy · Quận 1
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-                  {/* CỘT TRÁI (COL-5): CÁC PHƯƠNG THỨC THANH TOÁN KHÔNG DÙNG TIỀN MẶT */}
-                  <div className="md:col-span-5 space-y-3">
-                    {/* Tùy chọn 1: Quét mã QR */}
-                    <button
-                      type="button"
-                      onClick={() => setSelectedMethod('QR')}
-                      className={`w-full p-3.5 rounded-xl text-left transition cursor-pointer border ${
-                        selectedMethod === 'QR'
-                          ? 'bg-[#EADBC2] border-[#7D3F32] shadow-xs'
-                          : 'bg-[#F3E8D4] border-[#DDCCAE] hover:bg-[#ebdcc4]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${selectedMethod === 'QR' ? 'bg-[#7D3F32]' : 'border border-[#786B5A]'}`} />
-                        <span className={`text-xs font-bold ${selectedMethod === 'QR' ? 'text-[#7D3F32]' : 'text-[#3F3027]'}`}>
-                          Quét mã QR
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-[#786B5A] pl-4 mt-0.5">
-                        Không dùng tiền thật · VNPay QR
-                      </p>
-                    </button>
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-stretch">
+                  {/* CỘT TRÁI (COL-5): CÁC PHƯƠNG THỨC THANH TOÁN KHÔNG TIỀN MẶT */}
+                  <div className="sm:col-span-5 flex flex-col justify-between gap-3">
+                    <div className="space-y-2.5">
+                      {/* Tùy chọn 1: Quét mã QR */}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedMethod('QR')}
+                        className={`w-full p-2.5 rounded-xl text-left transition cursor-pointer border ${
+                          selectedMethod === 'QR'
+                            ? 'bg-[#EADBC2] border-[#7D3F32] shadow-xs'
+                            : 'bg-[#F3E8D4]/70 border-[#DDCCAE] hover:bg-[#ebdcc4]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span className={`w-2 h-2 rounded-full ${selectedMethod === 'QR' ? 'bg-[#7D3F32]' : 'border border-[#786B5A]'}`} />
+                          <span className={`text-xs font-bold ${selectedMethod === 'QR' ? 'text-[#7D3F32]' : 'text-[#3F3027]'}`}>
+                            Quét mã QR
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-[#786B5A] pl-3.5 mt-0.5">
+                          Không dùng tiền thật · VNPay QR
+                        </p>
+                      </button>
 
-                    {/* Tùy chọn 2: Ví điện tử mô phỏng */}
-                    <button
-                      type="button"
-                      onClick={() => setSelectedMethod('WALLET')}
-                      className={`w-full p-3.5 rounded-xl text-left transition cursor-pointer border ${
-                        selectedMethod === 'WALLET'
-                          ? 'bg-[#EADBC2] border-[#7D3F32] shadow-xs'
-                          : 'bg-[#F3E8D4] border-[#DDCCAE] hover:bg-[#ebdcc4]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${selectedMethod === 'WALLET' ? 'bg-[#7D3F32]' : 'border border-[#786B5A]'}`} />
-                        <span className={`text-xs font-bold ${selectedMethod === 'WALLET' ? 'text-[#7D3F32]' : 'text-[#3F3027]'}`}>
-                          Ví điện tử mô phỏng
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-[#786B5A] pl-4 mt-0.5">
-                        Không dùng tiền thật · VNPay e-Wallet
-                      </p>
-                    </button>
+                      {/* Tùy chọn 2: Ví điện tử mô phỏng */}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedMethod('WALLET')}
+                        className={`w-full p-2.5 rounded-xl text-left transition cursor-pointer border ${
+                          selectedMethod === 'WALLET'
+                            ? 'bg-[#EADBC2] border-[#7D3F32] shadow-xs'
+                            : 'bg-[#F3E8D4]/70 border-[#DDCCAE] hover:bg-[#ebdcc4]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span className={`w-2 h-2 rounded-full ${selectedMethod === 'WALLET' ? 'bg-[#7D3F32]' : 'border border-[#786B5A]'}`} />
+                          <span className={`text-xs font-bold ${selectedMethod === 'WALLET' ? 'text-[#7D3F32]' : 'text-[#3F3027]'}`}>
+                            Ví điện tử mô phỏng
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-[#786B5A] pl-3.5 mt-0.5">
+                          Không dùng tiền thật · VNPay e-Wallet
+                        </p>
+                      </button>
 
-                    {/* Tùy chọn 3: Thẻ thử nghiệm */}
-                    <button
-                      type="button"
-                      onClick={() => setSelectedMethod('CARD')}
-                      className={`w-full p-3.5 rounded-xl text-left transition cursor-pointer border ${
-                        selectedMethod === 'CARD'
-                          ? 'bg-[#EADBC2] border-[#7D3F32] shadow-xs'
-                          : 'bg-[#F3E8D4] border-[#DDCCAE] hover:bg-[#ebdcc4]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${selectedMethod === 'CARD' ? 'bg-[#7D3F32]' : 'border border-[#786B5A]'}`} />
-                        <span className={`text-xs font-bold ${selectedMethod === 'CARD' ? 'text-[#7D3F32]' : 'text-[#3F3027]'}`}>
-                          Thẻ thử nghiệm
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-[#786B5A] pl-4 mt-0.5">
-                        Không dùng tiền thật · ATM test
-                      </p>
-                    </button>
-
-                    {/* Hộp thông tin: Môi trường thử nghiệm */}
-                    <div className="pt-3">
-                      <p className="text-xs font-bold text-[#7D3F32]">
-                        Môi trường thử nghiệm
-                      </p>
-                      <p className="text-[11px] text-[#786B5A] mt-1 leading-relaxed">
-                        Không dùng tài khoản hoặc tiền thật. Chỉ ghi nhận thanh toán khi cổng thử nghiệm xác nhận.
-                      </p>
+                      {/* Tùy chọn 3: Thẻ thử nghiệm */}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedMethod('CARD')}
+                        className={`w-full p-2.5 rounded-xl text-left transition cursor-pointer border ${
+                          selectedMethod === 'CARD'
+                            ? 'bg-[#EADBC2] border-[#7D3F32] shadow-xs'
+                            : 'bg-[#F3E8D4]/70 border-[#DDCCAE] hover:bg-[#ebdcc4]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span className={`w-2 h-2 rounded-full ${selectedMethod === 'CARD' ? 'bg-[#7D3F32]' : 'border border-[#786B5A]'}`} />
+                          <span className={`text-xs font-bold ${selectedMethod === 'CARD' ? 'text-[#7D3F32]' : 'text-[#3F3027]'}`}>
+                            Thẻ thử nghiệm
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-[#786B5A] pl-3.5 mt-0.5">
+                          Không dùng tiền thật · ATM test
+                        </p>
+                      </button>
                     </div>
 
-                    {/* Hộp thông tin cấu hình minh bạch */}
-                    <div className="p-3 bg-[#F3E8D4]/60 rounded-xl border border-[#DDCCAE] text-[11px] text-[#786B5A] space-y-1">
-                      <div className="flex justify-between">
-                        <span>Cổng:</span>
-                        <span className="font-bold text-[#005BAA]">VNPay Sandbox v2.1.0</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>TmnCode:</span>
-                        <span className="font-mono font-bold text-[#3F3027]">{VNPAY_CONFIG.tmnCode}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Bảo vệ:</span>
-                        <span className="font-mono text-[#2E7D32]">HMAC SHA-512</span>
+                    {/* Hộp thông tin: Môi trường thử nghiệm */}
+                    <div className="p-3 bg-[#F3E8D4]/60 rounded-xl border border-[#DDCCAE] text-[11px] space-y-1.5">
+                      <p className="font-bold text-[#7D3F32] text-xs">
+                        Môi trường thử nghiệm
+                      </p>
+                      <p className="text-[#786B5A] leading-snug">
+                        Không dùng tài khoản hoặc tiền thật. Chỉ ghi nhận khi cổng thử nghiệm xác nhận.
+                      </p>
+                      <div className="pt-1.5 border-t border-[#DDCCAE]/80 flex flex-col gap-0.5 text-[10px] text-[#786B5A]">
+                        <div className="flex justify-between">
+                          <span>Cổng test:</span>
+                          <span className="font-bold text-[#005BAA]">VNPay Sandbox v2.1.0</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>TmnCode:</span>
+                          <span className="font-mono font-bold text-[#3F3027]">{VNPAY_CONFIG.tmnCode}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* CỘT PHẢI (COL-7): MÃ THANH TOÁN QR VÀ HÀNH ĐỘNG */}
-                  <div className="md:col-span-7">
-                    <div className="bg-[#F3E8D4] rounded-2xl p-5 text-center border border-[#DDCCAE]">
+                  {/* CỘT PHẢI (COL-7): MÃ THANH TOÁN QR & NÚT HÀNH ĐỘNG */}
+                  <div className="sm:col-span-7 flex flex-col justify-between">
+                    <div className="bg-[#F3E8D4] rounded-2xl p-4 text-center border border-[#DDCCAE]">
                       <p className="text-[10px] font-bold text-[#786B5A] tracking-wider uppercase">
                         TỔNG THANH TOÁN
                       </p>
-                      <p className="font-serif text-3xl font-semibold text-[#7D3F32] my-1">
+                      <p className="font-serif text-2xl sm:text-3xl font-bold text-[#7D3F32] my-0.5">
                         {finalTotal.toLocaleString('vi-VN')} đ
                       </p>
 
                       {/* Vector QR chuẩn bản vẽ Figma Cloud */}
-                      <div className="my-3 flex justify-center">
+                      <div className="my-2 flex justify-center">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src="/images/vnpay-qr-figma.svg"
                           alt="Mã QR thanh toán"
-                          className="w-44 h-44 bg-[#FFFAF0] p-2 rounded-xl border border-[#DDCCAE] shadow-xs"
+                          className="w-32 h-32 sm:w-36 sm:h-36 bg-[#FFFAF0] p-1.5 rounded-xl border border-[#DDCCAE] shadow-xs"
                         />
                       </div>
 
@@ -762,26 +752,28 @@ export default function CheckoutPage() {
                       <p className="text-[10px] text-[#786B5A] mt-0.5">
                         Nội dung: BL-ORDER-{orderCode || '8924'}
                       </p>
-                      <p className="text-xs font-bold text-[#7D3F32] mt-2">
-                        Mã hết hiệu lực sau {formatTimer(countdown)}
-                      </p>
+                      <div className="mt-1.5 inline-block bg-[#EADBC2]/70 px-3 py-0.5 rounded-full">
+                        <span className="text-xs font-bold text-[#7D3F32]">
+                          Mã hết hiệu lực sau {formatTimer(countdown)}
+                        </span>
+                      </div>
                     </div>
 
-                    {/* NÚT HÀNH ĐỘNG */}
-                    <div className="mt-4 space-y-2">
+                    {/* NÚT HÀNH ĐỘNG GỌN GÀNG */}
+                    <div className="mt-3 space-y-1.5">
                       <button
                         type="button"
                         onClick={handleRedirectToVNPayGateway}
-                        className="w-full h-12 bg-[#7D3F32] hover:bg-[#6A3328] text-[#FFFAF0] font-bold text-sm rounded-xl transition shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+                        className="w-full h-11 bg-[#7D3F32] hover:bg-[#6A3328] text-[#FFFAF0] font-bold text-xs sm:text-sm rounded-xl transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.99]"
                       >
                         <span>Mở Cổng thanh toán VNPay Sandbox</span>
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowRight className="w-3.5 h-3.5" />
                       </button>
 
                       <button
                         type="button"
                         onClick={handleCheckPaymentStatus}
-                        className="w-full h-11 bg-[#EADBC2] hover:bg-[#dfceb0] text-[#3F3027] font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer"
+                        className="w-full h-9 bg-[#EADBC2] hover:bg-[#dfceb0] text-[#3F3027] font-bold text-xs rounded-xl transition flex items-center justify-center cursor-pointer"
                       >
                         <span>Kiểm tra trạng thái</span>
                       </button>
@@ -789,7 +781,7 @@ export default function CheckoutPage() {
                       <button
                         type="button"
                         onClick={() => setShowPaymentModal(false)}
-                        className="w-full py-2 text-xs text-[#7D3F32] hover:underline cursor-pointer block text-center"
+                        className="w-full py-1 text-[11px] text-[#7D3F32] hover:underline cursor-pointer block text-center"
                       >
                         Hủy đơn đang chờ thanh toán
                       </button>
@@ -801,44 +793,44 @@ export default function CheckoutPage() {
 
             {/* TRƯỜNG HỢP 2: THANH TOÁN THÀNH CÔNG (FRAME 06H) */}
             {paymentStep === 'SUCCESS' && (
-              <div className="text-left py-2">
-                <div className="mb-4">
-                  <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#3F3027]">
+              <div className="text-left py-1">
+                <div className="mb-3">
+                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#3F3027]">
                     Thanh toán thành công
                   </h2>
-                  <p className="text-xs sm:text-sm text-[#786B5A] mt-1">
+                  <p className="text-xs text-[#786B5A] mt-0.5">
                     Cảm ơn bạn! Đơn <b>{orderCode || 'BL-8924'}</b> đã được thanh toán và chuyển đến quầy pha chế.
                   </p>
                 </div>
 
                 {/* Hộp ĐÃ THANH TOÁN (#E6E8D5) */}
-                <div className="bg-[#E6E8D5] rounded-xl p-4 mb-4">
+                <div className="bg-[#E6E8D5] rounded-xl p-3.5 mb-3">
                   <p className="text-[10px] font-bold text-[#246344] tracking-wider uppercase">
                     ĐÃ THANH TOÁN · VNPAY SANDBOX
                   </p>
-                  <p className="font-serif text-3xl font-semibold text-[#7D3F32] mt-1">
+                  <p className="font-serif text-2xl sm:text-3xl font-bold text-[#7D3F32] mt-0.5">
                     {finalTotal.toLocaleString('vi-VN')} đ
                   </p>
                 </div>
 
                 {/* Hộp Thông tin đơn hàng (#F3E8D4) */}
-                <div className="bg-[#F3E8D4] rounded-xl p-4 text-xs space-y-1.5 mb-6">
+                <div className="bg-[#F3E8D4] rounded-xl p-3.5 text-xs space-y-1 mb-4">
                   <p className="font-bold text-[#3F3027]">
                     Nhận tại BrewLite · Chi nhánh Quận 1
                   </p>
                   <p className="text-[#3F3027] whitespace-pre-line leading-relaxed">
                     {items.map((it) => `${it.quantity || 1} × ${it.name}`).join('\n')}
                   </p>
-                  <p className="text-[10px] text-[#786B5A] pt-1">
+                  <p className="text-[10px] text-[#786B5A] pt-0.5">
                     Dự kiến sẵn sàng trong khoảng 8–10 phút.
                   </p>
                 </div>
 
                 {/* 2 NÚT HÀNH ĐỘNG KHỚP FRAME 06H */}
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex flex-col sm:flex-row gap-2.5">
                   <Link
                     href="/orders"
-                    className="flex-1 h-12 bg-[#7D3F32] hover:bg-[#6A3328] text-[#FFFAF0] font-bold text-sm rounded-xl transition shadow-xs flex items-center justify-center cursor-pointer"
+                    className="flex-1 h-11 bg-[#7D3F32] hover:bg-[#6A3328] text-[#FFFAF0] font-bold text-xs sm:text-sm rounded-xl transition shadow-xs flex items-center justify-center cursor-pointer"
                   >
                     Theo dõi đơn hàng
                   </Link>
@@ -848,7 +840,7 @@ export default function CheckoutPage() {
                       setShowPaymentModal(false);
                       router.push('/menu');
                     }}
-                    className="flex-1 h-12 bg-[#EADBC2] hover:bg-[#dfceb0] text-[#3F3027] font-bold text-sm rounded-xl transition flex items-center justify-center cursor-pointer"
+                    className="flex-1 h-11 bg-[#EADBC2] hover:bg-[#dfceb0] text-[#3F3027] font-bold text-xs sm:text-sm rounded-xl transition flex items-center justify-center cursor-pointer"
                   >
                     Đóng
                   </button>
