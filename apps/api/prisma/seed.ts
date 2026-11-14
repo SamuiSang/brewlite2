@@ -256,7 +256,7 @@ async function main() {
   // 5. KHỞI TẠO TÀI KHOẢN NGƯỜI DÙNG MẪU (USERS VỚI MẬT KHẨU BĂM BCRYPT)
   console.log('5. Đang nạp tài khoản người dùng mẫu (Khách hàng, Barista, Admin)...');
   // Mật khẩu chung đã băm bcrypt (saltRounds = 10) cho chuỗi "Password123@":
-  const defaultPasswordHash = '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW';
+  const defaultPasswordHash = '$2b$10$u/UzH0Pxm8d4afGjL/jzeeODLRjIX5DmueCz00MVgpQ3otAKQqgc.';
 
   await prisma.user.create({
     data: {

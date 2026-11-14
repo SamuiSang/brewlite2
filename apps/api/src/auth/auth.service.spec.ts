@@ -13,6 +13,7 @@ describe('AuthService', () => {
     mockPrisma = {
       user: {
         findUnique: jest.fn(),
+        findFirst: jest.fn(),
         create: jest.fn(),
       },
     };
@@ -71,7 +72,7 @@ describe('AuthService', () => {
 
   describe('login', () => {
     it('should throw UnauthorizedException if user is not found', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.findFirst.mockResolvedValue(null);
 
       await expect(
         service.login({ email: 'nonexistent@brewlite.com', password: 'Password123' }),
@@ -80,7 +81,7 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException if password does not match', async () => {
       const hashed = await bcrypt.hash('CorrectPassword', 10);
-      mockPrisma.user.findUnique.mockResolvedValue({
+      mockPrisma.user.findFirst.mockResolvedValue({
         id: 'uuid-123',
         email: 'user@brewlite.com',
         passwordHash: hashed,
@@ -95,7 +96,7 @@ describe('AuthService', () => {
     it('should return accessToken and user profile if credentials are valid', async () => {
       const plainPass = 'ValidSecret123';
       const hashed = await bcrypt.hash(plainPass, 10);
-      mockPrisma.user.findUnique.mockResolvedValue({
+      mockPrisma.user.findFirst.mockResolvedValue({
         id: 'uuid-456',
         email: 'user@brewlite.com',
         fullName: 'Valid User',

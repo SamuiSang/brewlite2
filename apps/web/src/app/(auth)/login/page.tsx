@@ -34,8 +34,7 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
       // Hỗ trợ đăng nhập bằng email hoặc số điện thoại
-      const email = identifier.includes('@') ? identifier : `${identifier}@customer.brewlite.vn`;
-      const res = await ApiClient.post('/auth/login', { email, password });
+      const res = await ApiClient.post('/auth/login', { email: identifier.trim(), password });
 
       if (res.accessToken) {
         ApiClient.setToken(res.accessToken);
