@@ -15,7 +15,6 @@ import { DeliveryMethod } from './dto/create-order.dto';
  */
 describe('OrdersService - Concurrency & Race Condition Test (2 khách mua ly cuối cùng)', () => {
   let service: OrdersService;
-  let prisma: PrismaService;
 
   const mockProduct = {
     id: 'prod-concurrency-1',
@@ -84,7 +83,7 @@ describe('OrdersService - Concurrency & Race Condition Test (2 khách mua ly cu�
                     ...dbIngredient,
                     stockQuantity: String(dbIngredient.stockQuantity),
                   })),
-                  updateMany: jest.fn().mockImplementation(async ({ where, data }) => {
+                  updateMany: jest.fn().mockImplementation(async ({ where }) => {
                     // Kiểm tra điều kiện Optimistic Locking nguyên tử:
                     // WHERE id = ... AND version = currentVersion AND stockQuantity >= requiredQty
                     if (
@@ -125,7 +124,6 @@ describe('OrdersService - Concurrency & Race Condition Test (2 khách mua ly cu�
     }).compile();
 
     service = module.get<OrdersService>(OrdersService);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   it('2 khách hàng đồng thời gửi request mua 1 ly cuối: 1 khách thành công, 1 khách nhận 409 Conflict, kho còn đúng 0g', async () => {
