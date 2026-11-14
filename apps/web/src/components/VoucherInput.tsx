@@ -42,8 +42,8 @@ export function PromotionCard({ promotion: p, subtotal, busy, onApply, selected 
   selected?: boolean; onRemove?: () => void; deliveryMethod?: string;
 }) {
   const missing = Math.max(0, p.minOrderValue - subtotal);
-  const restriction = p.firstOrderOnly ? 'Chỉ đơn đầu tiên, 1 lần/khách. Cần tài khoản xác thực (chưa khả dụng).'
-    : p.deliveryOnly && deliveryMethod !== 'DELIVERY' ? 'Chỉ áp dụng cho đơn giao hàng.' : '';
+  const restriction = p.firstOrderOnly ? 'Chỉ đơn đầu tiên.'
+    : p.deliveryOnly && deliveryMethod !== 'DELIVERY' ? 'Chỉ áp dụng giao hàng.' : '';
   const unavailable = missing > 0 || subtotal <= 0 || !!restriction || p.remainingUses === 0 || (p.expiresAt !== null && Date.parse(p.expiresAt) < Date.now());
   return <article className="rounded-xl border border-[#DDCCAE] bg-[#FFFCF5] p-3">
     <h4 className="font-bold text-[#7D3F32]">{p.code}</h4>

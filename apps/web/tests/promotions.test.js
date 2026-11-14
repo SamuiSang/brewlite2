@@ -38,6 +38,15 @@ test('welcome and delivery-only offers show restrictions before applying', () =>
   }
 });
 
+test('delivery-only offer is disabled for PICKUP but enabled for DELIVERY', () => {
+  const deliveryOnlyOffer = { ...offer, code: 'DELIVERYONLY', deliveryOnly: true };
+  const pickupCard = PromotionCard({ promotion: deliveryOnlyOffer, subtotal: 100000, busy: false, deliveryMethod: 'PICKUP', onApply: () => {} });
+  expect(React.Children.toArray(pickupCard.props.children).find(child => child.type === 'button').props.disabled).toBe(true);
+
+  const deliveryCard = PromotionCard({ promotion: deliveryOnlyOffer, subtotal: 100000, busy: false, deliveryMethod: 'DELIVERY', onApply: () => {} });
+  expect(React.Children.toArray(deliveryCard.props.children).find(child => child.type === 'button').props.disabled).toBe(false);
+});
+
 test('eligible promotion applies selected code', () => {
   let selected;
   const card = PromotionCard({ promotion: offer, subtotal: 50000, busy: false, onApply: code => { selected = code; } });

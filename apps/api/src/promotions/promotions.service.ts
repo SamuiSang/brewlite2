@@ -14,7 +14,9 @@ export class PromotionsService {
     const promotion = await this.prisma.promotion.findFirst({ where: { code: { equals: code, mode: 'insensitive' } } });
     if (!promotion) throw new BadRequestException('Mã khuyến mãi không hợp lệ hoặc không tồn tại');
     if (promotion.firstOrderOnly) throw new BadRequestException('Mã đơn đầu tiên cần tài khoản đã xác thực; chức năng xác thực chưa khả dụng');
-    if (promotion.deliveryOnly && deliveryMethod !== 'DELIVERY') throw new BadRequestException('Mã chỉ áp dụng cho đơn giao hàng');
+    if (promotion.deliveryOnly && deliveryMethod !== 'DELIVERY') {
+      throw new BadRequestException('Chỉ áp dụng cho đơn giao hàng');
+    }
     const now = new Date();
     if (!promotion.isActive) throw new BadRequestException('Mã khuyến mãi không còn hiệu lực');
     if (now < promotion.startsAt) throw new BadRequestException('Mã khuyến mãi chưa đến thời gian sử dụng');

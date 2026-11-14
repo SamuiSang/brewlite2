@@ -40,8 +40,10 @@ describe('PromotionsService read-only preview', () => {
   it('rejects first-order offers without verified identity and delivery-only offers for pickup', async () => {
     findFirst.mockResolvedValue({ ...voucher, firstOrderOnly: true });
     await expect(service.validate('WELCOME10', 150000)).rejects.toThrow('xác thực');
-    findFirst.mockResolvedValue({ ...voucher, deliveryOnly: true });
-    await expect(service.validate('FREESHIP', 150000)).rejects.toThrow('giao hàng');
+    findFirst.mockResolvedValue({ ...voucher, code: 'FREESHIP', deliveryOnly: true, discountType: 'FIXED_AMOUNT', discountValue: decimal(15000) });
+    await expect(service.validate('FREESHIP', 150000, 'PICKUP')).rejects.toThrow('giao hàng');
+    const deliveryResult = await service.validate('FREESHIP', 150000, 'DELIVERY');
+    expect(deliveryResult.discountAmount).toBe(15000);
   });
   it('fixed discount cannot exceed subtotal; unlimited usage stays valid', async () => {
     findFirst.mockResolvedValue({ ...voucher, usageLimit: null, minOrderValue: decimal(0), discountType: 'FIXED_AMOUNT', discountValue: decimal(50000) });

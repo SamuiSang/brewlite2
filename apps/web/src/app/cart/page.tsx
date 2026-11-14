@@ -644,13 +644,7 @@ export default function CartPage() {
                 Ưu đãi cho một ngày vui
               </h2>
 
-              <label className="mb-3 block text-sm">Hình thức nhận hàng
-                <select value={deliveryMethod} onChange={event => { setDeliveryMethod(event.target.value as 'PICKUP' | 'DELIVERY'); setAppliedVoucher(null); }} className="ml-2 min-h-11 rounded-lg border border-[#DDCCAE] bg-[#FFFCF5] px-2">
-                  <option value="PICKUP">Nhận tại quầy</option>
-                  <option value="DELIVERY">Giao hàng</option>
-                </select>
-              </label>
-              <VoucherInput key={deliveryMethod} deliveryMethod={deliveryMethod} />
+              <VoucherInput />
             </div>
           </div>
 
