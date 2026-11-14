@@ -4,7 +4,6 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { PaymentsService } from '../src/payments/payments.service';
-import { OrdersService } from '../src/orders/orders.service';
 import { OrderStatus, PaymentStatus } from '@prisma/client';
 import { sortObject } from '../src/payments/vnpay.util';
 import * as crypto from 'crypto';
@@ -17,7 +16,6 @@ describe('Orders & Payments Integration Test (Task 5.2 - Quang)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let paymentsService: PaymentsService;
-  let ordersService: OrdersService;
 
   const VNP_HASH_SECRET = 'GJZGJZTKHBYBESRSLCLSPZXGFPEXVPGF';
   const VNP_TMN_CODE = '8VXIB1MM';
@@ -33,7 +31,6 @@ describe('Orders & Payments Integration Test (Task 5.2 - Quang)', () => {
 
     prisma = app.get<PrismaService>(PrismaService);
     paymentsService = app.get<PaymentsService>(PaymentsService);
-    ordersService = app.get<OrdersService>(OrdersService);
   });
 
   afterAll(async () => {
