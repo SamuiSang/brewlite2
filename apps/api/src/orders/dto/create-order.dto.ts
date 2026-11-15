@@ -72,5 +72,10 @@ export class CreateOrderDto {
   @IsOptional()
   @IsString()
   receiverPhone?: string;
+
+  @IsOptional()
+  @IsInt({ message: 'Số Hạt sử dụng phải là số nguyên.' })
+  @Min(0, { message: 'Số Hạt sử dụng không được âm.' })
+  loyaltyPointsUsed?: number;
 }
 

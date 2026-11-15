@@ -7,6 +7,7 @@ import { OrdersModule } from './orders/orders.module';
 import { PromotionsModule } from './promotions/promotions.module';
 import { AuthModule } from './auth/auth.module';
 import { PaymentsModule } from './payments/payments.module';
+import { LoyaltyModule } from './loyalty/loyalty.module';
 
 @Module({
   imports: [
@@ -20,13 +21,14 @@ import { PaymentsModule } from './payments/payments.module';
     PromotionsModule,
     AuthModule,
     PaymentsModule,
+    LoyaltyModule,
     // Các module nghiệp vụ sẽ được từng thành viên đăng ký tại đây ở Task 4.2, 4.3 & Task 5:
-    // - HealthModule & AuthModule (Hiếu - Chức năng 3) [HealthModule & AuthModule đã đăng ký]
+    // - HealthModule & AuthModule (Hiếu - Chức năng 3) [Đã đăng ký]
     // - ProductsModule (Duy & Chiến - Chức năng 1) [Đã đăng ký]
     // - PromotionsModule (Quỳnh - Chức năng 2) [Đã đăng ký]
     // - OrdersModule (Chiến - Chức năng 4) [Đã đăng ký]
     // - PaymentsModule (Quang - Chức năng 5) [Đã đăng ký]
-    // - LoyaltyModule (Sang - Chức năng 6)
+    // - LoyaltyModule (Sang - Chức năng 6) [Đã đăng ký]
   ],
 })
 export class AppModule {}

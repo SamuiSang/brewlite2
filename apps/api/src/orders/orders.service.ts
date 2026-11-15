@@ -1,13 +1,21 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DiscountType, OrderStatus } from '@prisma/client';
+import {
+  DiscountType,
+  LoyaltyTxType,
+  OrderStatus,
+  PaymentStatus,
+  Prisma,
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
+import { OrderCancelScenario } from './dto/update-order-status.dto';
 
 interface CalculatedItem {
   productId: string;
@@ -21,9 +29,74 @@ interface CalculatedItem {
   lineTotal: number;
 }
 
+const ALLOWED_ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  [OrderStatus.PENDING]: [OrderStatus.PAID, OrderStatus.CANCELLED],
+  [OrderStatus.PAID]: [OrderStatus.PREPARING, OrderStatus.CANCELLED],
+  [OrderStatus.PREPARING]: [OrderStatus.COMPLETED, OrderStatus.CANCELLED],
+  [OrderStatus.COMPLETED]: [],
+  [OrderStatus.CANCELLED]: [],
+};
+
 @Injectable()
 export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * Chuẩn hóa dữ liệu đơn hàng trả về cho Client (loại bỏ Decimal thô của Prisma)
+   */
+  private formatOrder(order: any): OrderResponseDto['order'] {
+    return {
+      id: order.id,
+      orderCode: order.orderCode,
+      userId: order.userId,
+      status: order.status,
+      subtotalAmount: Number(order.subtotalAmount),
+      discountAmount: Number(order.discountAmount),
+      loyaltyPointsUsed: order.loyaltyPointsUsed ?? 0,
+      finalAmount: Number(order.finalAmount),
+      note: order.note ?? null,
+      expiresAt: order.expiresAt ?? null,
+      createdAt: order.createdAt,
+      customerName: order.user?.fullName || null,
+      promotionCode: order.promotion?.code || null,
+      items: (order.items || []).map((it: any) => ({
+        id: it.id,
+        productId: it.productId,
+        productName: it.productName,
+        size: it.size,
+        sugarLevel: it.sugarLevel,
+        iceLevel: it.iceLevel,
+        toppings: it.toppingsJson,
+        quantity: it.quantity,
+        unitPrice: Number(it.unitPrice),
+        lineTotal: Number(it.lineTotal),
+      })),
+      ...(order.payment
+        ? {
+            payment: {
+              id: order.payment.id,
+              method: order.payment.method,
+              status: order.payment.status,
+              amount: Number(order.payment.amount),
+              transactionRef: order.payment.transactionRef ?? null,
+              paidAt: order.payment.paidAt ?? null,
+            },
+          }
+        : {}),
+      ...(order.statusLogs
+        ? {
+            statusLogs: order.statusLogs.map((log: any) => ({
+              id: log.id,
+              previousStatus: log.previousStatus ?? null,
+              newStatus: log.newStatus,
+              changedBy: log.changedBy ?? null,
+              reason: log.reason ?? null,
+              createdAt: log.createdAt,
+            })),
+          }
+        : {}),
+    };
+  }
 
   /**
    * Khởi tạo đơn hàng với cơ chế tính tiền 100% tại Server & Khóa tồn kho Optimistic Locking
@@ -234,13 +307,62 @@ export class OrdersService {
       }
 
       // ----------------------------------------------------------------------
+      // BƯỚC 4.5: QUY ĐỔI ĐIỂM THƯỞNG (HẠT) NẾU KHÁCH CHỌN DÙNG TẠI CHECKOUT
+      // Quy tắc BR-06.4: Tối thiểu 10 Hạt, 1 Hạt = 1.000đ, tối đa 50% tổng đơn
+      // ----------------------------------------------------------------------
+      let pointsUsed = 0;
+      let pointsDiscount = 0;
+      if (dto.loyaltyPointsUsed && dto.loyaltyPointsUsed > 0) {
+        if (!Number.isInteger(dto.loyaltyPointsUsed) || dto.loyaltyPointsUsed < 10) {
+          throw new BadRequestException('Số Hạt quy đổi tối thiểu mỗi lần là 10 Hạt.');
+        }
+
+        const userRecord = await tx.user.findUnique({
+          where: { id: targetUserId },
+          select: { id: true, loyaltyPoints: true },
+        });
+        const balance = userRecord?.loyaltyPoints ?? 0;
+        if (balance < dto.loyaltyPointsUsed) {
+          throw new BadRequestException(
+            `Số dư Hạt không đủ (hiện có ${balance} Hạt, yêu cầu ${dto.loyaltyPointsUsed} Hạt).`,
+          );
+        }
+
+        const maxAllowedDiscount = Math.floor(Math.max(0, subtotalAmount - discountAmount) * 0.5);
+        pointsDiscount = dto.loyaltyPointsUsed * 1000;
+        if (pointsDiscount > maxAllowedDiscount) {
+          throw new BadRequestException(
+            `Điểm đổi không được giảm quá 50% giá trị đơn hàng còn lại (${maxAllowedDiscount.toLocaleString('vi-VN')} đ).`,
+          );
+        }
+
+        const deductPoints = await tx.user.updateMany({
+          where: {
+            id: targetUserId,
+            loyaltyPoints: { gte: dto.loyaltyPointsUsed },
+          },
+          data: {
+            loyaltyPoints: { decrement: dto.loyaltyPointsUsed },
+          },
+        });
+
+        if (deductPoints.count === 0) {
+          throw new ConflictException('Số dư Hạt vừa thay đổi đồng thời. Vui lòng thử lại.');
+        }
+
+        pointsUsed = dto.loyaltyPointsUsed;
+      }
+
+      // ----------------------------------------------------------------------
       // BƯỚC 5: TẠO BẢN GHI ORDER VÀ CÁC DÒNG ORDERITEM (TRẠNG THÁI PENDING)
       // ----------------------------------------------------------------------
-      const finalAmount = Math.max(0, subtotalAmount - discountAmount);
+      const totalDiscount = discountAmount + pointsDiscount;
+      const finalAmount = Math.max(0, subtotalAmount - totalDiscount);
       const randomSuffix = Math.floor(1000 + Math.random() * 9000);
       const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
       const orderCode = `BL-${dateStr}-${randomSuffix}`;
-      const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // Hold Stock 15 phút
+      const ttlMinutes = Math.max(1, Number(process.env.ORDER_PAYMENT_TTL_MINUTES || 15));
+      const expiresAt = new Date(Date.now() + ttlMinutes * 60 * 1000);
 
       const order = await tx.order.create({
         data: {
@@ -249,7 +371,8 @@ export class OrdersService {
           promotionId: appliedPromotionId,
           status: OrderStatus.PENDING,
           subtotalAmount,
-          discountAmount,
+          discountAmount: totalDiscount,
+          ...(pointsUsed > 0 ? { loyaltyPointsUsed: pointsUsed } : {}),
           finalAmount,
           note: dto.note || null,
           expiresAt,
@@ -281,47 +404,216 @@ export class OrdersService {
         },
       });
 
+      if (pointsUsed > 0 && (tx as any).loyaltyTransaction?.create) {
+        await (tx as any).loyaltyTransaction.create({
+          data: {
+            userId: targetUserId,
+            orderId: order.id,
+            type: LoyaltyTxType.REDEEM,
+            points: -pointsUsed,
+            description: `Đổi ${pointsUsed} Hạt cho đơn hàng ${order.orderCode}`,
+          },
+        });
+      }
+
       return {
         success: true,
         message: 'Khởi tạo đơn hàng và khóa nguyên liệu thành công.',
-        order: {
-          id: order.id,
-          orderCode: order.orderCode,
-          userId: order.userId,
-          status: order.status,
-          subtotalAmount: Number(order.subtotalAmount),
-          discountAmount: Number(order.discountAmount),
-          finalAmount: Number(order.finalAmount),
-          note: order.note,
-          expiresAt: order.expiresAt,
-          createdAt: order.createdAt,
-          promotionCode: order.promotion?.code || null,
-          items: order.items.map((it) => ({
-            id: it.id,
-            productId: it.productId,
-            productName: it.productName,
-            size: it.size,
-            sugarLevel: it.sugarLevel,
-            iceLevel: it.iceLevel,
-            toppings: it.toppingsJson,
-            quantity: it.quantity,
-            unitPrice: Number(it.unitPrice),
-            lineTotal: Number(it.lineTotal),
-          })),
-        },
+        order: this.formatOrder(order),
       };
     });
   }
 
   /**
-   * Tra cứu đơn hàng theo ID
+   * Hoàn trả đồng bộ nguyên liệu kho, lượt voucher và Hạt thưởng khi hủy đơn hàng
    */
-  async getOrderById(id: string): Promise<OrderResponseDto['order']> {
+  private async restockOrderResources(
+    tx: Prisma.TransactionClient,
+    order: {
+      id: string;
+      orderCode: string;
+      userId: string;
+      promotionId?: string | null;
+      loyaltyPointsUsed?: number;
+      items?: Array<{ productId: string; quantity: number }>;
+    },
+  ) {
+    // 1. Hoàn kho nguyên liệu theo BOM RecipeItem (tăng version Optimistic Lock)
+    for (const item of order.items || []) {
+      const recipes = await tx.recipeItem.findMany({
+        where: { productId: item.productId },
+      });
+
+      for (const recipe of recipes) {
+        const refundQty = Number(recipe.quantityRequired) * item.quantity;
+        if (refundQty > 0) {
+          await tx.ingredient.update({
+            where: { id: recipe.ingredientId },
+            data: {
+              stockQuantity: { increment: refundQty },
+              version: { increment: 1 },
+            },
+          });
+        }
+      }
+    }
+
+    // 2. Hoàn lượt sử dụng Promotion (nếu có)
+    if (order.promotionId && (tx as any).promotion?.updateMany) {
+      await (tx as any).promotion.updateMany({
+        where: {
+          id: order.promotionId,
+          usedCount: { gt: 0 },
+        },
+        data: {
+          usedCount: { decrement: 1 },
+        },
+      });
+    }
+
+    // 3. Hoàn Hạt thưởng đã tiêu (Idempotent theo orderId)
+    const pointsUsed = Number(order.loyaltyPointsUsed || 0);
+    if (pointsUsed > 0 && order.userId && (tx as any).loyaltyTransaction && (tx as any).user) {
+      const existingRefund = await (tx as any).loyaltyTransaction.findFirst({
+        where: {
+          orderId: order.id,
+          type: LoyaltyTxType.REFUND,
+        },
+      });
+
+      if (!existingRefund) {
+        await (tx as any).user.update({
+          where: { id: order.userId },
+          data: { loyaltyPoints: { increment: pointsUsed } },
+        });
+        await (tx as any).loyaltyTransaction.create({
+          data: {
+            userId: order.userId,
+            orderId: order.id,
+            type: LoyaltyTxType.REFUND,
+            points: pointsUsed,
+            description: `Hoàn ${pointsUsed} Hạt do hủy đơn ${order.orderCode}`,
+          },
+        });
+      }
+    }
+  }
+
+  /**
+   * Tự động giải phóng tồn kho cho các đơn PENDING đã quá hạn TTL thanh toán (Kịch bản hủy #2)
+   */
+  async expireOverdueOrders(userId?: string) {
+    if (!this.prisma.order?.findMany || !this.prisma.$transaction) {
+      return { success: true, expiredCount: 0, expiredOrderCodes: [] as string[] };
+    }
+
+    const now = new Date();
+    const overdueOrders = await this.prisma.order.findMany({
+      where: {
+        ...(userId ? { userId } : {}),
+        status: OrderStatus.PENDING,
+        expiresAt: { lt: now },
+      },
+      include: {
+        items: true,
+        payment: true,
+      },
+    });
+
+    if (!overdueOrders || overdueOrders.length === 0) {
+      return { success: true, expiredCount: 0, expiredOrderCodes: [] as string[] };
+    }
+
+    const expiredOrderCodes: string[] = [];
+
+    for (const overdue of overdueOrders) {
+      await this.prisma.$transaction(async (tx) => {
+        // Cập nhật nguyên tử có điều kiện status = PENDING để tránh xung đột với webhook vừa tới
+        const updated = await tx.order.updateMany({
+          where: {
+            id: overdue.id,
+            status: OrderStatus.PENDING,
+          },
+          data: {
+            status: OrderStatus.CANCELLED,
+          },
+        });
+
+        if (updated.count === 0) {
+          return;
+        }
+
+        await this.restockOrderResources(tx, overdue);
+
+        if (overdue.payment && (tx as any).payment?.update) {
+          await (tx as any).payment.update({
+            where: { orderId: overdue.id },
+            data: { status: PaymentStatus.FAILED },
+          });
+        }
+
+        if ((tx as any).orderStatusLog?.create) {
+          await (tx as any).orderStatusLog.create({
+            data: {
+              orderId: overdue.id,
+              previousStatus: OrderStatus.PENDING,
+              newStatus: OrderStatus.CANCELLED,
+              changedBy: 'SYSTEM_TTL_CRON',
+              reason: `[${OrderCancelScenario.PAYMENT_TIMEOUT_TTL}] Hết thời hạn giữ chỗ thanh toán. Nguyên liệu đã được trả lại kho.`,
+            },
+          });
+        }
+
+        expiredOrderCodes.push(overdue.orderCode);
+      });
+    }
+
+    return {
+      success: true,
+      expiredCount: expiredOrderCodes.length,
+      expiredOrderCodes,
+    };
+  }
+
+  /**
+   * UC-06.2: Tra cứu lịch sử đơn hàng cá nhân của khách hàng
+   */
+  async findByUser(userId: string) {
+    await this.expireOverdueOrders(userId);
+
+    const orders = await this.prisma.order.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        items: true,
+        promotion: true,
+        payment: true,
+        statusLogs: { orderBy: { createdAt: 'asc' } },
+        user: { select: { id: true, fullName: true, email: true, phone: true } },
+      },
+    });
+
+    return {
+      success: true,
+      total: orders.length,
+      orders: orders.map((order) => this.formatOrder(order)),
+    };
+  }
+
+  /**
+   * UC-06.1: Tra cứu đơn hàng theo ID kèm Anti-IDOR 403
+   */
+  async getOrderById(
+    id: string,
+    requester?: { userId?: string; role?: string },
+  ): Promise<OrderResponseDto['order']> {
     const order = await this.prisma.order.findUnique({
       where: { id },
       include: {
         items: true,
         promotion: true,
+        payment: true,
+        statusLogs: { orderBy: { createdAt: 'asc' } },
         user: { select: { id: true, fullName: true, email: true, phone: true } },
       },
     });
@@ -330,31 +622,14 @@ export class OrdersService {
       throw new NotFoundException(`Không tìm thấy đơn hàng với mã ID: ${id}`);
     }
 
-    return {
-      id: order.id,
-      orderCode: order.orderCode,
-      userId: order.userId,
-      status: order.status,
-      subtotalAmount: Number(order.subtotalAmount),
-      discountAmount: Number(order.discountAmount),
-      finalAmount: Number(order.finalAmount),
-      note: order.note,
-      expiresAt: order.expiresAt,
-      createdAt: order.createdAt,
-      promotionCode: order.promotion?.code || null,
-      items: order.items.map((it) => ({
-        id: it.id,
-        productId: it.productId,
-        productName: it.productName,
-        size: it.size,
-        sugarLevel: it.sugarLevel,
-        iceLevel: it.iceLevel,
-        toppings: it.toppingsJson,
-        quantity: it.quantity,
-        unitPrice: Number(it.unitPrice),
-        lineTotal: Number(it.lineTotal),
-      })),
-    };
+    const isPrivileged = requester?.role === 'STAFF' || requester?.role === 'ADMIN';
+    if (requester?.userId && !isPrivileged && order.userId !== requester.userId) {
+      throw new ForbiddenException(
+        'Bạn không có quyền truy cập biên nhận đơn hàng của tài khoản khác.',
+      );
+    }
+
+    return this.formatOrder(order);
   }
 
   /**
@@ -366,6 +641,9 @@ export class OrdersService {
       include: {
         items: true,
         promotion: true,
+        payment: true,
+        statusLogs: { orderBy: { createdAt: 'asc' } },
+        user: { select: { id: true, fullName: true, email: true, phone: true } },
       },
     });
 
@@ -373,30 +651,233 @@ export class OrdersService {
       throw new NotFoundException(`Không tìm thấy đơn hàng với mã: ${orderCode}`);
     }
 
+    return this.formatOrder(order);
+  }
+
+  /**
+   * UC-06.4: Chuyển trạng thái đơn hàng theo State Machine nghiêm ngặt (BR-06.1)
+   */
+  async updateOrderStatus(
+    id: string,
+    targetStatus: OrderStatus,
+    actor?: { userId?: string; role?: string },
+    reason?: string,
+  ) {
+    const existing = await this.prisma.order.findUnique({
+      where: { id },
+      include: { items: true, payment: true, promotion: true },
+    });
+
+    if (!existing) {
+      throw new NotFoundException(`Không tìm thấy đơn hàng với mã ID: ${id}`);
+    }
+
+    const allowedTargets = ALLOWED_ORDER_TRANSITIONS[existing.status] || [];
+    if (!allowedTargets.includes(targetStatus)) {
+      throw new BadRequestException(
+        `Chuyển trạng thái không hợp lệ: không thể chuyển từ ${existing.status} sang ${targetStatus}.`,
+      );
+    }
+
+    const updatedOrder = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.order.update({
+        where: { id: existing.id },
+        data: { status: targetStatus },
+        include: {
+          items: true,
+          promotion: true,
+          payment: true,
+          statusLogs: { orderBy: { createdAt: 'asc' } },
+        },
+      });
+
+      if ((tx as any).orderStatusLog?.create) {
+        await (tx as any).orderStatusLog.create({
+          data: {
+            orderId: existing.id,
+            previousStatus: existing.status,
+            newStatus: targetStatus,
+            changedBy: actor?.userId || 'STAFF',
+            reason: reason || `Cập nhật trạng thái từ ${existing.status} sang ${targetStatus}.`,
+          },
+        });
+      }
+
+      if (
+        targetStatus === OrderStatus.PAID &&
+        existing.userId &&
+        (tx as any).loyaltyTransaction &&
+        (tx as any).user
+      ) {
+        const alreadyEarned = await (tx as any).loyaltyTransaction.findFirst({
+          where: { orderId: existing.id, type: LoyaltyTxType.EARN },
+        });
+        const points = Math.floor(Number(existing.finalAmount) / 10000);
+        if (!alreadyEarned && points > 0) {
+          await (tx as any).user.update({
+            where: { id: existing.userId },
+            data: { loyaltyPoints: { increment: points } },
+          });
+          await (tx as any).loyaltyTransaction.create({
+            data: {
+              userId: existing.userId,
+              orderId: existing.id,
+              type: LoyaltyTxType.EARN,
+              points,
+              description: `Tích lũy từ đơn hàng ${existing.orderCode}`,
+            },
+          });
+        }
+      }
+
+      if (targetStatus === OrderStatus.CANCELLED) {
+        await this.restockOrderResources(tx, existing);
+        if (existing.payment && (tx as any).payment?.update) {
+          const refundRequired =
+            existing.status === OrderStatus.PAID ||
+            existing.status === OrderStatus.PREPARING ||
+            existing.payment.status === PaymentStatus.SUCCESS;
+          await (tx as any).payment.update({
+            where: { orderId: existing.id },
+            data: {
+              status: refundRequired ? PaymentStatus.REFUNDED : PaymentStatus.FAILED,
+            },
+          });
+        }
+      }
+
+      return updated;
+    });
+
     return {
-      id: order.id,
-      orderCode: order.orderCode,
-      userId: order.userId,
-      status: order.status,
-      subtotalAmount: Number(order.subtotalAmount),
-      discountAmount: Number(order.discountAmount),
-      finalAmount: Number(order.finalAmount),
-      note: order.note,
-      expiresAt: order.expiresAt,
-      createdAt: order.createdAt,
-      promotionCode: order.promotion?.code || null,
-      items: order.items.map((it) => ({
-        id: it.id,
-        productId: it.productId,
-        productName: it.productName,
-        size: it.size,
-        sugarLevel: it.sugarLevel,
-        iceLevel: it.iceLevel,
-        toppings: it.toppingsJson,
-        quantity: it.quantity,
-        unitPrice: Number(it.unitPrice),
-        lineTotal: Number(it.lineTotal),
-      })),
+      success: true,
+      message: `Cập nhật trạng thái đơn hàng thành ${targetStatus}.`,
+      order: this.formatOrder(updatedOrder),
+    };
+  }
+
+  /**
+   * Hủy đơn hàng & hoàn kho cho đủ 4 kịch bản ngoại lệ:
+   * 1. ONLINE_CUSTOMER_CANCEL: Khách hủy đơn PENDING online
+   * 2. PAYMENT_TIMEOUT_TTL: Quá hạn TTL giữ chỗ thanh toán
+   * 3. OFFLINE_COUNTER_CANCEL: Nhân viên/Admin hủy tại quầy Offline
+   * 4. OUT_OF_STOCK_REFUND: Hết nguyên liệu bất khả kháng sau khi đã PAID -> REFUNDED
+   */
+  async cancelOrder(
+    id: string,
+    dto: { scenario?: OrderCancelScenario; reason?: string },
+    requester?: { userId?: string; role?: string },
+  ) {
+    const existing = await this.prisma.order.findUnique({
+      where: { id },
+      include: { items: true, payment: true, promotion: true },
+    });
+
+    if (!existing) {
+      throw new NotFoundException(`Không tìm thấy đơn hàng với mã ID: ${id}`);
+    }
+
+    const isPrivileged = requester?.role === 'STAFF' || requester?.role === 'ADMIN';
+    if (requester?.userId && !isPrivileged && existing.userId !== requester.userId) {
+      throw new ForbiddenException('Bạn không có quyền hủy đơn hàng của tài khoản khác.');
+    }
+
+    if (
+      existing.status === OrderStatus.COMPLETED ||
+      existing.status === OrderStatus.CANCELLED
+    ) {
+      throw new BadRequestException(
+        `Không thể hủy đơn hàng đang ở trạng thái ${existing.status}.`,
+      );
+    }
+
+    const scenario =
+      dto.scenario ||
+      (existing.status === OrderStatus.PENDING
+        ? OrderCancelScenario.ONLINE_CUSTOMER_CANCEL
+        : OrderCancelScenario.OUT_OF_STOCK_REFUND);
+
+    if (
+      scenario === OrderCancelScenario.ONLINE_CUSTOMER_CANCEL &&
+      existing.status !== OrderStatus.PENDING
+    ) {
+      throw new BadRequestException(
+        'Khách hàng chỉ có thể tự hủy đơn Online khi chưa thanh toán (PENDING). Đơn đã thanh toán cần nhân viên xác nhận hoàn tiền.',
+      );
+    }
+
+    if (
+      scenario === OrderCancelScenario.PAYMENT_TIMEOUT_TTL &&
+      existing.status !== OrderStatus.PENDING
+    ) {
+      throw new BadRequestException('Chỉ đơn hàng PENDING chưa thanh toán mới áp dụng hết hạn TTL.');
+    }
+
+    if (
+      (scenario === OrderCancelScenario.OFFLINE_COUNTER_CANCEL ||
+        scenario === OrderCancelScenario.OUT_OF_STOCK_REFUND) &&
+      requester?.role &&
+      !isPrivileged
+    ) {
+      throw new ForbiddenException(
+        'Thao tác hủy đơn tại quầy hoặc xác nhận hoàn tiền hết món yêu cầu quyền Nhân viên / Quản trị viên.',
+      );
+    }
+
+    const wasPaid =
+      existing.status === OrderStatus.PAID ||
+      existing.status === OrderStatus.PREPARING ||
+      existing.payment?.status === PaymentStatus.SUCCESS;
+
+    const cancelledOrder = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.order.update({
+        where: { id: existing.id },
+        data: { status: OrderStatus.CANCELLED },
+        include: {
+          items: true,
+          promotion: true,
+          payment: true,
+          statusLogs: { orderBy: { createdAt: 'asc' } },
+        },
+      });
+
+      await this.restockOrderResources(tx, existing);
+
+      if (existing.payment && (tx as any).payment?.update) {
+        const nextPaymentStatus =
+          wasPaid || scenario === OrderCancelScenario.OUT_OF_STOCK_REFUND
+            ? PaymentStatus.REFUNDED
+            : PaymentStatus.FAILED;
+        await (tx as any).payment.update({
+          where: { orderId: existing.id },
+          data: { status: nextPaymentStatus },
+        });
+      }
+
+      if ((tx as any).orderStatusLog?.create) {
+        await (tx as any).orderStatusLog.create({
+          data: {
+            orderId: existing.id,
+            previousStatus: existing.status,
+            newStatus: OrderStatus.CANCELLED,
+            changedBy: requester?.userId || 'SYSTEM',
+            reason: `[${scenario}] ${dto.reason || 'Hủy đơn hàng và giải phóng tồn kho nguyên liệu.'}`,
+          },
+        });
+      }
+
+      return updated;
+    });
+
+    return {
+      success: true,
+      scenario,
+      refundIssued: wasPaid || scenario === OrderCancelScenario.OUT_OF_STOCK_REFUND,
+      message:
+        wasPaid || scenario === OrderCancelScenario.OUT_OF_STOCK_REFUND
+          ? 'Đã hủy đơn hàng, hoàn trả nguyên liệu và khởi tạo lệnh hoàn tiền.'
+          : 'Đã hủy đơn hàng và hoàn trả nguyên liệu giữ chỗ về kho.',
+      order: this.formatOrder(cancelledOrder),
     };
   }
 }

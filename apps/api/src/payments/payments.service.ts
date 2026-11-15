@@ -211,7 +211,7 @@ export class PaymentsService {
 
     // 5. Cập nhật trạng thái trong Database Transaction
     if (vnpResponseCode === '00') {
-      // THANH TOÁN THÀNH CÔNG: Chuyển Order -> PAID, Payment -> SUCCESS
+      // THANH TOÁN THÀNH CÔNG: Chuyển Order -> PAID, Payment -> SUCCESS & Tích điểm Idempotent
       await this.prisma.$transaction(async (tx) => {
         await tx.payment.upsert({
           where: { orderId: order.id },
@@ -237,6 +237,41 @@ export class PaymentsService {
           where: { id: order.id },
           data: { status: OrderStatus.PAID },
         });
+
+        if ((tx as any).orderStatusLog?.create) {
+          await (tx as any).orderStatusLog.create({
+            data: {
+              orderId: order.id,
+              previousStatus: order.status,
+              newStatus: OrderStatus.PAID,
+              changedBy: 'VNPAY_IPN',
+              reason: `Xác nhận thanh toán thành công qua VNPay Sandbox (#${vnpTransactionNo || 'IPN'}).`,
+            },
+          });
+        }
+
+        // Tích điểm thành viên Idempotent (10.000đ = 1 Hạt, tối đa 1 EARN/đơn)
+        if (order.userId && (tx as any).loyaltyTransaction && (tx as any).user) {
+          const existingEarn = await (tx as any).loyaltyTransaction.findFirst({
+            where: { orderId: order.id, type: 'EARN' },
+          });
+          const earnedPoints = Math.floor(Number(order.finalAmount) / 10000);
+          if (!existingEarn && earnedPoints > 0) {
+            await (tx as any).user.update({
+              where: { id: order.userId },
+              data: { loyaltyPoints: { increment: earnedPoints } },
+            });
+            await (tx as any).loyaltyTransaction.create({
+              data: {
+                userId: order.userId,
+                orderId: order.id,
+                type: 'EARN',
+                points: earnedPoints,
+                description: `Tích lũy từ đơn hàng ${order.orderCode}`,
+              },
+            });
+          }
+        }
       });
 
       this.logger.log(
@@ -245,7 +280,7 @@ export class PaymentsService {
       return { RspCode: '00', Message: 'Confirm Success' };
     } else {
       // THANH TOÁN THẤT BẠI HOẶC KHÁCH HỦY:
-      // Chuyển Order -> CANCELLED, Payment -> FAILED và HOÀN TRẢ TỒN KHO NGUYÊN LIỆU
+      // Chuyển Order -> CANCELLED, Payment -> FAILED, HOÀN TRẢ TỒN KHO & HOÀN HẠT ĐÃ DÙNG
       await this.prisma.$transaction(async (tx) => {
         await tx.payment.upsert({
           where: { orderId: order.id },
@@ -270,6 +305,18 @@ export class PaymentsService {
           data: { status: OrderStatus.CANCELLED },
         });
 
+        if ((tx as any).orderStatusLog?.create) {
+          await (tx as any).orderStatusLog.create({
+            data: {
+              orderId: order.id,
+              previousStatus: order.status,
+              newStatus: OrderStatus.CANCELLED,
+              changedBy: 'VNPAY_IPN',
+              reason: `Thanh toán thất bại / Khách hủy trên VNPay (Mã lỗi: ${vnpResponseCode}). Hoàn kho nguyên liệu.`,
+            },
+          });
+        }
+
         // Hoàn trả nguyên liệu thô theo công thức RecipeItem
         for (const item of order.items) {
           const recipeItems = await tx.recipeItem.findMany({
@@ -287,6 +334,29 @@ export class PaymentsService {
                 version: {
                   increment: 1,
                 },
+              },
+            });
+          }
+        }
+
+        // Hoàn Hạt thưởng nếu đơn có dùng Hạt quy đổi
+        const pointsUsed = Number((order as any).loyaltyPointsUsed || 0);
+        if (order.userId && pointsUsed > 0 && (tx as any).loyaltyTransaction && (tx as any).user) {
+          const existingRefund = await (tx as any).loyaltyTransaction.findFirst({
+            where: { orderId: order.id, type: 'REFUND' },
+          });
+          if (!existingRefund) {
+            await (tx as any).user.update({
+              where: { id: order.userId },
+              data: { loyaltyPoints: { increment: pointsUsed } },
+            });
+            await (tx as any).loyaltyTransaction.create({
+              data: {
+                userId: order.userId,
+                orderId: order.id,
+                type: 'REFUND',
+                points: pointsUsed,
+                description: `Hoàn ${pointsUsed} Hạt do thanh toán đơn ${order.orderCode} thất bại`,
               },
             });
           }
