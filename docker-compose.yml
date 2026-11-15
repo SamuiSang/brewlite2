@@ -82,7 +82,7 @@ services:
 
 volumes:
   postgres_data:
-    name: brewlite_postgres_data
+    name: brewlite2_postgres_data
 
 networks:
   edge_public_net:

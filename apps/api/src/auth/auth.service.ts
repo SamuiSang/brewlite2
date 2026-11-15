@@ -64,12 +64,18 @@ export class AuthService {
    * Đăng nhập hệ thống và cấp phát JWT Token
    */
   async login(dto: LoginDto) {
-    // 1. Tìm kiếm User theo email
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email.toLowerCase().trim() },
+    // 1. Tìm kiếm User theo email hoặc số điện thoại
+    const identifier = dto.email.toLowerCase().trim();
+    const user = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: identifier },
+          { phone: identifier },
+        ],
+      },
     });
     if (!user) {
-      throw new UnauthorizedException('Email hoặc mật khẩu không chính xác.');
+      throw new UnauthorizedException('Số điện thoại/email hoặc mật khẩu không chính xác.');
     }
 
     // 2. So khớp mật khẩu đã băm bằng constant-time comparison
