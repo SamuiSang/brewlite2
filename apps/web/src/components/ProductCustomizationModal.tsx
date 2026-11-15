@@ -29,10 +29,10 @@ export default function ProductCustomizationModal({ product, toppings, onClose, 
       <div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={product.imageUrl || '/images/drinks/ca-phe-muoi-con-dao.jpg'}
+          src={product.imageUrl || '/images/products/ca-phe-sua-da.jpg'}
           alt={product.name}
           onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = '/images/drinks/ca-phe-muoi-con-dao.jpg';
+            (e.currentTarget as HTMLImageElement).src = '/images/products/ca-phe-sua-da.jpg';
           }}
           className="aspect-square w-full rounded-xl object-cover"
         />

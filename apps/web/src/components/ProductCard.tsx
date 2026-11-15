@@ -30,6 +30,15 @@ const CATEGORY_NAMES: Record<string, string> = {
   COFFEE: 'CÀ PHÊ',
 };
 
+const CATEGORY_FALLBACK_IMAGES: Record<string, string> = {
+  COFFEE: '/images/products/ca-phe-sua-da.jpg',
+  ESPRESSO: '/images/products/bac-xiu.jpg',
+  COLD_BREW: '/images/products/ca-phe-den-da.jpg',
+  TEA: '/images/products/tra-dao-cam-sa.jpg',
+  FREEZE: '/images/products/matcha-da-xay.jpg',
+  PASTRY: '/images/products/croissant-bo-toi.jpg',
+};
+
 /**
  * Component hiển thị thẻ từng món đồ uống trong thực đơn (ProductCard).
  * Khớp 100% bản vẽ Figma Cloud BrewLite 2 (Node 3:2 Desktop & Node 3:6 Mobile):
@@ -70,10 +79,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       }`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={product.imageUrl || '/images/drinks/ca-phe-muoi-con-dao.jpg'}
+          src={product.imageUrl || CATEGORY_FALLBACK_IMAGES[product.category] || '/images/products/ca-phe-sua-da.jpg'}
           alt={product.name}
           onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = '/images/drinks/ca-phe-muoi-con-dao.jpg';
+            const fallback = CATEGORY_FALLBACK_IMAGES[product.category] || '/images/products/ca-phe-sua-da.jpg';
+            if ((e.currentTarget as HTMLImageElement).src !== fallback) {
+              (e.currentTarget as HTMLImageElement).src = fallback;
+            }
           }}
           className={`h-full w-full object-cover transition-all duration-500 ${
             isOutOfStock ? 'grayscale-[90%] opacity-70 contrast-[0.92]' : 'group-hover:scale-105'
