@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -11,10 +12,32 @@ import {
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
 import { OrdersService } from './orders.service';
+import { ValidatePromotionDto } from '../promotions/dto/promotions.dto';
+import { PromotionsService } from '../promotions/promotions.service';
 
 @Controller(['orders', 'api/v1/orders'])
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    private readonly promotionsService: PromotionsService,
+  ) {}
+
+  /**
+   * UC-02.3: Thẩm định mã khuyến mãi trong luồng đặt hàng (Postman compatibility)
+   * POST /orders/validate-voucher hoặc POST /api/v1/orders/validate-voucher
+   */
+  @Post('validate-voucher')
+  @HttpCode(HttpStatus.OK)
+  async validateVoucher(
+    @Body(new ValidationPipe({ transform: true, whitelist: true }))
+    body: ValidatePromotionDto,
+  ) {
+    const amount = body.cartSubtotal ?? body.subtotal;
+    if (amount === undefined || amount === null) {
+      throw new BadRequestException('Giá trị đơn hàng (cartSubtotal hoặc subtotal) không hợp lệ');
+    }
+    return await this.promotionsService.validate(body.code, amount, body.deliveryMethod);
+  }
 
   /**
    * UC-04: Khởi tạo đơn hàng & Khóa tồn kho nguyên liệu an toàn

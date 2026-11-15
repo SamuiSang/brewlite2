@@ -5,6 +5,18 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Tự động tương thích với các request từ Postman hoặc client không kèm tiền tố /api/v1
+  app.use((req: any, _res: any, next: any) => {
+    if (
+      typeof req.url === 'string' &&
+      !req.url.startsWith('/api/v1') &&
+      req.url !== '/favicon.ico'
+    ) {
+      req.url = '/api/v1' + (req.url.startsWith('/') ? req.url : '/' + req.url);
+    }
+    next();
+  });
+
   app.setGlobalPrefix('api/v1');
 
   app.enableCors({
