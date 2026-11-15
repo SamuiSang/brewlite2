@@ -126,3 +126,35 @@ Một Task hoặc User Story chỉ được nghiệm thu (`Done`) khi thỏa mã
    npm run dev:api   # Chạy NestJS API tại cổng 3001
    npm run dev:web   # Chạy Next.js PWA tại cổng 3000
    ```
+
+---
+
+## 6. Quy trình CD Pipeline & Kế hoạch Rollback Production (Task 5.3 – ADR-006)
+
+### 6.1 Kiến trúc CD Pipeline (`.github/workflows/cd.yml`)
+
+Khi code được hợp nhất vào nhánh `main` (hoặc kích hoạt thủ công qua `workflow_dispatch`), GitHub Actions thực thi tuần tự 3 giai đoạn:
+
+1. **Stage 1 (`quality-gate`):** Cài đặt phụ thuộc sạch (`npm ci`), sinh Prisma Client (`npm run prisma:generate --workspace=apps/api`), chạy `npm run lint`, `npm test` (Backend NestJS + Frontend Next.js Jest) và `npm run build`.
+2. **Stage 2 (`build-and-push`):** Đóng gói multi-stage Docker images (`apps/api/Dockerfile` và `apps/web/Dockerfile`) và đẩy lên **GitHub Container Registry (GHCR)** với bộ tag bất biến `sha-<short_sha>` kèm `latest`:
+   - `ghcr.io/samuisang/brewlite-api:<sha-tag>`
+   - `ghcr.io/samuisang/brewlite-web:<sha-tag>`
+3. **Stage 3 (`deploy-and-verify`):** Gửi webhook triển khai tới nền tảng Cloud PaaS (`RENDER_DEPLOY_HOOK_URL`), sau đó chạy **Smoke Test** gọi `GET <PRODUCTION_API_URL>/api/v1/health` tối đa **6 lần × 5 giây** (30 giây) để xác nhận API trả HTTP `200` và kết nối PostgreSQL (`SELECT 1`) khỏe mạnh.
+
+### 6.2 Quy trình Rollback Tự động & Thủ công (Auto-Rollback Runbook)
+
+- **Rollback tự động trên CI/CD:** Nếu bước Smoke Test `/api/v1/health` thất bại (HTTP khác `200` hoặc timeout sau 30 giây), bước `Automated Rollback on Health Check Failure` tự động chạy (`if: failure() && steps.smoke.outcome == 'failure'`) để kích hoạt `RENDER_ROLLBACK_HOOK_URL`, chuyển lưu lượng về container image ổn định trước đó mà không làm mất dữ liệu trong Persistent Volume PostgreSQL.
+- **Rollback thủ công qua GitHub Actions (`workflow_dispatch`):**
+  1. Vào tab **Actions** -> chọn workflow **CD - Deploy to Production & Auto-Rollback** -> bấm **Run workflow**.
+  2. Nhập immutable image tag ổn định gần nhất vào trường `target_tag` (ví dụ `sha-4743bca`).
+- **Rollback thủ công trên Docker Host / VPS:**
+  ```bash
+  # Dừng dịch vụ gặp sự cố và kéo image phiên bản ổn định (last-known-good SHA)
+  docker pull ghcr.io/samuisang/brewlite-api:<stable_sha_tag>
+  docker pull ghcr.io/samuisang/brewlite-web:<stable_sha_tag>
+  docker compose up -d
+  # Hoặc hoàn tác commit lỗi trên nhánh main:
+  git revert <bad_commit_sha> && git push origin main
+  ```
+- Tài liệu tổng kết Sprint 2 Retrospective và Bộ Q&A bảo vệ kỹ thuật xem tại [`docs/project-management/sprint2-retro.md`](docs/project-management/sprint2-retro.md).
+
