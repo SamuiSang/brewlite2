@@ -39,130 +39,6 @@ interface LoyaltyTxRecord {
   createdAt: string;
 }
 
-const DEMO_FALLBACK_ORDERS: OrderRecord[] = [
-  {
-    id: 'demo-order-8924',
-    orderCode: 'BL-8924',
-    status: 'PREPARING',
-    subtotalAmount: 115000,
-    discountAmount: 20000,
-    loyaltyPointsUsed: 0,
-    finalAmount: 95000,
-    note: 'BrewLite · Chi nhánh Quận 1',
-    createdAt: '2026-11-11T09:42:00.000Z',
-    customerName: 'Hàn Minh Hiếu',
-    promotionCode: 'BANMOI10',
-    payment: { id: 'p-1', method: 'VNPAY', status: 'SUCCESS', amount: 95000 },
-    items: [
-      {
-        id: 'i-1',
-        productId: 'prod-001',
-        productName: 'Cà phê Muối Côn Đảo',
-        size: 'M',
-        sugarLevel: '50%',
-        iceLevel: '100%',
-        toppings: ['Sữa yến mạch', 'Macchiato'],
-        quantity: 1,
-        unitPrice: 73000,
-        lineTotal: 73000,
-      },
-      {
-        id: 'i-2',
-        productId: 'prod-002',
-        productName: 'Trà Lài Vải Thiều',
-        size: 'M',
-        sugarLevel: '70%',
-        iceLevel: '100%',
-        toppings: null,
-        quantity: 1,
-        unitPrice: 42000,
-        lineTotal: 42000,
-      },
-    ],
-  },
-  {
-    id: 'demo-order-8810',
-    orderCode: 'BL-8810',
-    status: 'COMPLETED',
-    subtotalAmount: 45000,
-    discountAmount: 0,
-    loyaltyPointsUsed: 0,
-    finalAmount: 45000,
-    note: 'BrewLite · Chi nhánh Quận 1',
-    createdAt: '2026-11-10T08:10:00.000Z',
-    customerName: 'Hàn Minh Hiếu',
-    payment: { id: 'p-2', method: 'VNPAY', status: 'SUCCESS', amount: 45000 },
-    items: [
-      {
-        id: 'i-3',
-        productId: 'prod-001',
-        productName: 'Cà phê Muối Côn Đảo',
-        size: 'M',
-        sugarLevel: '100%',
-        iceLevel: '100%',
-        toppings: null,
-        quantity: 1,
-        unitPrice: 45000,
-        lineTotal: 45000,
-      },
-    ],
-  },
-  {
-    id: 'demo-order-8820',
-    orderCode: 'BL-8820',
-    status: 'CANCELLED',
-    subtotalAmount: 45000,
-    discountAmount: 0,
-    loyaltyPointsUsed: 0,
-    finalAmount: 45000,
-    note: 'Hết thời hạn thanh toán 7 phút. Nguyên liệu giữ chỗ đã được trả lại kho.',
-    createdAt: '2026-11-07T14:23:00.000Z',
-    customerName: 'Hàn Minh Hiếu',
-    payment: { id: 'p-3', method: 'VNPAY', status: 'FAILED', amount: 45000 },
-    statusLogs: [
-      {
-        id: 'log-1',
-        previousStatus: 'PENDING',
-        newStatus: 'CANCELLED',
-        reason: '[PAYMENT_TIMEOUT_TTL] Hết thời hạn thanh toán 7 phút. Nguyên liệu giữ chỗ đã được trả lại kho.',
-        createdAt: '2026-11-07T14:30:00.000Z',
-      },
-    ],
-    items: [
-      {
-        id: 'i-4',
-        productId: 'prod-001',
-        productName: 'Cà phê Muối Côn Đảo',
-        size: 'M',
-        sugarLevel: '100%',
-        iceLevel: '100%',
-        toppings: null,
-        quantity: 1,
-        unitPrice: 45000,
-        lineTotal: 45000,
-      },
-    ],
-  },
-];
-
-const DEMO_FALLBACK_TXS: LoyaltyTxRecord[] = [
-  {
-    id: 'ltx-1',
-    orderCode: 'BL-8872',
-    type: 'EARN',
-    points: 20,
-    description: 'Đơn BL-8872 · 09/11/2026',
-    createdAt: '2026-11-09T10:15:00.000Z',
-  },
-  {
-    id: 'ltx-2',
-    type: 'REDEEM',
-    points: -50,
-    description: 'Đổi nâng cấp sữa · 08/11/2026',
-    createdAt: '2026-11-08T14:20:00.000Z',
-  },
-];
-
 type PageTab = 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'LOYALTY';
 
 function statusBadgeMeta(order: OrderRecord) {
@@ -193,14 +69,14 @@ function MyOrdersContent() {
   const initialTab = searchParams.get('tab') === 'loyalty' ? 'LOYALTY' : 'IN_PROGRESS';
   const [activeTab, setActiveTab] = useState<PageTab>(initialTab);
   const [orders, setOrders] = useState<OrderRecord[]>([]);
-  const [loyaltyPoints, setLoyaltyPoints] = useState<number>(420);
-  const [memberName, setMemberName] = useState<string>('Hàn Minh Hiếu');
-  const [memberCode, setMemberCode] = useState<string>('BL · 000 024');
+  const [loyaltyPoints, setLoyaltyPoints] = useState<number>(0);
+  const [memberName, setMemberName] = useState<string>('Khách hàng BrewLite');
+  const [memberCode, setMemberCode] = useState<string>('BL · MEMBER');
   const [userRole, setUserRole] = useState<string>('CUSTOMER');
   const [loyaltyTxs, setLoyaltyTxs] = useState<LoyaltyTxRecord[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isOfflineDemo, setIsOfflineDemo] = useState<boolean>(false);
+  const [needsLogin, setNeedsLogin] = useState<boolean>(false);
 
   const [receiptOrder, setReceiptOrder] = useState<OrderRecord | null>(null);
   const [cancelTargetOrder, setCancelTargetOrder] = useState<OrderRecord | null>(null);
@@ -224,18 +100,23 @@ function MyOrdersContent() {
         if (cached) {
           const parsed = JSON.parse(cached);
           if (parsed?.role) setUserRole(parsed.role);
+          if (parsed?.fullName) setMemberName(parsed.fullName);
         }
-      } catch {}
+      } catch {
+        // Bỏ qua cache lỗi định dạng
+      }
     }
 
     if (!token) {
-      setIsOfflineDemo(true);
-      setOrders(DEMO_FALLBACK_ORDERS);
-      setLoyaltyPoints(420);
-      setLoyaltyTxs(DEMO_FALLBACK_TXS);
+      setNeedsLogin(true);
+      setOrders([]);
+      setLoyaltyPoints(0);
+      setLoyaltyTxs([]);
       setIsLoading(false);
       return;
     }
+
+    setNeedsLogin(false);
 
     try {
       const [ordersRes, loyaltyRes] = await Promise.all([
@@ -248,18 +129,18 @@ function MyOrdersContent() {
         }>('/loyalty/balance'),
       ]);
 
-      setIsOfflineDemo(false);
       setOrders(ordersRes?.orders || []);
       setLoyaltyPoints(loyaltyRes?.loyaltyPoints ?? 0);
       if (loyaltyRes?.fullName) setMemberName(loyaltyRes.fullName);
       if (loyaltyRes?.memberCode) setMemberCode(loyaltyRes.memberCode);
       setLoyaltyTxs(loyaltyRes?.transactions || []);
-    } catch {
-      // Nếu API chưa khởi động, hiển thị dữ liệu mẫu Figma + thông báo rõ ràng
-      setIsOfflineDemo(true);
-      setOrders(DEMO_FALLBACK_ORDERS);
-      setLoyaltyPoints(420);
-      setLoyaltyTxs(DEMO_FALLBACK_TXS);
+    } catch (err) {
+      setErrorMessage(
+        err instanceof Error
+          ? err.message
+          : 'Không thể tải lịch sử đơn hàng từ máy chủ. Vui lòng thử lại.',
+      );
+      setOrders([]);
     } finally {
       setIsLoading(false);
     }
@@ -333,25 +214,11 @@ function MyOrdersContent() {
     if (!cancelTargetOrder) return;
     setIsMutating(true);
     try {
-      if (!isOfflineDemo) {
-        await ApiClient.post(`/orders/${cancelTargetOrder.id}/cancel`, {
-          scenario: 'ONLINE_CUSTOMER_CANCEL',
-          reason: 'Khách hàng hủy đơn trực tuyến trước khi thanh toán.',
-        });
-        await fetchData();
-      } else {
-        setOrders((prev) =>
-          prev.map((o) =>
-            o.id === cancelTargetOrder.id
-              ? {
-                  ...o,
-                  status: 'CANCELLED',
-                  note: 'Khách hàng tự hủy đơn chưa thanh toán. Nguyên liệu đã hoàn kho.',
-                }
-              : o,
-          ),
-        );
-      }
+      await ApiClient.post(`/orders/${cancelTargetOrder.id}/cancel`, {
+        scenario: 'ONLINE_CUSTOMER_CANCEL',
+        reason: 'Khách hàng hủy đơn trực tuyến trước khi thanh toán.',
+      });
+      await fetchData();
       showToast(`Đã hủy đơn ${cancelTargetOrder.orderCode} và hoàn nguyên liệu về kho.`);
       setCancelTargetOrder(null);
       setActiveTab('CANCELLED');
@@ -365,17 +232,11 @@ function MyOrdersContent() {
   const handleAdvanceStatus = async (order: OrderRecord, nextStatus: 'PREPARING' | 'COMPLETED') => {
     setIsMutating(true);
     try {
-      if (!isOfflineDemo) {
-        await ApiClient.patch(`/orders/${order.id}/status`, {
-          status: nextStatus,
-          reason: `Cập nhật trạng thái quầy pha chế sang ${nextStatus}`,
-        });
-        await fetchData();
-      } else {
-        setOrders((prev) =>
-          prev.map((o) => (o.id === order.id ? { ...o, status: nextStatus } : o)),
-        );
-      }
+      await ApiClient.patch(`/orders/${order.id}/status`, {
+        status: nextStatus,
+        reason: `Cập nhật trạng thái quầy pha chế sang ${nextStatus}`,
+      });
+      await fetchData();
       showToast(`Đơn ${order.orderCode} đã chuyển sang ${nextStatus === 'PREPARING' ? 'Đang pha chế' : 'Đã hoàn thành'}.`);
     } catch (err: any) {
       showToast(err?.message || 'Cập nhật trạng thái yêu cầu quyền Nhân viên (STAFF/ADMIN).');
@@ -387,28 +248,12 @@ function MyOrdersContent() {
   const handleOutOfStockRefund = async (order: OrderRecord) => {
     setIsMutating(true);
     try {
-      if (!isOfflineDemo) {
-        const res = await ApiClient.post<{ order: OrderRecord }>(`/orders/${order.id}/cancel`, {
-          scenario: 'OUT_OF_STOCK_REFUND',
-          reason: 'Món trong đơn hiện TẠM HẾT tại quầy. Đã hoàn tiền và hoàn kho nguyên liệu còn lại.',
-        });
-        await fetchData();
-        setRefundStatusOrder(res.order);
-      } else {
-        const updated: OrderRecord = {
-          ...order,
-          status: 'CANCELLED',
-          note: 'Món hiện TẠM HẾT. Hệ thống đã hoàn tiền và trả nguyên liệu còn lại.',
-          payment: order.payment ? { ...order.payment, status: 'REFUNDED' } : {
-            id: 'pay-refund',
-            method: 'VNPAY',
-            status: 'REFUNDED',
-            amount: order.finalAmount,
-          },
-        };
-        setOrders((prev) => prev.map((o) => (o.id === order.id ? updated : o)));
-        setRefundStatusOrder(updated);
-      }
+      const res = await ApiClient.post<{ order: OrderRecord }>(`/orders/${order.id}/cancel`, {
+        scenario: 'OUT_OF_STOCK_REFUND',
+        reason: 'Món trong đơn hiện TẠM HẾT tại quầy. Đã hoàn tiền và hoàn kho nguyên liệu còn lại.',
+      });
+      await fetchData();
+      setRefundStatusOrder(res.order);
       showToast(`Đã khởi tạo hoàn tiền cho đơn ${order.orderCode}.`);
     } catch (err: any) {
       showToast(err?.message || 'Thao tác hoàn tiền hết món yêu cầu quyền Nhân viên (STAFF/ADMIN).');
@@ -424,28 +269,13 @@ function MyOrdersContent() {
   }) => {
     setIsMutating(true);
     try {
-      if (!isOfflineDemo) {
-        const res = await ApiClient.post<{
-          remainingPoints: number;
-          message?: string;
-        }>('/loyalty/redeem', payload);
-        setLoyaltyPoints(res.remainingPoints);
-        await fetchData();
-        showToast(res.message || `Đổi thành công ${payload.pointsToRedeem} Hạt!`);
-      } else {
-        setLoyaltyPoints((p) => Math.max(0, p - payload.pointsToRedeem));
-        setLoyaltyTxs((prev) => [
-          {
-            id: `demo-redeem-${Date.now()}`,
-            type: 'REDEEM',
-            points: -payload.pointsToRedeem,
-            description: payload.description || 'Đổi quà thành viên',
-            createdAt: new Date().toISOString(),
-          },
-          ...prev,
-        ]);
-        showToast(`Đã đổi thành công ${payload.pointsToRedeem} Hạt!`);
-      }
+      const res = await ApiClient.post<{
+        remainingPoints: number;
+        message?: string;
+      }>('/loyalty/redeem', payload);
+      setLoyaltyPoints(res.remainingPoints);
+      await fetchData();
+      showToast(res.message || `Đổi thành công ${payload.pointsToRedeem} Hạt!`);
     } catch (err: any) {
       showToast(err?.message || 'Không thể đổi Hạt lúc này.');
     } finally {
@@ -466,24 +296,12 @@ function MyOrdersContent() {
             <Link href="/menu" className="hover:text-[#7D3F32] transition-colors">
               Thực đơn
             </Link>
-            <button
-              type="button"
-              onClick={() => setActiveTab('IN_PROGRESS')}
-              className={`cursor-pointer transition-colors ${
-                activeTab !== 'LOYALTY' ? 'text-[#7D3F32] font-bold' : 'hover:text-[#7D3F32]'
-              }`}
-            >
+            <Link href="/orders" className="text-[#7D3F32] font-bold transition-colors">
               Đơn hàng
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('LOYALTY')}
-              className={`cursor-pointer transition-colors ${
-                activeTab === 'LOYALTY' ? 'text-[#7D3F32] font-bold' : 'hover:text-[#7D3F32]'
-              }`}
-            >
-              Ưu đãi · Hạt
-            </button>
+            </Link>
+            <Link href="/rewards" className="hover:text-[#7D3F32] transition-colors">
+              Ưu đãi
+            </Link>
             <Link href="/profile" className="hover:text-[#7D3F32] transition-colors">
               Tài khoản
             </Link>
@@ -510,17 +328,23 @@ function MyOrdersContent() {
           </div>
         )}
 
-        {/* Banner thông báo nếu đang ở chế độ xem mẫu offline / chưa đăng nhập */}
-        {isOfflineDemo && (
-          <div className="rounded-2xl bg-[#FFFAF0] border border-[#E8D7B8] px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-[#786B5A]">
-            <span>
-              Đang hiển thị dữ liệu mẫu theo bản thiết kế Figma. Đăng nhập để đồng bộ đơn hàng và số dư Hạt thực tế từ PostgreSQL.
-            </span>
-            <Link href="/login?redirect=/orders/my-orders" className="font-bold text-[#7D3F32] hover:underline shrink-0">
+        {/* Yêu cầu đăng nhập nếu chưa có phiên */}
+        {needsLogin ? (
+          <div className="rounded-3xl bg-[#FFFAF0] border border-[#E8D7B8] p-8 text-center space-y-3">
+            <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#3F3027]">
+              Đăng nhập để xem đơn hàng của riêng bạn
+            </h2>
+            <p className="text-sm text-[#786B5A]">
+              Lịch sử đơn hàng, trạng thái pha chế và điểm thưởng được tách biệt cho từng tài khoản.
+            </p>
+            <Link
+              href="/login?redirect=/orders"
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#7D3F32] hover:bg-[#693327] px-5 text-sm font-bold text-[#FFFAF0]"
+            >
               Đăng nhập ngay →
             </Link>
           </div>
-        )}
+        ) : null}
 
         {/* Tiêu đề trang (Figma 07b hoặc 08) */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -568,7 +392,7 @@ function MyOrdersContent() {
           })}
         </div>
 
-        {isLoading ? (
+        {needsLogin ? null : isLoading ? (
           <SkeletonLoading count={4} />
         ) : errorMessage ? (
           <ErrorState message={errorMessage} onRetry={() => void fetchData()} />
@@ -663,11 +487,10 @@ function MyOrdersContent() {
                       Theo dõi món trực tiếp · Quầy Quận 1
                     </span>
                     <div className="flex items-baseline gap-4 flex-wrap">
-                      <span className="font-serif text-4xl sm:text-5xl font-bold text-[#7D3F32]">
-                        SỐ 12
+                      <span className="font-serif text-3xl sm:text-4xl font-bold text-[#7D3F32]">
+                        {readyHighlightOrder.orderCode}
                       </span>
                       <span className="text-sm font-semibold text-[#786B5A]">
-                        {readyHighlightOrder.orderCode} ·{' '}
                         {Number(readyHighlightOrder.finalAmount).toLocaleString('vi-VN')} đ
                       </span>
                     </div>
@@ -806,6 +629,12 @@ function MyOrdersContent() {
                             </button>
                           )}
 
+                          {['PAID', 'PREPARING'].includes(order.status.toUpperCase()) && (
+                            <span className="text-[11px] text-[#786B5A] italic">
+                              Đơn đã thanh toán đang xử lý · liên hệ quầy nếu cần hỗ trợ hủy/hoàn tiền
+                            </span>
+                          )}
+
                           {isOutOfStockRefund && (
                             <button
                               type="button"
@@ -816,7 +645,7 @@ function MyOrdersContent() {
                             </button>
                           )}
 
-                          {(userRole === 'STAFF' || userRole === 'ADMIN' || isOfflineDemo) &&
+                          {(userRole === 'STAFF' || userRole === 'ADMIN') &&
                             (order.status === 'PAID' || order.status === 'PREPARING') && (
                               <>
                                 <button
