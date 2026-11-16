@@ -321,5 +321,48 @@ describe('PaymentsService & VNPay Sandbox Gateway (Quang - Chức năng 5)', () 
         },
       });
     });
+
+    it('khi thanh toán thành công (vnp_ResponseCode=00) có module Loyalty: tự động cộng Hạt Idempotent (floor(amount/10000))', async () => {
+      const earnQuery: Record<string, any> = {
+        vnp_Amount: '9500000',
+        vnp_Command: 'pay',
+        vnp_ResponseCode: '00',
+        vnp_TmnCode: VNP_TMN_CODE,
+        vnp_TransactionNo: '14999999',
+        vnp_TxnRef: 'BL-9999',
+      };
+      const sorted = sortObject(earnQuery);
+      const signData = Object.entries(sorted)
+        .map(([k, v]) => `${k}=${v}`)
+        .join('&');
+      earnQuery['vnp_SecureHash'] = crypto
+        .createHmac('sha512', VNP_HASH_SECRET)
+        .update(Buffer.from(signData, 'utf-8'))
+        .digest('hex');
+
+      (prisma as any).loyaltyTransaction = {
+        findFirst: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockResolvedValue({ id: 'ltx-earn-1', points: 9 }),
+      };
+      (prisma as any).user = {
+        update: jest.fn().mockResolvedValue({ id: mockOrder.userId, loyaltyPoints: 9 }),
+      };
+      (prisma as any).orderStatusLog = {
+        create: jest.fn().mockResolvedValue({}),
+      };
+
+      jest.spyOn(prisma.order, 'findFirst').mockResolvedValue({
+        ...mockOrder,
+        finalAmount: '95000',
+        payment: null,
+      } as any);
+
+      const res = await service.handleVnpayIpn(earnQuery);
+      expect(res).toEqual({ RspCode: '00', Message: 'Confirm Success' });
+      expect((prisma as any).user.update).toHaveBeenCalledWith({
+        where: { id: mockOrder.userId },
+        data: { loyaltyPoints: { increment: 9 } },
+      });
+    });
   });
 });

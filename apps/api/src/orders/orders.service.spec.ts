@@ -1,8 +1,9 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { DiscountType, OrderStatus } from '@prisma/client';
+import { DiscountType, OrderStatus, PaymentStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrdersService } from './orders.service';
+import { OrderCancelScenario } from './dto/update-order-status.dto';
 
 describe('OrdersService - Chức năng 4 (UC-04: Khởi tạo đơn & Khóa tồn kho Optimistic Locking)', () => {
   let service: OrdersService;
@@ -273,6 +274,232 @@ describe('OrdersService - Chức năng 4 (UC-04: Khởi tạo đơn & Khóa tồ
           items: [],
         }),
       ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('Module 6 - Anti-IDOR, State Machine & 4 Kịch bản Hủy Đơn Hoàn Kho', () => {
+    const baseOrderRecord = {
+      id: 'order-uuid-601',
+      orderCode: 'BL-20261115-6010',
+      userId: 'user-owner-A',
+      promotionId: 'promo-uuid-1',
+      status: OrderStatus.PENDING,
+      subtotalAmount: '73000',
+      discountAmount: '20000',
+      loyaltyPointsUsed: 15,
+      finalAmount: '53000',
+      note: 'Quầy Quận 1',
+      expiresAt: new Date(Date.now() + 600000),
+      createdAt: new Date(),
+      items: [
+        {
+          id: 'item-1',
+          productId: mockProduct.id,
+          productName: mockProduct.name,
+          size: 'M',
+          sugarLevel: '100%',
+          iceLevel: '100%',
+          toppingsJson: null,
+          quantity: 2,
+          unitPrice: '36500',
+          lineTotal: '73000',
+        },
+      ],
+      promotion: { code: 'BREW20K' },
+      payment: null,
+      statusLogs: [],
+      user: { id: 'user-owner-A', fullName: 'Hàn Minh Hiếu', email: 'hieu@brewlite.vn', phone: '0901234567' },
+    };
+
+    it('ORD-T02: Chặn Anti-IDOR (403 Forbidden) khi Khách B truy cập biên nhận của Khách A', async () => {
+      (prisma as any).order = {
+        findUnique: jest.fn().mockResolvedValue(baseOrderRecord),
+      };
+
+      await expect(
+        service.getOrderById(baseOrderRecord.id, { userId: 'user-other-B', role: 'CUSTOMER' }),
+      ).rejects.toThrow(ForbiddenException);
+
+      // Chủ đơn (Customer A) hoặc Barista (STAFF) được phép xem
+      const ownerRes = await service.getOrderById(baseOrderRecord.id, {
+        userId: 'user-owner-A',
+        role: 'CUSTOMER',
+      });
+      expect(ownerRes.orderCode).toBe(baseOrderRecord.orderCode);
+    });
+
+    it('AC-06.04 & AC-06.05: Chuyển trạng thái hợp lệ PAID -> PREPARING -> COMPLETED và từ chối nhảy cóc PENDING -> COMPLETED', async () => {
+      (prisma as any).order = {
+        findUnique: jest.fn().mockResolvedValue({ ...baseOrderRecord, status: OrderStatus.PENDING }),
+      };
+
+      await expect(
+        service.updateOrderStatus(baseOrderRecord.id, OrderStatus.COMPLETED, {
+          userId: 'staff-1',
+          role: 'STAFF',
+        }),
+      ).rejects.toThrow(BadRequestException);
+
+      (prisma as any).order.findUnique.mockResolvedValue({ ...baseOrderRecord, status: OrderStatus.PAID });
+      const mockTx = {
+        order: {
+          update: jest.fn().mockResolvedValue({ ...baseOrderRecord, status: OrderStatus.PREPARING }),
+        },
+        orderStatusLog: { create: jest.fn().mockResolvedValue({}) },
+      };
+      ((prisma as any).$transaction as jest.Mock).mockImplementation(async (cb) => await cb(mockTx));
+
+      const res = await service.updateOrderStatus(baseOrderRecord.id, OrderStatus.PREPARING, {
+        userId: 'staff-1',
+        role: 'STAFF',
+      });
+      expect(res.order.status).toBe(OrderStatus.PREPARING);
+    });
+
+    it('Kịch bản Hủy #1 (ONLINE_CUSTOMER_CANCEL): Khách tự hủy đơn PENDING -> hoàn nguyên liệu, voucher và điểm Hạt', async () => {
+      (prisma as any).order = {
+        findUnique: jest.fn().mockResolvedValue(baseOrderRecord),
+      };
+
+      const mockTx = {
+        order: {
+          update: jest.fn().mockResolvedValue({ ...baseOrderRecord, status: OrderStatus.CANCELLED }),
+        },
+        recipeItem: {
+          findMany: jest.fn().mockResolvedValue([mockRecipeItem]),
+        },
+        ingredient: {
+          update: jest.fn().mockResolvedValue({}),
+        },
+        promotion: {
+          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        },
+        loyaltyTransaction: {
+          findFirst: jest.fn().mockResolvedValue(null),
+          create: jest.fn().mockResolvedValue({}),
+        },
+        user: {
+          update: jest.fn().mockResolvedValue({}),
+        },
+        orderStatusLog: {
+          create: jest.fn().mockResolvedValue({}),
+        },
+      };
+      ((prisma as any).$transaction as jest.Mock).mockImplementation(async (cb) => await cb(mockTx));
+
+      const res = await service.cancelOrder(
+        baseOrderRecord.id,
+        { scenario: OrderCancelScenario.ONLINE_CUSTOMER_CANCEL, reason: 'Đổi ý' },
+        { userId: 'user-owner-A', role: 'CUSTOMER' },
+      );
+
+      expect(res.order.status).toBe(OrderStatus.CANCELLED);
+      // 25g * 2 ly = 50g được cộng trả về kho + version tăng 1
+      expect(mockTx.ingredient.update).toHaveBeenCalledWith({
+        where: { id: mockRecipeItem.ingredientId },
+        data: { stockQuantity: { increment: 50 }, version: { increment: 1 } },
+      });
+      expect(mockTx.promotion.updateMany).toHaveBeenCalled();
+      expect(mockTx.user.update).toHaveBeenCalledWith({
+        where: { id: 'user-owner-A' },
+        data: { loyaltyPoints: { increment: 15 } },
+      });
+    });
+
+    it('Kịch bản Hủy #2 (PAYMENT_TIMEOUT_TTL): Tự động hủy đơn PENDING quá hạn expiresAt và nhả kho', async () => {
+      const expiredOrder = {
+        ...baseOrderRecord,
+        expiresAt: new Date(Date.now() - 60000),
+        payment: { id: 'pay-1', status: PaymentStatus.PENDING },
+      };
+      (prisma as any).order = {
+        findMany: jest.fn().mockResolvedValue([expiredOrder]),
+      };
+
+      const mockTx = {
+        order: { updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
+        recipeItem: { findMany: jest.fn().mockResolvedValue([mockRecipeItem]) },
+        ingredient: { update: jest.fn().mockResolvedValue({}) },
+        promotion: { updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
+        loyaltyTransaction: {
+          findFirst: jest.fn().mockResolvedValue(null),
+          create: jest.fn().mockResolvedValue({}),
+        },
+        user: { update: jest.fn().mockResolvedValue({}) },
+        payment: { update: jest.fn().mockResolvedValue({}) },
+        orderStatusLog: { create: jest.fn().mockResolvedValue({}) },
+      };
+      ((prisma as any).$transaction as jest.Mock).mockImplementation(async (cb) => await cb(mockTx));
+
+      const ttlRes = await service.expireOverdueOrders('user-owner-A');
+      expect(ttlRes.expiredCount).toBe(1);
+      expect(ttlRes.expiredOrderCodes).toContain(expiredOrder.orderCode);
+      expect(mockTx.payment.update).toHaveBeenCalledWith({
+        where: { orderId: expiredOrder.id },
+        data: { status: PaymentStatus.FAILED },
+      });
+      expect(mockTx.ingredient.update).toHaveBeenCalledWith({
+        where: { id: mockRecipeItem.ingredientId },
+        data: { stockQuantity: { increment: 50 }, version: { increment: 1 } },
+      });
+    });
+
+    it('Kịch bản Hủy #3 (OFFLINE_COUNTER_CANCEL): Chỉ STAFF/ADMIN được hủy tại quầy, CUSTOMER bị chặn 403', async () => {
+      (prisma as any).order = {
+        findUnique: jest.fn().mockResolvedValue(baseOrderRecord),
+      };
+
+      await expect(
+        service.cancelOrder(
+          baseOrderRecord.id,
+          { scenario: OrderCancelScenario.OFFLINE_COUNTER_CANCEL },
+          { userId: 'user-owner-A', role: 'CUSTOMER' },
+        ),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('Kịch bản Hủy #4 (OUT_OF_STOCK_REFUND): Đơn đã PAID hết nguyên liệu -> hoàn tiền Payment.REFUNDED & hoàn kho', async () => {
+      const paidOrder = {
+        ...baseOrderRecord,
+        status: OrderStatus.PAID,
+        payment: { id: 'pay-paid-1', status: PaymentStatus.SUCCESS },
+      };
+      (prisma as any).order = {
+        findUnique: jest.fn().mockResolvedValue(paidOrder),
+      };
+
+      const mockTx = {
+        order: {
+          update: jest.fn().mockResolvedValue({ ...paidOrder, status: OrderStatus.CANCELLED }),
+        },
+        recipeItem: { findMany: jest.fn().mockResolvedValue([mockRecipeItem]) },
+        ingredient: { update: jest.fn().mockResolvedValue({}) },
+        promotion: { updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
+        loyaltyTransaction: {
+          findFirst: jest.fn().mockResolvedValue(null),
+          create: jest.fn().mockResolvedValue({}),
+        },
+        user: { update: jest.fn().mockResolvedValue({}) },
+        payment: { update: jest.fn().mockResolvedValue({ status: PaymentStatus.REFUNDED }) },
+        orderStatusLog: { create: jest.fn().mockResolvedValue({}) },
+      };
+      ((prisma as any).$transaction as jest.Mock).mockImplementation(async (cb) => await cb(mockTx));
+
+      const res = await service.cancelOrder(
+        paidOrder.id,
+        {
+          scenario: OrderCancelScenario.OUT_OF_STOCK_REFUND,
+          reason: 'Quầy hết kem cheese bất khả kháng',
+        },
+        { userId: 'staff-1', role: 'STAFF' },
+      );
+
+      expect(res.refundIssued).toBe(true);
+      expect(res.order.status).toBe(OrderStatus.CANCELLED);
+      expect(mockTx.payment.update).toHaveBeenCalledWith({
+        where: { orderId: paidOrder.id },
+        data: { status: PaymentStatus.REFUNDED },
+      });
     });
   });
 });

@@ -1,0 +1,177 @@
+name: CD - Deploy to Production & Auto-Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_tag:
+        description: 'Image tag to deploy (leave empty for current commit SHA)'
+        required: false
+        default: ''
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_OWNER: samuisang
+  API_IMAGE: ghcr.io/samuisang/brewlite-api
+  WEB_IMAGE: ghcr.io/samuisang/brewlite-web
+  NEXT_TELEMETRY_DISABLED: '1'
+
+jobs:
+  # ----------------------------------------------------------------------------
+  # STAGE 1: CI QUALITY GATE (Lint, Unit Tests, Build)
+  # ----------------------------------------------------------------------------
+  quality-gate:
+    name: Stage 1 - Quality Gate (Lint, Test & Build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install monorepo dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run prisma:generate --workspace=apps/api
+
+      - name: Run Lint across monorepo
+        run: npm run lint
+
+      - name: Run Unit & Integration Tests (Backend + Frontend)
+        run: npm test
+
+      - name: Build API & Web workspaces
+        run: npm run build
+
+  # ----------------------------------------------------------------------------
+  # STAGE 2: BUILD & PUSH MULTI-STAGE DOCKER IMAGES TO GHCR (ADR-006)
+  # ----------------------------------------------------------------------------
+  build-and-push:
+    name: Stage 2 - Build & Push Docker Images (GHCR)
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.sha_tag }}
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Compute immutable release tag
+        id: meta
+        run: |
+          SHORT_SHA=$(git rev-parse --short=7 "$GITHUB_SHA")
+          echo "sha_tag=sha-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push API image (brewlite-api)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/api
+          file: ./apps/api/Dockerfile
+          push: true
+          tags: |
+            ${{ env.API_IMAGE }}:latest
+            ${{ env.API_IMAGE }}:${{ steps.meta.outputs.sha_tag }}
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+
+      - name: Build and push Web image (brewlite-web)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/web
+          file: ./apps/web/Dockerfile
+          push: true
+          tags: |
+            ${{ env.WEB_IMAGE }}:latest
+            ${{ env.WEB_IMAGE }}:${{ steps.meta.outputs.sha_tag }}
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+
+  # ----------------------------------------------------------------------------
+  # STAGE 3: PRODUCTION DEPLOYMENT, SMOKE TEST (/api/v1/health) & AUTO-ROLLBACK
+  # ----------------------------------------------------------------------------
+  deploy-and-verify:
+    name: Stage 3 - Deploy Production, Health Smoke Test & Rollback
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout deployment manifests
+        uses: actions/checkout@v4
+
+      - name: Trigger Production Deploy Hook (Render / Cloud PaaS)
+        id: deploy
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          RELEASE_TAG="${{ github.event.inputs.target_tag || needs.build-and-push.outputs.image_tag }}"
+          echo "Deploying BrewLite release tag: ${RELEASE_TAG}"
+          if [ -n "$DEPLOY_HOOK_URL" ]; then
+            curl -fsSL -X POST "$DEPLOY_HOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\":\"${RELEASE_TAG}\"}"
+          else
+            echo "::notice::RENDER_DEPLOY_HOOK_URL secret chưa được cấu hình — chạy mô phỏng bước deploy chuẩn ADR-006."
+          fi
+
+      - name: Production Health Smoke Test (GET /api/v1/health - Max 6 retries x 5s)
+        id: smoke
+        env:
+          PRODUCTION_API_URL: ${{ secrets.PRODUCTION_API_URL }}
+        run: |
+          if [ -z "$PRODUCTION_API_URL" ]; then
+            echo "::notice::PRODUCTION_API_URL chưa được cấu hình — bỏ qua gọi HTTP thực tế trên môi trường CI."
+            exit 0
+          fi
+
+          HEALTH_ENDPOINT="${PRODUCTION_API_URL%/}/api/v1/health"
+          MAX_RETRIES=6
+          SLEEP_SECONDS=5
+
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "[Smoke Test $i/$MAX_RETRIES] Checking $HEALTH_ENDPOINT ..."
+            HTTP_CODE=$(curl -s -o /tmp/health.json -w "%{http_code}" "$HEALTH_ENDPOINT" || echo "000")
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "Health check PASSED (HTTP 200):"
+              cat /tmp/health.json
+              exit 0
+            fi
+            echo "Health check failed with HTTP $HTTP_CODE; waiting ${SLEEP_SECONDS}s..."
+            sleep $SLEEP_SECONDS
+          done
+
+          echo "::error::Production /api/v1/health không phản hồi HTTP 200 sau $((MAX_RETRIES * SLEEP_SECONDS))s!"
+          exit 1
+
+      - name: Automated Rollback on Health Check Failure (ADR-006)
+        if: failure() && steps.smoke.outcome == 'failure'
+        env:
+          ROLLBACK_HOOK_URL: ${{ secrets.RENDER_ROLLBACK_HOOK_URL }}
+        run: |
+          echo "::warning::Kích hoạt quy trình Rollback tự động về phiên bản ổn định gần nhất (last-known-good SHA)!"
+          if [ -n "$ROLLBACK_HOOK_URL" ]; then
+            curl -fsSL -X POST "$ROLLBACK_HOOK_URL"
+            echo "Đã gửi yêu cầu Rollback tới nền tảng Production."
+          else
+            echo "Cảnh báo: Chưa có ROLLBACK_HOOK_URL secret; cần chạy 'git revert' hoặc re-tag image ổn định trong GHCR."
+          fi
