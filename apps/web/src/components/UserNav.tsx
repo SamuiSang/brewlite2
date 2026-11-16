@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ApiClient } from '@/lib/api-client';
+import { useCartStore } from '../lib/store';
 import {
   User,
   Receipt,
@@ -81,6 +82,9 @@ export function UserNav() {
 
   const handleLogout = () => {
     ApiClient.removeToken();
+    localStorage.removeItem('brewlite_user_profile');
+    useCartStore.getState().clearCart();
+    void useCartStore.persist.rehydrate();
     setIsLoggedIn(false);
     setProfile(null);
     setIsOpen(false);

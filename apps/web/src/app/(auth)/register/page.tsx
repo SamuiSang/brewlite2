@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ApiClient } from '@/lib/api-client';
+import { useCartStore, getCartStorageKey } from '@/lib/store';
 import { Eye, EyeOff } from 'lucide-react';
 
 // Mã hóa Base64 an toàn hỗ trợ đầy đủ ký tự Unicode tiếng Việt
@@ -72,6 +73,13 @@ export default function RegisterPage() {
           if (res.user) {
             localStorage.setItem('brewlite_user_profile', JSON.stringify(res.user));
           }
+          // Đảm bảo tài khoản mới tạo luôn bắt đầu với giỏ hàng mới tinh (không lấy giỏ của tài khoản cũ)
+          useCartStore.getState().clearCart();
+          const newKey = getCartStorageKey();
+          try {
+            localStorage.setItem(newKey, JSON.stringify({ state: { items: [] }, version: 0 }));
+          } catch {}
+          void useCartStore.persist.rehydrate();
           router.push(redirectTarget);
           return;
         }
@@ -91,6 +99,12 @@ export default function RegisterPage() {
       const token = 'brewlite_jwt_' + safeBase64Encode(newUser) + '.' + Date.now();
       ApiClient.setToken(token);
       localStorage.setItem('brewlite_user_profile', JSON.stringify(newUser));
+      useCartStore.getState().clearCart();
+      const newKey = getCartStorageKey();
+      try {
+        localStorage.setItem(newKey, JSON.stringify({ state: { items: [] }, version: 0 }));
+      } catch {}
+      void useCartStore.persist.rehydrate();
       router.push(redirectTarget);
     } catch (err: any) {
       setErrorMsg(err.message || 'Đăng ký không thành công. Vui lòng kiểm tra lại thông tin.');
