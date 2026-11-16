@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ApiClient } from '@/lib/api-client';
 import { createVnpayPaymentUrl, VNPAY_CONFIG } from '@/lib/vnpay';
 import { useCartStore } from '@/lib/store';
+import { SavedAddress, loadUserAddresses } from '@/lib/address-storage';
 import {
   ArrowRight,
   AlertCircle,
@@ -15,7 +16,7 @@ import {
   Zap,
   Clock,
   MapPin,
-  ExternalLink,
+  ShoppingCart,
 } from 'lucide-react';
 
 function generateUUID(): string {
@@ -29,41 +30,35 @@ function generateUUID(): string {
   });
 }
 
-function safeBase64Encode(str: string): string {
-  if (typeof window === 'undefined') return Buffer.from(str).toString('base64');
-  return btoa(
-    encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, p1) =>
-      String.fromCharCode(parseInt(p1, 16))
-    )
-  );
-}
+const UUID_V4_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const items = useCartStore((state) => state.items);
+  const appliedVoucher = useCartStore((state) => state.appliedVoucher);
+  const getSubtotal = useCartStore((state) => state.getSubtotal);
+  const getFinalTotal = useCartStore((state) => state.getFinalTotal);
   const clearCart = useCartStore((state) => state.clearCart);
 
-  // State giỏ hàng & thanh toán
-  const [items, setItems] = useState<any[]>([]);
-  const [cartSubtotal, setCartSubtotal] = useState<number>(0);
-  const [discountAmount, setDiscountAmount] = useState<number>(0);
-  const [finalTotal, setFinalTotal] = useState<number>(0);
-  const [appliedVoucher, setAppliedVoucher] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
 
   // Form thông tin nhận món (Frame 05)
   const [pickupMethod, setPickupMethod] = useState<'PICKUP' | 'DELIVERY'>('PICKUP');
-  const [recipientName, setRecipientName] = useState<string>('Nguyễn Khách Hàng');
-  const [recipientPhone, setRecipientPhone] = useState<string>('090 123 4524');
+  const [recipientName, setRecipientName] = useState<string>('');
+  const [recipientPhone, setRecipientPhone] = useState<string>('');
+  const [deliveryAddress, setDeliveryAddress] = useState<string>('');
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
   const [pickupTime, setPickupTime] = useState<'NOW' | 'SCHEDULED'>('NOW');
 
   // Auth state
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
 
   // Popup modal thanh toán VNPay Sandbox (Frame 06 & 06h)
   const [showPaymentModal, setShowPaymentModal] = useState<boolean>(false);
   const [paymentStep, setPaymentStep] = useState<'PAYING' | 'SUCCESS'>('PAYING');
   const [selectedMethod, setSelectedMethod] = useState<'QR' | 'WALLET' | 'CARD'>('QR');
-  const [orderCode, setOrderCode] = useState<string>('BL-8924');
+  const [orderCode, setOrderCode] = useState<string>('');
   const [createdOrderId, setCreatedOrderId] = useState<string>('');
   const [countdown, setCountdown] = useState<number>(582); // 09:42 đếm ngược theo chuẩn Figma Frame 06
 
@@ -71,10 +66,31 @@ export default function CheckoutPage() {
   const [idempotencyKey, setIdempotencyKey] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [modalNotice, setModalNotice] = useState<string>('');
   const [vnpayRedirectUrl, setVnpayRedirectUrl] = useState<string>('');
 
+  const cartSubtotal = getSubtotal();
+  const discountAmount = appliedVoucher?.discountAmount || 0;
+  const finalTotal = getFinalTotal();
+
   useEffect(() => {
-    // 1. Kiểm tra phiên đăng nhập
+    const syncUserAndAddresses = (profile: any) => {
+      setCurrentUser(profile);
+      setRecipientName((prev) => prev || profile?.fullName || '');
+      setRecipientPhone((prev) => prev || profile?.phone || '');
+      const userAddrs = loadUserAddresses(profile);
+      setSavedAddresses(userAddrs);
+      const defaultAddr = userAddrs.find((a) => a.isDefault) || userAddrs[0];
+      if (defaultAddr) {
+        setDeliveryAddress((prev) => prev || defaultAddr.address);
+      }
+    };
+
+    // 1. Khởi tạo lại giỏ hàng đúng theo tài khoản từ store
+    void useCartStore.persist.rehydrate();
+    setMounted(true);
+
+    // 2. Kiểm tra phiên đăng nhập & tải hồ sơ thật
     const token = ApiClient.getToken();
     if (!token) {
       setIsLoggedIn(false);
@@ -83,50 +99,30 @@ export default function CheckoutPage() {
       try {
         const savedProfile = localStorage.getItem('brewlite_user_profile');
         if (savedProfile) {
-          const profile = JSON.parse(savedProfile);
-          setCurrentUser(profile);
-          if (profile.fullName) setRecipientName(profile.fullName);
-          if (profile.phone) setRecipientPhone(profile.phone);
+          syncUserAndAddresses(JSON.parse(savedProfile));
         }
-      } catch {}
-    }
-
-    // 2. Tải giỏ hàng từ localStorage
-    const savedCart = typeof window !== 'undefined' ? localStorage.getItem('brewlite_cart') : null;
-    if (savedCart) {
-      try {
-        const parsed = JSON.parse(savedCart);
-        const cartItems = parsed.state?.items || parsed.items || [];
-        const voucher = parsed.state?.appliedVoucher || parsed.appliedVoucher || null;
-
-        if (cartItems.length > 0) {
-          setItems(cartItems);
-          setAppliedVoucher(voucher);
-
-          const subtotal = cartItems.reduce(
-            (sum: number, it: any) => sum + (it.lineTotal || (it.unitPrice || 0) * (it.quantity || 1)),
-            0
-          );
-          const discount = voucher?.discountAmount || 0;
-          setCartSubtotal(subtotal);
-          setDiscountAmount(discount);
-          setFinalTotal(Math.max(0, subtotal - discount));
-        } else {
-          setDefaultFigmaItems();
-        }
-      } catch (e) {
-        console.error('Lỗi phân tích giỏ hàng:', e);
-        setDefaultFigmaItems();
+      } catch {
+        // Bỏ qua cache lỗi định dạng
       }
-    } else {
-      setDefaultFigmaItems();
+
+      ApiClient.get<any>('/auth/me')
+        .then((freshProfile) => {
+          if (freshProfile?.id) {
+            localStorage.setItem('brewlite_user_profile', JSON.stringify(freshProfile));
+            syncUserAndAddresses(freshProfile);
+            void useCartStore.persist.rehydrate();
+          }
+        })
+        .catch(() => {
+          // Giữ cache hiện tại nếu không gọi được /auth/me
+        });
     }
 
     // 3. Khởi tạo Idempotency-Key UUID duy nhất cho phiên thanh toán
     setIdempotencyKey(generateUUID());
-  }, [router]);
+  }, []);
 
-  // Bộ đếm ngược cho popup thanh toán Frame 06 (09:42)
+  // Bộ đếm ngược cho popup thanh toán Frame 06
   useEffect(() => {
     if (!showPaymentModal || paymentStep === 'SUCCESS') return;
     const timer = setInterval(() => {
@@ -135,131 +131,128 @@ export default function CheckoutPage() {
     return () => clearInterval(timer);
   }, [showPaymentModal, paymentStep]);
 
-  const setDefaultFigmaItems = () => {
-    const figmaDefaultItems = [
-      {
-        id: 'item-01',
-        productId: 'prod-001',
-        name: 'Cà phê Muối Côn Đảo',
-        quantity: 1,
-        unitPrice: 73000,
-        lineTotal: 73000,
-        size: 'Vừa',
-        milk: 'Yến mạch',
-        sugarLevel: '50%',
-        iceLevel: '100%',
-        toppings: ['Thêm Macchiato'],
-      },
-      {
-        id: 'item-02',
-        productId: 'prod-002',
-        name: 'Trà Lài Vải Thiều',
-        quantity: 1,
-        unitPrice: 42000,
-        lineTotal: 42000,
-        size: 'Tiêu chuẩn',
-        sugarLevel: '70%',
-        iceLevel: '100%',
-        toppings: [],
-      },
-    ];
-    setItems(figmaDefaultItems);
-    setAppliedVoucher({ code: 'BANMOI10', discountAmount: 20000 });
-    setCartSubtotal(115000);
-    setDiscountAmount(20000);
-    setFinalTotal(95000);
-  };
-
   const formatTimer = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  // Đăng nhập nhanh 1-Click ngay tại trang checkout
-  const handleQuickLoginAtCheckout = () => {
-    const demoUser = {
-      id: 'usr-customer-001',
-      email: 'customer@brewlite.vn',
-      fullName: 'Nguyễn Khách Hàng',
-      phone: '090 123 4524',
-      role: 'CUSTOMER',
-      loyaltyPoints: 120,
-    };
-    const demoToken = 'brewlite_jwt_' + safeBase64Encode(JSON.stringify(demoUser)) + '.' + Date.now();
-    ApiClient.setToken(demoToken);
-    localStorage.setItem('brewlite_user_profile', JSON.stringify(demoUser));
-    setCurrentUser(demoUser);
-    setRecipientName(demoUser.fullName);
-    setRecipientPhone(demoUser.phone);
-    setIsLoggedIn(true);
+  // Đăng nhập nhanh 1-Click bằng tài khoản khách hàng mẫu có trong PostgreSQL
+  const handleQuickLoginAtCheckout = async () => {
+    setErrorMessage('');
+    try {
+      const res = await ApiClient.post<{
+        accessToken?: string;
+        access_token?: string;
+        token?: string;
+        user?: any;
+      }>('/auth/login', {
+        email: 'customer@brewlite.vn',
+        password: 'Password123@',
+      });
+      const jwt = res.accessToken || res.access_token || res.token;
+      if (!jwt || !res.user) {
+        router.push('/login?redirect=/checkout');
+        return;
+      }
+      ApiClient.setToken(jwt);
+      localStorage.setItem('brewlite_user_profile', JSON.stringify(res.user));
+      setCurrentUser(res.user);
+      setRecipientName(res.user.fullName || '');
+      setRecipientPhone(res.user.phone || '');
+      const userAddrs = loadUserAddresses(res.user);
+      setSavedAddresses(userAddrs);
+      const defaultAddr = userAddrs.find((a) => a.isDefault) || userAddrs[0];
+      setDeliveryAddress(defaultAddr ? defaultAddr.address : '');
+      setIsLoggedIn(true);
+    } catch {
+      router.push('/login?redirect=/checkout');
+    }
   };
 
   // Bước 1: Bấm "Tạo đơn và chọn thanh toán" (Frame 05 -> Mở Popup Frame 06)
   const handleCreateOrderAndOpenModal = async () => {
     setErrorMessage('');
+    setModalNotice('');
     if (isSubmitting) return;
 
-    if (!isLoggedIn) {
-      handleQuickLoginAtCheckout();
+    if (items.length === 0) {
+      setErrorMessage('Giỏ hàng của bạn đang trống. Vui lòng chọn món từ Thực đơn.');
+      return;
+    }
+
+    if (!isLoggedIn || !ApiClient.getToken()) {
+      setErrorMessage('Vui lòng đăng nhập tài khoản trước khi đặt đơn hàng.');
+      return;
+    }
+
+    if (!recipientName.trim() || !recipientPhone.trim()) {
+      setErrorMessage('Vui lòng nhập đầy đủ họ tên và số điện thoại người nhận.');
+      return;
+    }
+
+    if (pickupMethod === 'DELIVERY' && !deliveryAddress.trim()) {
+      setErrorMessage('Vui lòng nhập hoặc chọn địa chỉ giao hàng khi chọn Giao tận nơi.');
+      return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const generatedCode = `BL-${Math.floor(1000 + Math.random() * 9000)}`;
-      setOrderCode(generatedCode);
+      const orderNote =
+        pickupMethod === 'DELIVERY'
+          ? `Giao tận nơi: ${deliveryAddress.trim()}${pickupTime === 'SCHEDULED' ? ' (Hẹn giờ)' : ''}`
+          : `Nhận tại quầy · Chi nhánh Quận 1${pickupTime === 'SCHEDULED' ? ' (Hẹn giờ)' : ''}`;
+
+      const orderPayload = {
+        ...(currentUser?.id && UUID_V4_REGEX.test(currentUser.id)
+          ? { userId: currentUser.id }
+          : {}),
+        items: items.map((it) => ({
+          productId: it.productId,
+          size: it.size || 'M',
+          sugarLevel: it.sugarLevel || '100%',
+          iceLevel: it.iceLevel || '100%',
+          toppings: it.toppings || [],
+          quantity: it.quantity || 1,
+        })),
+        promoCode: appliedVoucher?.code || undefined,
+        deliveryMethod: pickupMethod,
+        receiverName: recipientName.trim(),
+        receiverPhone: recipientPhone.trim(),
+        note: orderNote,
+      };
+
+      const orderRes = await ApiClient.post<any>('/orders', orderPayload);
+      const createdOrder = orderRes.order || orderRes;
+      const orderId = createdOrder.id;
+      const actualCode = createdOrder.orderCode || `BL-${Math.floor(1000 + Math.random() * 9000)}`;
+
+      setOrderCode(actualCode);
+      setCreatedOrderId(orderId);
 
       let redirectUrl = '';
-      let orderId = '';
-
-      // Thử tạo đơn qua Backend NestJS
-      try {
-        const orderPayload = {
-          items: items.length > 0
-            ? items.map((it) => ({
-                productId: it.productId || it.id || 'prod-001',
-                size: it.size || 'M',
-                sugarLevel: it.sugarLevel || '100%',
-                iceLevel: it.iceLevel || '100%',
-                toppings: it.toppings || [],
-                quantity: it.quantity || 1,
-              }))
-            : [{ productId: 'prod-001', size: 'M', quantity: 1 }],
-          voucherCode: appliedVoucher?.code || undefined,
-          deliveryMethod: pickupMethod,
-        };
-
-        const orderRes = await ApiClient.post('/orders', orderPayload);
-        const createdOrder = orderRes.order || orderRes;
-        orderId = createdOrder.id;
-        setCreatedOrderId(orderId);
-
-        if (orderId) {
-          const paymentRes = await ApiClient.post(
-            '/payments',
-            {
-              orderId: orderId,
-              method: 'VNPAY',
-            },
-            {
-              'Idempotency-Key': idempotencyKey,
-            }
-          );
-          if (paymentRes.paymentUrl) {
-            redirectUrl = paymentRes.paymentUrl;
-          }
+      if (orderId) {
+        const paymentRes = await ApiClient.post<any>(
+          '/payments',
+          {
+            orderId,
+            method: 'VNPAY',
+          },
+          {
+            'Idempotency-Key': idempotencyKey,
+          },
+        );
+        if (paymentRes.paymentUrl) {
+          redirectUrl = paymentRes.paymentUrl;
         }
-      } catch (apiErr) {
-        console.warn('API Backend chưa phản hồi, tự động khởi tạo URL VNPay Sandbox chính thức:', apiErr);
       }
 
-      // Nếu Backend chưa trả URL, sinh URL VNPay Sandbox hợp lệ với chữ ký HMAC SHA-512
       if (!redirectUrl) {
         redirectUrl = await createVnpayPaymentUrl({
-          orderCode: generatedCode,
-          amount: finalTotal > 0 ? finalTotal : 95000,
-          orderInfo: `Thanh toan don hang ${generatedCode}`,
+          orderCode: actualCode,
+          amount: Number(createdOrder.finalAmount) || finalTotal,
+          orderInfo: `Thanh toan don hang ${actualCode}`,
         });
       }
 
@@ -267,8 +260,7 @@ export default function CheckoutPage() {
       setPaymentStep('PAYING');
       setShowPaymentModal(true);
     } catch (err: any) {
-      console.error('Lỗi khởi tạo thanh toán:', err);
-      setErrorMessage(err.message || 'Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại.');
+      setErrorMessage(err?.message || 'Không thể khởi tạo đơn hàng. Vui lòng thử lại.');
     } finally {
       setIsSubmitting(false);
     }
@@ -281,26 +273,21 @@ export default function CheckoutPage() {
     }
   };
 
-  // Bước 3: Nút "Kiểm tra trạng thái" trên Popup (Frame 06 -> 06h)
+  // Bước 3: Nút "Kiểm tra trạng thái" trên Popup (đối soát trạng thái thật từ API)
   const handleCheckPaymentStatus = async () => {
+    setModalNotice('');
+    if (!createdOrderId) return;
     try {
-      if (createdOrderId) {
-        const res = await ApiClient.get(`/payments/status/${createdOrderId}`);
-        if (res.status === 'COMPLETED' || res.status === 'PAID') {
-          setPaymentStep('SUCCESS');
-          clearCart();
-          return;
-        }
+      const res = await ApiClient.get<any>(`/payments/status/${createdOrderId}`);
+      const status = String(res?.status || res?.orderStatus || '').toUpperCase();
+      if (status === 'COMPLETED' || status === 'PAID' || status === 'SUCCESS') {
+        setPaymentStep('SUCCESS');
+        clearCart();
+        return;
       }
-    } catch (e) {
-      console.warn('Đang đối soát trạng thái đơn hàng...');
-    }
-
-    // Chuyển sang Popup "Thanh toán thành công" (Frame 06h Figma)
-    setPaymentStep('SUCCESS');
-    clearCart();
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('brewlite_cart');
+      setModalNotice('Đơn hàng vẫn đang chờ thanh toán từ VNPay Sandbox. Vui lòng hoàn tất trên cổng VNPay.');
+    } catch {
+      setModalNotice('Không thể kiểm tra trạng thái thanh toán lúc này. Vui lòng thử lại.');
     }
   };
 
@@ -341,28 +328,36 @@ export default function CheckoutPage() {
                 <Zap className="w-4 h-4 fill-[#D97706]" />
               </div>
               <div>
-                <p className="text-xs sm:text-sm font-bold text-[#3F3027]">Bạn đang đặt hàng với tư cách Khách</p>
-                <p className="text-[11px] text-[#786B5A]">Đăng nhập nhanh để tích lũy điểm thưởng thành viên BrewLite.</p>
+                <p className="text-xs sm:text-sm font-bold text-[#3F3027]">Bạn chưa đăng nhập tài khoản</p>
+                <p className="text-[11px] text-[#786B5A]">Đăng nhập để tạo đơn hàng thật và tích lũy Hạt thưởng BrewLite.</p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={handleQuickLoginAtCheckout}
-              className="px-3.5 py-1.5 bg-[#7D3F32] hover:bg-[#6A3328] text-white rounded-xl text-xs font-bold transition shadow-xs shrink-0 cursor-pointer"
-            >
-              Đăng nhập nhanh (1-Click)
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <Link
+                href="/login?redirect=/checkout"
+                className="px-3.5 py-1.5 bg-[#EADDC7] hover:bg-[#dfceb0] text-[#3F3027] rounded-xl text-xs font-bold transition"
+              >
+                Đăng nhập
+              </Link>
+              <button
+                type="button"
+                onClick={() => void handleQuickLoginAtCheckout()}
+                className="px-3.5 py-1.5 bg-[#7D3F32] hover:bg-[#6A3328] text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+              >
+                Dùng tài khoản mẫu
+              </button>
+            </div>
           </div>
         ) : (
           <div className="mb-5 p-3 bg-[#FFFAF0] border border-[#A7D7B5] rounded-2xl flex flex-wrap items-center justify-between gap-2 text-xs text-[#246344] shadow-xs">
             <div className="flex items-center gap-2 min-w-0">
               <UserCheck className="w-4 h-4 text-[#246344] shrink-0" />
               <span className="truncate">
-                Đã xác thực: <b>{currentUser?.fullName || recipientName}</b> ({currentUser?.email || 'customer@brewlite.vn'})
+                Đã xác thực: <b>{currentUser?.fullName || recipientName}</b> ({currentUser?.email || ''})
               </span>
             </div>
             <span className="font-bold bg-[#246344] text-white px-2.5 py-0.5 rounded-full text-[10px] shrink-0">
-              {currentUser?.loyaltyPoints || 120} điểm thưởng
+              {currentUser?.loyaltyPoints ?? 0} điểm thưởng
             </span>
           </div>
         )}
@@ -411,19 +406,76 @@ export default function CheckoutPage() {
                 </button>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-[#E8D7B8]/60 space-y-1">
-                <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#3F3027]">
-                  <MapPin className="w-3.5 h-3.5 text-[#7D3F32]" />
-                  <span>BrewLite · Chi nhánh Quận 1</span>
+              {pickupMethod === 'PICKUP' ? (
+                <div className="mt-4 pt-3 border-t border-[#E8D7B8]/60 space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#3F3027]">
+                    <MapPin className="w-3.5 h-3.5 text-[#7D3F32]" />
+                    <span>BrewLite · Chi nhánh Quận 1</span>
+                  </div>
+                  <p className="text-[11px] text-[#786B5A] pl-5">
+                    123 Đường Cà Phê, Quận 1, TP. Hồ Chí Minh
+                  </p>
+                  <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#A95619] pl-5 pt-0.5">
+                    <Clock className="w-3 h-3 text-[#A95619]" />
+                    <span>Chuẩn bị trong khoảng 10–15 phút</span>
+                  </div>
                 </div>
-                <p className="text-[11px] text-[#786B5A] pl-5">
-                  123 Đường Cà Phê, Quận 1, TP. Hồ Chí Minh
-                </p>
-                <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#A95619] pl-5 pt-0.5">
-                  <Clock className="w-3 h-3 text-[#A95619]" />
-                  <span>Chuẩn bị trong khoảng 10–15 phút</span>
+              ) : (
+                <div className="mt-4 pt-3 border-t border-[#E8D7B8]/60 space-y-3">
+                  {savedAddresses.length > 0 && (
+                    <div>
+                      <p className="text-[11px] font-semibold text-[#3F3027] mb-1.5">
+                        Chọn nhanh địa chỉ đã lưu:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {savedAddresses.map((addr) => {
+                          const selected = deliveryAddress.trim() === addr.address.trim();
+                          return (
+                            <button
+                              key={addr.id}
+                              type="button"
+                              onClick={() => {
+                                setDeliveryAddress(addr.address);
+                                if (addr.receiver) setRecipientName(addr.receiver);
+                                if (addr.phone && addr.phone !== 'Chưa cập nhật SĐT') {
+                                  setRecipientPhone(addr.phone);
+                                }
+                              }}
+                              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer ${
+                                selected
+                                  ? 'bg-[#EADBC2] border-[#7D3F32] text-[#3F3027]'
+                                  : 'bg-[#F3E8D4]/50 border-[#DDCCAE] text-[#786B5A] hover:text-[#3F3027]'
+                              }`}
+                            >
+                              {addr.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    <label
+                      htmlFor="checkout-delivery-address"
+                      className="block text-[11px] font-semibold text-[#3F3027] mb-1"
+                    >
+                      Địa chỉ giao hàng <span className="text-[#B42318]">*</span>
+                    </label>
+                    <textarea
+                      id="checkout-delivery-address"
+                      rows={2}
+                      value={deliveryAddress}
+                      onChange={(e) => setDeliveryAddress(e.target.value)}
+                      placeholder="Nhập số nhà, tên đường, phường, quận nhận hàng..."
+                      className="w-full bg-[#F3E8D4]/60 border border-[#DDCCAE] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-[#3F3027] focus:outline-none focus:border-[#7D3F32] transition"
+                    />
+                    <p className="text-[11px] text-[#786B5A] mt-1">
+                      Chưa lưu sổ địa chỉ? Bạn có thể nhập trực tiếp tại đây hoặc thêm trong mục Hồ sơ.
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* THẺ 2: THÔNG TIN NGƯỜI NHẬN */}
@@ -510,45 +562,68 @@ export default function CheckoutPage() {
               </h2>
 
               {/* Danh sách món */}
-              <div className="space-y-3.5 max-h-[260px] overflow-y-auto pr-1">
-                {items.map((item, idx) => {
-                  const linePrice = item.lineTotal || (item.unitPrice || 0) * (item.quantity || 1);
-                  const optionSummary = [
-                    item.size ? (item.size === 'L' ? 'Lớn' : item.size === 'S' ? 'Nhỏ' : 'Vừa') : 'Vừa',
-                    item.milk || '',
-                    item.sugarLevel ? `${item.sugarLevel} đường` : '',
-                    item.iceLevel ? `${item.iceLevel} đá` : '',
-                    ...(item.toppings || []),
-                  ]
-                    .filter(Boolean)
-                    .join(' · ');
+              {mounted && items.length === 0 ? (
+                <div className="py-6 text-center space-y-3">
+                  <ShoppingCart className="w-8 h-8 text-[#7D3F32] mx-auto opacity-60" />
+                  <p className="text-xs text-[#786B5A]">
+                    Giỏ hàng của bạn đang trống.
+                  </p>
+                  <Link
+                    href="/menu"
+                    className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-[#EADBC2] text-xs font-bold text-[#3F3027] hover:bg-[#dfceb0]"
+                  >
+                    Quay lại Thực đơn
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-3.5 max-h-[260px] overflow-y-auto pr-1">
+                  {items.map((item, idx) => {
+                    const linePrice = (item.unitPrice || 0) * (item.quantity || 1);
+                    const toppingNames = (item.toppings || []).map(
+                      (tid) => item.toppingOptions?.find((t) => t.id === tid)?.name || tid,
+                    );
+                    const optionSummary =
+                      item.optionsDesc ||
+                      [
+                        item.size ? (item.size === 'L' ? 'Lớn' : item.size === 'S' ? 'Nhỏ' : 'Vừa') : 'Vừa',
+                        item.sugarLevel ? `${item.sugarLevel} đường` : '',
+                        item.iceLevel ? `${item.iceLevel} đá` : '',
+                        ...toppingNames,
+                      ]
+                        .filter(Boolean)
+                        .join(' · ');
 
-                  return (
-                    <div key={item.id || idx} className="text-xs sm:text-sm">
-                      <div className="flex justify-between items-baseline">
-                        <span className="font-bold text-[#3F3027]">
-                          {item.quantity || 1} × {item.name}
-                        </span>
-                        <span className="font-bold text-[#7D3F32]">
-                          {linePrice.toLocaleString('vi-VN')} đ
-                        </span>
+                    return (
+                      <div key={`${item.productId}-${idx}`} className="text-xs sm:text-sm">
+                        <div className="flex justify-between items-baseline">
+                          <span className="font-bold text-[#3F3027]">
+                            {item.quantity || 1} × {item.name}
+                          </span>
+                          <span className="font-bold text-[#7D3F32]">
+                            {linePrice.toLocaleString('vi-VN')} đ
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#786B5A] mt-0.5 leading-snug">
+                          {optionSummary || 'Tiêu chuẩn'}
+                        </p>
                       </div>
-                      <p className="text-[11px] text-[#786B5A] mt-0.5 leading-snug">
-                        {optionSummary || 'Tiêu chuẩn'}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Phân cách */}
               <div className="border-t border-[#DDCCAE] my-4" />
 
               {/* Chi tiết chi phí */}
               <div className="space-y-2 text-xs">
+                <div className="flex justify-between text-[#786B5A]">
+                  <span>Tạm tính:</span>
+                  <span className="font-semibold text-[#3F3027]">{cartSubtotal.toLocaleString('vi-VN')} đ</span>
+                </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-[#246344]">
-                    <span>Ưu đãi {appliedVoucher?.code || 'BANMOI10'}:</span>
+                    <span>Ưu đãi {appliedVoucher?.code || ''}:</span>
                     <span className="font-bold">−{discountAmount.toLocaleString('vi-VN')} đ</span>
                   </div>
                 )}
@@ -574,8 +649,8 @@ export default function CheckoutPage() {
               {/* Nút chính: Tạo đơn và chọn thanh toán */}
               <button
                 type="button"
-                onClick={handleCreateOrderAndOpenModal}
-                disabled={isSubmitting}
+                onClick={() => void handleCreateOrderAndOpenModal()}
+                disabled={isSubmitting || items.length === 0}
                 className="w-full h-11 bg-[#7D3F32] hover:bg-[#6A3328] disabled:bg-[#BCA99B] text-[#FFFAF0] font-bold text-xs sm:text-sm rounded-xl transition shadow-sm mt-5 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
               >
                 {isSubmitting ? (
@@ -630,7 +705,10 @@ export default function CheckoutPage() {
                     Thanh toán đơn hàng
                   </h2>
                   <p className="text-xs text-[#786B5A] mt-0.5">
-                    {orderCode || 'BL-8924'} · Nhận tại quầy · Quận 1
+                    {orderCode} ·{' '}
+                    {pickupMethod === 'DELIVERY'
+                      ? `Giao tận nơi: ${deliveryAddress}`
+                      : 'Nhận tại quầy · Quận 1'}
                   </p>
                 </div>
 
@@ -761,6 +839,11 @@ export default function CheckoutPage() {
 
                     {/* NÚT HÀNH ĐỘNG GỌN GÀNG */}
                     <div className="mt-3 space-y-1.5">
+                      {modalNotice && (
+                        <p className="text-[11px] text-[#92400E] bg-[#FEF3C7] border border-[#FCD34D] rounded-xl px-3 py-2 text-center font-medium">
+                          {modalNotice}
+                        </p>
+                      )}
                       <button
                         type="button"
                         onClick={handleRedirectToVNPayGateway}
@@ -772,7 +855,7 @@ export default function CheckoutPage() {
 
                       <button
                         type="button"
-                        onClick={handleCheckPaymentStatus}
+                        onClick={() => void handleCheckPaymentStatus()}
                         className="w-full h-9 bg-[#EADBC2] hover:bg-[#dfceb0] text-[#3F3027] font-bold text-xs rounded-xl transition flex items-center justify-center cursor-pointer"
                       >
                         <span>Kiểm tra trạng thái</span>
@@ -780,7 +863,19 @@ export default function CheckoutPage() {
 
                       <button
                         type="button"
-                        onClick={() => setShowPaymentModal(false)}
+                        onClick={async () => {
+                          if (createdOrderId) {
+                            try {
+                              await ApiClient.post(`/orders/${createdOrderId}/cancel`, {
+                                scenario: 'ONLINE_CUSTOMER_CANCEL',
+                                reason: 'Khách hàng hủy đơn tại màn hình chờ thanh toán.',
+                              });
+                            } catch {
+                              // Bỏ qua nếu đơn đã chuyển trạng thái trước đó
+                            }
+                          }
+                          setShowPaymentModal(false);
+                        }}
                         className="w-full py-1 text-[11px] text-[#7D3F32] hover:underline cursor-pointer block text-center"
                       >
                         Hủy đơn đang chờ thanh toán
@@ -816,7 +911,9 @@ export default function CheckoutPage() {
                 {/* Hộp Thông tin đơn hàng (#F3E8D4) */}
                 <div className="bg-[#F3E8D4] rounded-xl p-3.5 text-xs space-y-1 mb-4">
                   <p className="font-bold text-[#3F3027]">
-                    Nhận tại BrewLite · Chi nhánh Quận 1
+                    {pickupMethod === 'DELIVERY'
+                      ? `Giao tận nơi: ${deliveryAddress}`
+                      : 'Nhận tại BrewLite · Chi nhánh Quận 1'}
                   </p>
                   <p className="text-[#3F3027] whitespace-pre-line leading-relaxed">
                     {items.map((it) => `${it.quantity || 1} × ${it.name}`).join('\n')}
