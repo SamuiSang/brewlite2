@@ -214,6 +214,17 @@ async function main() {
   console.log('4. Đang nạp danh mục mã khuyến mãi Voucher...');
   const promotionsData = [
     {
+      code: 'WELCOME10',
+      description: 'Giảm 10% cho khách hàng mới',
+      discountType: DiscountType.PERCENTAGE,
+      discountValue: 10.0,
+      minOrderValue: 50000.0,
+      maxDiscountAmount: 20000.0,
+      usageLimit: 1000,
+      startsAt: new Date(),
+      expiresAt: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000), // Hết hạn sau 180 ngày
+    },
+    {
       code: 'BREWNEW',
       description: 'Dành cho khách hàng mới',
       discountType: DiscountType.PERCENTAGE,

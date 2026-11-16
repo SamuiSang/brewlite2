@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ApiClient } from '@/lib/api-client';
+import { useCartStore } from '@/lib/store';
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
@@ -41,6 +42,9 @@ export default function LoginPage() {
         if (res.user) {
           localStorage.setItem('brewlite_user_profile', JSON.stringify(res.user));
         }
+        // Đồng bộ giỏ hàng tương ứng của tài khoản vừa đăng nhập
+        useCartStore.getState().clearCart();
+        void useCartStore.persist.rehydrate();
         router.push(redirectTarget);
       }
     } catch (err: any) {

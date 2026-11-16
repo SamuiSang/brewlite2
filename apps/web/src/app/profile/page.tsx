@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ApiClient } from '@/lib/api-client';
+import { useCartStore } from '@/lib/store';
 import { UserNav } from '@/components/UserNav';
 import {
   ArrowLeft,
@@ -128,6 +129,8 @@ export default function ProfilePage() {
   const handleLogout = () => {
     ApiClient.removeToken();
     localStorage.removeItem('brewlite_user_profile');
+    useCartStore.getState().clearCart();
+    void useCartStore.persist.rehydrate();
     router.push('/login');
   };
 

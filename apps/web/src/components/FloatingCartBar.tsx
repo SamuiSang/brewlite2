@@ -24,13 +24,12 @@ export const FloatingCartBar: React.FC = () => {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
+  if (!mounted || totalItems === 0) {
     return null;
   }
 
-  // Khớp Figma Cloud Node 3:6: Hiển thị mặc định '2 món · 115.000 đ' khi chưa có thao tác giỏ
-  const displayItems = totalItems > 0 ? totalItems : 2;
-  const displaySubtotal = totalItems > 0 ? formatVnd(subtotal) : '115.000 đ';
+  const displayItems = totalItems;
+  const displaySubtotal = formatVnd(subtotal);
 
   const handleClearCart = (e: React.MouseEvent) => {
     e.preventDefault();

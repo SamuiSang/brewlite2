@@ -4,7 +4,7 @@ global.localStorage = {
   setItem: (key, value) => saved.set(key, value),
   removeItem: key => saved.delete(key),
 };
-const { useCartStore, cartItemKey, getMaxQuantity } = require('../src/lib/store');
+const { useCartStore, cartItemKey, getMaxQuantity, getCartStorageKey } = require('../src/lib/store');
 afterAll(() => { delete global.localStorage; });
 
 const item = { productId: 'coffee', name: 'Coffee', category: 'COFFEE', imageUrl: null,
@@ -100,4 +100,33 @@ test('cart changes invalidate voucher and persist items for refresh', () => {
   localStorage.setItem('brewlite-cart', persisted);
   useCartStore.persist.rehydrate();
   expect(useCartStore.getState().items[0].quantity).toBe(2);
+});
+
+test('cart is isolated per user and new user account starts with clean cart', async () => {
+  // 1. User A has items in cart
+  localStorage.setItem('brewlite_user_profile', JSON.stringify({ id: 'user-A', fullName: 'User A' }));
+  expect(getCartStorageKey()).toBe('brewlite-cart-user-A');
+  useCartStore.getState().clearCart();
+  useCartStore.getState().addItem(item);
+  expect(useCartStore.getState().items).toHaveLength(1);
+  expect(saved.get('brewlite-cart-user-A')).toBeDefined();
+
+  // 2. New User B registers (tài khoản mới)
+  localStorage.setItem('brewlite_user_profile', JSON.stringify({ id: 'user-B', fullName: 'User B' }));
+  expect(getCartStorageKey()).toBe('brewlite-cart-user-B');
+  useCartStore.getState().clearCart();
+  await useCartStore.persist.rehydrate();
+
+  // User B's cart must be empty, not inheriting User A's items
+  expect(useCartStore.getState().items).toHaveLength(0);
+
+  // 3. User A logs back in
+  localStorage.setItem('brewlite_user_profile', JSON.stringify({ id: 'user-A', fullName: 'User A' }));
+  await useCartStore.persist.rehydrate();
+  // User A still has their items
+  expect(useCartStore.getState().items).toHaveLength(1);
+  expect(useCartStore.getState().items[0].name).toBe('Coffee');
+
+  // Clean up
+  localStorage.removeItem('brewlite_user_profile');
 });

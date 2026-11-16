@@ -19,6 +19,19 @@ export interface CartItem {
   toppingOptions?: import('../store/useCartStore').Topping[];
 }
 
+export function getCartStorageKey(): string {
+  if (typeof localStorage === 'undefined') return 'brewlite-cart';
+  try {
+    const raw = localStorage.getItem('brewlite_user_profile');
+    if (raw) {
+      const user = JSON.parse(raw);
+      const uid = user?.id || user?.email;
+      if (uid) return `brewlite-cart-${uid}`;
+    }
+  } catch {}
+  return 'brewlite-cart';
+}
+
 export const cartItemKey = (item: CartItem) => JSON.stringify([
   item.productId, item.size, [...(item.toppings || [])].sort(),
   item.sugarLevel || '100%', item.iceLevel || '100%',
@@ -130,7 +143,7 @@ export const useCartStore = create<CartStore>()(persist((set, get) => ({
     });
   },
   setAppliedVoucher: appliedVoucher => set({ appliedVoucher, notice: null }),
-  clearCart: () => set(state => ({ items: [], appliedVoucher: null, notice: voucherNotice(state) })),
+  clearCart: () => set({ items: [], appliedVoucher: null, notice: null }),
   getTotalItems: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
   getSubtotal: () => get().items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0),
   getFinalTotal: () => Math.max(0, get().getSubtotal() - (get().appliedVoucher?.discountAmount || 0)),
@@ -138,9 +151,36 @@ export const useCartStore = create<CartStore>()(persist((set, get) => ({
   name: 'brewlite-cart',
   skipHydration: true,
   storage: createJSONStorage(() => ({
-    getItem: key => { try { return localStorage.getItem(key); } catch { reportStorageError('Không thể khôi phục giỏ hàng vì trình duyệt chặn lưu trữ.'); return null; } },
-    setItem: (key, value) => { try { localStorage.setItem(key, value); } catch { reportStorageError('Không thể lưu giỏ hàng. Các thay đổi có thể mất khi tải lại trang.'); } },
-    removeItem: key => { try { localStorage.removeItem(key); } catch { reportStorageError('Không thể cập nhật dữ liệu giỏ hàng đã lưu.'); } },
+    getItem: key => {
+      try {
+        const userKey = getCartStorageKey();
+        const data = localStorage.getItem(userKey);
+        if (data) return data;
+        if (userKey !== 'brewlite-cart') {
+          return JSON.stringify({ state: { items: [] }, version: 0 });
+        }
+        return null;
+      } catch {
+        reportStorageError('Không thể khôi phục giỏ hàng vì trình duyệt chặn lưu trữ.');
+        return null;
+      }
+    },
+    setItem: (key, value) => {
+      try {
+        const userKey = getCartStorageKey();
+        localStorage.setItem(userKey, value);
+      } catch {
+        reportStorageError('Không thể lưu giỏ hàng. Các thay đổi có thể mất khi tải lại trang.');
+      }
+    },
+    removeItem: key => {
+      try {
+        const userKey = getCartStorageKey();
+        localStorage.removeItem(userKey);
+      } catch {
+        reportStorageError('Không thể cập nhật dữ liệu giỏ hàng đã lưu.');
+      }
+    },
   })),
   onRehydrateStorage: () => (_state, error) => {
     if (error) reportStorageError('Không thể khôi phục giỏ hàng đã lưu. Dữ liệu có thể bị hỏng.');
