@@ -1,16 +1,16 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ApiClient } from '@/lib/api-client';
 import { useCartStore } from '../lib/store';
+import { calculateLoyaltyTier } from './LoyaltyBadge';
 import {
   User,
   Receipt,
   Gift,
-  MapPin,
-  Settings,
+  ShoppingCart,
   LogOut,
   Sparkles,
   Award,
@@ -28,6 +28,9 @@ interface UserProfile {
   loyaltyPoints?: number;
 }
 
+/**
+ * Menu tài khoản nhanh trên thanh điều hướng (tách biệt lối tắt chuyển trang với trang Hồ sơ chi tiết)
+ */
 export function UserNav() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -35,35 +38,46 @@ export function UserNav() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    // 1. Kiểm tra token & nạp thông tin user
+  const syncProfile = useCallback(() => {
     const token = ApiClient.getToken();
-    if (token) {
-      setIsLoggedIn(true);
-      // Đọc cache nhanh
-      const cached = localStorage.getItem('brewlite_user_profile');
-      if (cached) {
-        try {
-          setProfile(JSON.parse(cached));
-        } catch {}
-      }
-
-      // Tải từ API GET /api/v1/auth/me
-      ApiClient.get('/auth/me')
-        .then((data) => {
-          if (data && data.fullName) {
-            setProfile(data);
-            localStorage.setItem('brewlite_user_profile', JSON.stringify(data));
-          }
-        })
-        .catch(() => {
-          // fallback giữ cache
-        });
-    } else {
+    if (!token) {
       setIsLoggedIn(false);
       setProfile(null);
+      return;
     }
+
+    setIsLoggedIn(true);
+    const cached = localStorage.getItem('brewlite_user_profile');
+    if (cached) {
+      try {
+        setProfile(JSON.parse(cached));
+      } catch {
+        // Bỏ qua cache lỗi định dạng
+      }
+    }
+
+    ApiClient.get<UserProfile>('/auth/me')
+      .then((data) => {
+        if (data && data.fullName) {
+          setProfile(data);
+          localStorage.setItem('brewlite_user_profile', JSON.stringify(data));
+        }
+      })
+      .catch(() => {
+        // Giữ cache hiện tại nếu API tạm thời không phản hồi
+      });
   }, []);
+
+  useEffect(() => {
+    syncProfile();
+  }, [syncProfile]);
+
+  // Đồng bộ lại mỗi khi người dùng mở dropdown để tránh dính thông tin tài khoản cũ
+  useEffect(() => {
+    if (isOpen) {
+      syncProfile();
+    }
+  }, [isOpen, syncProfile]);
 
   // Đóng dropdown khi click ra ngoài
   useEffect(() => {
@@ -91,12 +105,18 @@ export function UserNav() {
     router.push('/login');
   };
 
-  // Xác định chữ cái hiển thị Avatar
   const initial = profile?.fullName
     ? profile.fullName.trim().charAt(0).toUpperCase()
-    : 'H';
+    : 'U';
 
-  const loyaltyPoints = profile?.loyaltyPoints ?? 420;
+  const loyaltyPoints = profile?.loyaltyPoints ?? 0;
+  const tierSummary = calculateLoyaltyTier(loyaltyPoints);
+  const tierShortLabel =
+    tierSummary.tierName === 'THÀNH VIÊN KIM CƯƠNG'
+      ? 'Thành viên Kim Cương'
+      : tierSummary.tierName === 'THÀNH VIÊN VÀNG'
+        ? 'Thành viên Vàng'
+        : 'Thành viên Bạc';
 
   return (
     <div className="relative inline-block text-left" ref={dropdownRef}>
@@ -106,18 +126,18 @@ export function UserNav() {
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        title={isLoggedIn ? `Tài khoản: ${profile?.fullName || 'Hàn Minh Hiếu'}` : 'Đăng nhập / Tài khoản'}
+        title={isLoggedIn ? `Tài khoản: ${profile?.fullName || 'Thành viên'}` : 'Đăng nhập / Tài khoản'}
         className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#7D3F32] hover:bg-[#693327] text-[#FFFAF0] font-bold flex items-center justify-center text-xs sm:text-sm shadow-xs transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#7D3F32]/50 focus:ring-offset-1 select-none"
       >
         {isLoggedIn ? initial : <User className="w-4 h-4 text-[#FFFAF0]" />}
       </button>
 
-      {/* Dropdown Menu Popover */}
+      {/* Dropdown Menu điều hướng nhanh giữa các phân hệ */}
       {isOpen && (
         <div className="absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl bg-[#FFFAF0] border border-[#E8D7B8] shadow-xl shadow-black/10 py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
           {isLoggedIn ? (
             <>
-              {/* Header người dùng */}
+              {/* Header thông tin người dùng hiện tại */}
               <div className="px-4 py-3 bg-[#F4EFE6]/60 border-b border-[#E8D7B8]/70">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-[#7D3F32] text-[#FFFAF0] font-bold flex items-center justify-center text-sm shadow-xs">
@@ -125,19 +145,19 @@ export function UserNav() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-[#3F3027] truncate">
-                      {profile?.fullName || 'Hàn Minh Hiếu'}
+                      {profile?.fullName || 'Khách hàng BrewLite'}
                     </p>
                     <p className="text-xs text-[#786B5A] truncate">
-                      {profile?.email || 'hieu.customer@brewlite.vn'}
+                      {profile?.email || ''}
                     </p>
                   </div>
                 </div>
 
-                {/* Huy hiệu Hạng thành viên & Điểm */}
+                {/* Hạng thành viên & Số dư Hạt thực tế */}
                 <div className="mt-2.5 pt-2 border-t border-[#E8D7B8]/60 flex items-center justify-between text-xs">
                   <span className="inline-flex items-center gap-1 font-semibold text-[#8C5E28]">
                     <Award className="w-3.5 h-3.5 text-[#D98236]" />
-                    <span>Thành viên Vàng</span>
+                    <span>{tierShortLabel}</span>
                   </span>
                   <span className="inline-flex items-center gap-1 font-medium text-[#7D3F32]">
                     <Sparkles className="w-3 h-3 text-[#D98236]" />
@@ -146,7 +166,7 @@ export function UserNav() {
                 </div>
               </div>
 
-              {/* Danh sách hành động */}
+              {/* Lối tắt nhanh sang từng trang tính năng riêng biệt */}
               <div className="py-1 text-sm text-[#3F3027]">
                 <Link
                   href="/profile"
@@ -155,7 +175,7 @@ export function UserNav() {
                 >
                   <div className="flex items-center gap-2.5">
                     <User className="w-4 h-4 text-[#7D3F32]" />
-                    <span>Hồ sơ tài khoản</span>
+                    <span>Hồ sơ &amp; Sổ địa chỉ</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-[#A08F87]" />
                 </Link>
@@ -167,45 +187,31 @@ export function UserNav() {
                 >
                   <div className="flex items-center gap-2.5">
                     <Receipt className="w-4 h-4 text-[#7D3F32]" />
-                    <span>Lịch sử đơn hàng</span>
+                    <span>Đơn hàng của tôi</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-[#A08F87]" />
                 </Link>
 
                 <Link
-                  href="/profile?tab=vouchers"
+                  href="/rewards"
                   onClick={() => setIsOpen(false)}
                   className="flex items-center justify-between px-4 py-2.5 hover:bg-[#E8D7B8]/30 transition-colors"
                 >
                   <div className="flex items-center gap-2.5">
                     <Gift className="w-4 h-4 text-[#7D3F32]" />
-                    <span>Thẻ quà tặng &amp; ưu đãi</span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-full bg-[#EADDC7] text-[#593E2B] text-[10px] font-bold">
-                    2 voucher
-                  </span>
-                </Link>
-
-                <Link
-                  href="/profile?tab=addresses"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-between px-4 py-2.5 hover:bg-[#E8D7B8]/30 transition-colors"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <MapPin className="w-4 h-4 text-[#7D3F32]" />
-                    <span>Địa chỉ đã lưu</span>
+                    <span>Ưu đãi &amp; Đổi Hạt</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-[#A08F87]" />
                 </Link>
 
                 <Link
-                  href="/profile?tab=settings"
+                  href="/cart"
                   onClick={() => setIsOpen(false)}
                   className="flex items-center justify-between px-4 py-2.5 hover:bg-[#E8D7B8]/30 transition-colors"
                 >
                   <div className="flex items-center gap-2.5">
-                    <Settings className="w-4 h-4 text-[#7D3F32]" />
-                    <span>Cài đặt tài khoản</span>
+                    <ShoppingCart className="w-4 h-4 text-[#7D3F32]" />
+                    <span>Giỏ hàng hiện tại</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-[#A08F87]" />
                 </Link>
@@ -216,7 +222,7 @@ export function UserNav() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#B42318] hover:bg-red-50 transition-colors text-left font-medium"
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#B42318] hover:bg-red-50 transition-colors text-left font-medium cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Đăng xuất</span>
