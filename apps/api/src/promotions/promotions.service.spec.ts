@@ -159,4 +159,58 @@ describe('PromotionsService CRUD operations', () => {
     await expect(service.update('invalid-id', { description: 'test' })).rejects.toThrow('Không tìm thấy');
     await expect(service.remove('invalid-id')).rejects.toThrow('Không tìm thấy');
   });
+
+  describe('cleanupOverdueOrders', () => {
+    it('quét và hủy đơn PENDING quá hạn TTL, hoàn lại usedCount cho voucher', async () => {
+      const mockOverdueOrder = {
+        id: 'order-expired-1',
+        status: 'PENDING',
+        promotionId: 'promo-1',
+        items: [{ productId: 'prod-1', quantity: 2 }],
+      };
+      const mockTx = {
+        order: {
+          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        },
+        promotion: {
+          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        },
+        recipeItem: {
+          findMany: jest.fn().mockResolvedValue([
+            { id: 'rec-1', productId: 'prod-1', ingredientId: 'ing-1', quantityRequired: 15 },
+          ]),
+        },
+        ingredient: {
+          update: jest.fn().mockResolvedValue({}),
+        },
+        orderStatusLog: {
+          create: jest.fn().mockResolvedValue({}),
+        },
+      };
+
+      const mockPrisma = {
+        order: {
+          findMany: jest.fn().mockResolvedValue([mockOverdueOrder]),
+        },
+        $transaction: jest.fn().mockImplementation(async (cb) => await cb(mockTx)),
+      } as unknown as PrismaService;
+
+      const testService = new PromotionsService(mockPrisma);
+      await testService.cleanupOverdueOrders();
+
+      expect(mockPrisma.order.findMany).toHaveBeenCalled();
+      expect(mockTx.order.updateMany).toHaveBeenCalledWith({
+        where: { id: 'order-expired-1', status: 'PENDING' },
+        data: { status: 'CANCELLED' },
+      });
+      expect(mockTx.promotion.updateMany).toHaveBeenCalledWith({
+        where: { id: 'promo-1', usedCount: { gt: 0 } },
+        data: { usedCount: { decrement: 1 } },
+      });
+      expect(mockTx.ingredient.update).toHaveBeenCalledWith({
+        where: { id: 'ing-1' },
+        data: { stockQuantity: { increment: 30 }, version: { increment: 1 } },
+      });
+    });
+  });
 });
