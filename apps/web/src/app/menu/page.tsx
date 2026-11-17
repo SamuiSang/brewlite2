@@ -12,6 +12,7 @@ import { useCartStore } from '../../lib/store';
 import { FloatingCartBar } from '../../components/FloatingCartBar';
 import ProductCustomizationModal from '../../components/ProductCustomizationModal';
 import { UserNav } from '../../components/UserNav';
+import { DEFAULT_TOPPINGS } from '../../lib/toppings';
 
 /**
  * Danh sách 18 món thực đơn BrewLite 2 khớp 100% bản thiết kế Figma Cloud (BdBtjCNyz1miLp27sp0Hzp).
@@ -398,7 +399,7 @@ export default function MenuPage() {
 
   return (
     <div className="min-h-screen bg-[#F3E8D4] text-[#3F3027] font-sans flex flex-col justify-between overflow-x-hidden">
-      {selectedProduct && <ProductCustomizationModal product={selectedProduct} toppings={[]} onClose={() => setSelectedProduct(null)} />}
+      {selectedProduct && <ProductCustomizationModal product={selectedProduct} toppings={DEFAULT_TOPPINGS} onClose={() => setSelectedProduct(null)} />}
       {/* Container hàng đợi thông báo (Toast Stack): Tối đa 8 cái */}
       <div
         aria-live="polite"

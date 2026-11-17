@@ -26,6 +26,7 @@ import VoucherInput from '../../components/VoucherInput';
 import ProductCustomizationModal from '../../components/ProductCustomizationModal';
 import type { Product } from '../../types/product';
 import { UserNav } from '../../components/UserNav';
+import { DEFAULT_TOPPINGS } from '../../lib/toppings';
 
 export default function CartPage() {
   const router = useRouter();
@@ -146,7 +147,7 @@ export default function CartPage() {
             <nav className="hidden sm:flex items-center gap-7 text-[14px] text-[#786B5A] font-medium">
               <Link href="/menu" className="hover:text-[#7D3F32] transition-colors">Thực đơn</Link>
               <Link href="/orders" className="hover:text-[#7D3F32] transition-colors">Đơn hàng</Link>
-              <Link href="/profile?tab=vouchers" className="hover:text-[#7D3F32] transition-colors">Ưu đãi</Link>
+              <Link href="/rewards" className="hover:text-[#7D3F32] transition-colors">Ưu đãi</Link>
               <Link href="/profile" className="hover:text-[#7D3F32] transition-colors">Tài khoản</Link>
               <UserNav />
             </nav>
@@ -269,7 +270,7 @@ export default function CartPage() {
             <nav className="hidden lg:flex items-center gap-7 text-[14px] text-[#786B5A] font-medium">
               <Link href="/menu" className="hover:text-[#7D3F32] transition-colors">Thực đơn</Link>
               <Link href="/orders" className="hover:text-[#7D3F32] transition-colors">Đơn hàng</Link>
-              <Link href="/profile?tab=vouchers" className="hover:text-[#7D3F32] transition-colors">Ưu đãi</Link>
+              <Link href="/rewards" className="hover:text-[#7D3F32] transition-colors">Ưu đãi</Link>
               <Link href="/profile" className="hover:text-[#7D3F32] transition-colors">Tài khoản</Link>
               <UserNav />
             </nav>
@@ -493,7 +494,9 @@ export default function CartPage() {
   return (
     <main className="min-h-screen bg-[#F3E8D4] text-[#3F3027] pb-36 lg:pb-16">
       {editingItem && editingProduct && <ProductCustomizationModal
-        product={editingProduct} toppings={editingItem.toppingOptions || []} editingItem={editingItem}
+        product={editingProduct}
+        toppings={editingItem.toppingOptions?.length ? editingItem.toppingOptions : DEFAULT_TOPPINGS}
+        editingItem={editingItem}
         onClose={() => { setEditingItem(null); setEditingProduct(null); }} />}
       {/* Top Header */}
       <header className="px-5 sm:px-12 lg:px-20 pt-5 pb-3">
@@ -504,7 +507,7 @@ export default function CartPage() {
           <nav className="hidden lg:flex items-center gap-7 text-[14px] text-[#786B5A] font-medium">
             <Link href="/menu" className="hover:text-[#7D3F32] transition-colors">Thực đơn</Link>
             <Link href="/orders" className="hover:text-[#7D3F32] transition-colors">Đơn hàng</Link>
-            <Link href="/profile?tab=vouchers" className="hover:text-[#7D3F32] transition-colors">Ưu đãi</Link>
+            <Link href="/rewards" className="hover:text-[#7D3F32] transition-colors">Ưu đãi</Link>
             <Link href="/profile" className="hover:text-[#7D3F32] transition-colors">Tài khoản</Link>
             <UserNav />
           </nav>
