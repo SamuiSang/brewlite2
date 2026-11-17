@@ -1,95 +1,74 @@
-@startuml
+@startuml sequence-05-payment
 skinparam monochrome true
 skinparam shadowing false
+skinparam defaultFontName SansSerif
 skinparam backgroundColor white
-skinparam defaultFontName "Segoe UI", "Arial", sans-serif
-
+skinparam sequenceParticipantBackgroundColor white
+skinparam actorBackgroundColor white
+<style>
+participant {
+  Padding 20
+}
+</style>
 hide footbox
-skinparam sequenceMessageAlign left
-skinparam responseMessageBelowArrow true
-skinparam maxMessageSize 250
+title SƠ ĐỒ TUẦN TỰ (TASK 2.2): UC-05 - THANH TOÁN & WEBHOOK
 
-title SƠ ĐỒ TUẦN TỰ: UC-05 - THANH TOÁN ĐƠN HÀNG QUA CỔNG SANDBOX & WEBHOOK
-
-actor "Khách hàng" as Customer
+actor "Khách hàng" as C
 participant "«giao diện»\n:Màn hình thanh toán" as UI
-participant "«điều khiển»\n:Hệ thống thanh toán" as Service
+participant "«điều khiển»\n:Thanh toán" as Pay
 participant "«thực thể»\n:Cơ sở dữ liệu" as DB
-participant "«dịch vụ ngoài»\n:Cổng thanh toán Sandbox" as Gateway
+participant "«dịch vụ ngoài»\n:Cổng Sandbox" as GW
 
-Customer -> UI: 1. Chọn phương thức thanh toán()
+C -> UI: 1. Chọn cách & bấm Thanh toán
 activate UI
-
-Customer -> UI: 2. Nhấn xác nhận thanh toán()
-UI -> Service: Yêu cầu khởi tạo thanh toán()
-activate Service
-
-Service -> DB: Kiểm tra khóa chống trùng lặp()
+UI -> Pay: Gửi yêu cầu thanh toán
+activate Pay
+Pay -> DB: Kiểm tra Idempotency-Key
 activate DB
-DB --> Service: Kết quả kiểm tra giao dịch
+DB --> Pay: Kết quả kiểm tra
 deactivate DB
 
-opt [2a: Giao dịch gửi trùng lặp (Bấm đúp / Rớt mạng)]
-    Service --> UI: Trả về kết quả giao dịch trước đó
-    UI --> Customer: Cảnh báo giao dịch đã được xử lý (Chống trừ tiền 2 lần)
+alt Giao dịch trùng lặp
+  Pay --> UI: Trả kết quả cũ
+  UI --> C: Hiện kết quả cũ (không trừ 2 lần)
+else Giao dịch mới
+  Pay -> DB: 2. Lưu Payment PENDING
+  activate DB
+  DB --> Pay: Đã lưu
+  deactivate DB
+
+  Pay -> GW: 3. Tạo phiên Sandbox
+  activate GW
+  GW --> Pay: URL & mã QR
+  deactivate GW
+  Pay --> UI: Trả mã QR thanh toán
+  UI --> C: Hiển thị mã QR
+
+  C -> GW: 4. Quét QR thanh toán
+  activate GW
+  GW -> Pay: 5. Gửi Webhook (kèm HMAC)
+  Pay -> Pay: Xác thực chữ ký HMAC
+
+  alt Thanh toán thành công
+    Pay -> DB: 6. Đổi PAID & cộng điểm
+    activate DB
+    DB --> Pay: Đã cập nhật
+    deactivate DB
+    Pay --> GW: Xác nhận Webhook OK
+    Pay --> UI: Thanh toán thành công
+    UI --> C: Hiện biên nhận (PAID)
+  else Thất bại / Quá hạn 15p
+    Pay -> DB: 6b. Hủy đơn & hoàn kho
+    activate DB
+    DB --> Pay: Đã hoàn kho
+    deactivate DB
+    Pay --> GW: Xác nhận Webhook OK
+    Pay --> UI: Báo lỗi thanh toán
+    UI --> C: Thông báo lỗi & thử lại
+  end
+  deactivate GW
 end
 
-Service -> Service: Khởi tạo thông tin thanh toán Chờ xử lý()
-
-Service -> Gateway: 3. Yêu cầu tạo phiên thanh toán Sandbox()
-activate Gateway
-
-Gateway -> Gateway: Khởi tạo phiên thử nghiệm & Tạo mã QR VietQR()
-Gateway --> Service: Trả về thông tin mã QR & liên kết thanh toán
-deactivate Gateway
-
-Service --> UI: Chuyển tiếp thông tin thanh toán
-deactivate Service
-
-UI --> Customer: 4. Hiển thị mã QR VietQR thanh toán
-
-Customer -> Gateway: 5. Quét mã QR thanh toán trên ứng dụng ngân hàng / ví điện tử
-activate Gateway
-
-Gateway -> Gateway: Xử lý giao dịch thử nghiệm & Tạo chữ ký số xác thực()
-Gateway -> Service: 6. Gửi thông báo kết quả thanh toán (Webhook)()
-activate Service
-
-Service -> Service: Kiểm tra chữ ký bảo mật từ Cổng Sandbox()
-
-alt [Thanh toán thành công]
-    Service -> DB: Cập nhật thanh toán thành công & Chuyển đơn sang Đã thanh toán (PAID)
-    activate DB
-    Service -> DB: Tích lũy điểm thưởng thành viên
-    DB --> Service: Xác nhận lưu dữ liệu thành công
-    deactivate DB
-    
-    Service --> Gateway: Xác nhận đã tiếp nhận thông báo Webhook
-    deactivate Gateway
-    
-    Service --> UI: Thông báo thanh toán thành công
-    deactivate Service
-    
-    UI -> UI: Làm rỗng giỏ hàng hiện tại()
-    UI --> Customer: 7. Hiển thị biên nhận đơn hàng thành công (PAID)
-
-else [Thanh toán thất bại / Khách hủy đơn / Quá hạn 15 phút]
-    activate Service
-    activate Gateway
-    Service -> DB: Hủy đơn hàng & Tự động hoàn trả 100% nguyên liệu về kho
-    activate DB
-    DB --> Service: Xác nhận hủy và hoàn kho thành công
-    deactivate DB
-    
-    Service --> Gateway: Xác nhận đã tiếp nhận thông báo Webhook
-    deactivate Gateway
-    
-    Service --> UI: Thông báo thanh toán thất bại
-    deactivate Service
-    
-    UI --> Customer: Cảnh báo lỗi thanh toán & hướng dẫn khách hàng thử lại
-end
-
+deactivate Pay
 deactivate UI
-
 @enduml
