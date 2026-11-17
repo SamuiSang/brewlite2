@@ -79,9 +79,9 @@
   <path d="M 708 205 L 805 205 L 805 247" class="flow"/>
   <text x="758" y="198" class="guard" text-anchor="middle">[Đúng chủ sở hữu]</text>
   <path d="M 470 270 L 462 270 L 462 970 L 257 970" class="flow"/>
-  <path d="M 805 293 L 805 318 L 690 318 L 690 332" class="flow"/>
-  <path d="M 565 355 L 370 355" class="flow"/>
-  <path d="M 245 378 L 245 417" class="flow"/>
+  <path d="M 805 293 L 805 312 L 245 312 L 245 332" class="flow"/>
+  <path d="M 370 355 L 565 355" class="flow"/>
+  <path d="M 690 378 L 690 398 L 245 398 L 245 417" class="flow"/>
   <path d="M 245 463 L 245 497" class="flow"/>
   <path d="M 245 533 L 245 567" class="flow"/>
   <text x="308" y="552" class="guard" text-anchor="middle">[Xem lịch sử &amp; Ví điểm]</text>

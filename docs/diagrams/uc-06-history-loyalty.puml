@@ -37,7 +37,7 @@ rectangle "BrewLite - Phân hệ Biên nhận, Lịch sử Đơn, Trạng thái 
     usecase "UC-06.1: Xem biên nhận điện tử &\nTheo dõi tiến trình trạng thái đơn hàng\n(OrderStatusStepper)" as UC_ReceiptTrack
     usecase "UC-06.2: Tra cứu danh sách\nlịch sử đơn hàng cá nhân\n(GET /api/v1/orders/my-orders)" as UC_OrderHistory
     usecase "UC-06.3: Tra cứu số dư &\nlịch sử biến động điểm thưởng\n(GET /api/v1/loyalty/balance)" as UC_LoyaltyHistory
-    usecase "UC-06.4: Cập nhật trạng thái\nchế biến & hoàn tất đơn hàng\n(PAID -> PREPARING -> COMPLETED)" as UC_UpdateStatus
+    usecase "UC-06.4: Cập nhật trạng thái\nchế biến & hoàn tất đơn hàng\n(PENDING -> PAID -> PREPARING -> COMPLETED)" as UC_UpdateStatus
 
     usecase "Tích lũy điểm thưởng tự động\nkhi đơn hàng chuyển sang PAID\n(LoyaltyTransaction: EARN)" as UC_EarnPoints
     usecase "Sử dụng điểm thưởng\nđể giảm giá đơn hàng\n(LoyaltyTransaction: REDEEM)" as UC_RedeemPoints
@@ -52,7 +52,7 @@ UC_UpdateStatus -- Staff
 
 UC_ReceiptTrack .right.> UC_VerifyOwner : <<include>>
 UC_OrderHistory .right.> UC_VerifyOwner : <<include>>
-UC_UpdateStatus .up.> UC_EarnPoints : <<include>>
+UC_EarnPoints .down.> UC_UpdateStatus : <<extend>>\n[khi chuyển sang PAID]
 UC_RedeemPoints .up.> UC_LoyaltyHistory : <<extend>>
 
 @enduml

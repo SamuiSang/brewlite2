@@ -1285,10 +1285,10 @@ Toàn bộ luồng tương tác và quan hệ nghiệp vụ giữa Khách hàng,
 | **UC-06.1** | **Xem biên nhận điện tử & Theo dõi tiến trình đơn (`OrderStatusStepper`)** | Base Use Case | Hiển thị hóa đơn điện tử chi tiết sau thanh toán và thanh tiến trình 4 bước trạng thái đơn hàng theo thời gian thực. |
 | **UC-06.2** | **Xem lịch sử đơn hàng cá nhân (`GET /api/v1/orders/my-orders`)** | Base Use Case | Liệt kê danh sách các đơn hàng thuộc sở hữu của khách hàng theo thứ tự mới nhất đến cũ nhất. |
 | **UC-06.3** | **Tra cứu số dư & lịch sử điểm thưởng (`GET /api/v1/loyalty/balance`)** | Base Use Case | Hiển thị tổng điểm tích lũy hiện có (`User.loyaltyPoints`) và danh sách các giao dịch biến động điểm (`EARN`, `REDEEM`, `REFUND`). |
-| **UC-06.4** | **Cập nhật trạng thái đơn hàng (`PAID` → `PREPARING` → `COMPLETED`)** | Base Use Case | Cho phép nhân viên pha chế chuyển trạng thái đơn hàng theo đúng trình tự máy trạng thái hữu hạn. |
+| **UC-06.4** | **Cập nhật trạng thái đơn hàng (`PENDING` → `PAID` → `PREPARING` → `COMPLETED`)** | Base Use Case | Cho phép nhân viên quầy / pha chế chuyển trạng thái đơn hàng theo đúng trình tự máy trạng thái hữu hạn (`ALLOWED_ORDER_TRANSITIONS`). |
 | **Include 1** | **Kiểm tra quyền sở hữu đơn hàng & Xác thực phiên JWT** | `<<include>>` (từ `UC-06.1`, `UC-06.2`) | Bắt buộc kiểm tra chữ ký JWT và xác minh `order.userId === currentUser.sub` trước khi trả dữ liệu đơn hàng về cho Client. |
-| **Include 2** | **Tích lũy điểm thưởng tự động khi đơn `PAID` (`Loyalty: EARN`)** | `<<include>>` (từ `UC-06.1`) | Tự động ghi nhận bản ghi cộng điểm thưởng ($\lfloor \text{finalAmount} / 10.000 \rfloor$) ngay khi đơn hàng hoàn tất thanh toán. |
-| **Extend 1** | **Đổi điểm thưởng giảm giá đơn hàng (`LoyaltyTransaction: REDEEM`)** | `<<extend>>` (vào `UC-06.3`) | Mở rộng khi khách hàng có số dư điểm dương và chọn sử dụng điểm để khấu trừ vào giá trị đơn hàng tiếp theo. |
+| **Extend 1** | **Đổi điểm thưởng giảm giá đơn hàng (`LoyaltyTransaction: REDEEM`)** | `<<extend>>` (vào `UC-06.3`) | Mở rộng có điều kiện khi khách hàng có số dư điểm đủ tiêu chuẩn (`>= 10` điểm) và chủ động chọn quy đổi để khấu trừ vào giá trị đơn hàng tiếp theo. |
+| **Extend 2** | **Tích lũy điểm thưởng tự động khi đơn `PAID` (`Loyalty: EARN`)** | `<<extend>>` (vào `UC-06.4` `[khi chuyển sang PAID]`) | Mở rộng có điều kiện — chỉ kích hoạt đúng 1 lần duy nhất (`idempotent`) tại thời điểm đơn hàng chuyển sang trạng thái `PAID` (qua `UC-05` hoặc `UC-06.4`), tự động ghi nhận $\lfloor \text{finalAmount} / 10.000 \rfloor$ điểm vào `LoyaltyTransaction`, không chạy khi xem lại biên nhận hay lúc chuyển `PREPARING`/`COMPLETED`. |
 
 ---
 
