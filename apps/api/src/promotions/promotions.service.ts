@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, Promotion } from '@prisma/client';
+import { OrderStatus, Prisma, Promotion } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePromotionDto, QueryPromotionDto, UpdatePromotionDto } from './dto/promotions.dto';
 
@@ -150,7 +150,7 @@ export class PromotionsService {
     };
   }
 
-  async validate(rawCode: string, cartSubtotal: number, deliveryMethod = 'PICKUP') {
+  async validate(rawCode: string, cartSubtotal: number, deliveryMethod = 'PICKUP', userId?: string) {
     if (
       typeof rawCode !== 'string' ||
       !rawCode.trim() ||
@@ -167,7 +167,20 @@ export class PromotionsService {
     });
     if (!promotion) throw new BadRequestException('Mã khuyến mãi không hợp lệ hoặc không tồn tại');
     if (promotion.firstOrderOnly) {
-      throw new BadRequestException('Mã đơn đầu tiên cần tài khoản đã xác thực; chức năng xác thực chưa khả dụng');
+      if (!userId) {
+        throw new BadRequestException('Mã đơn đầu tiên cần tài khoản đã xác thực; vui lòng đăng nhập để sử dụng');
+      }
+      if (this.prisma.order?.count) {
+        const previousOrdersCount = await this.prisma.order.count({
+          where: {
+            userId,
+            status: { not: OrderStatus.CANCELLED },
+          },
+        });
+        if (previousOrdersCount > 0) {
+          throw new BadRequestException('Mã ưu đãi này chỉ áp dụng cho đơn hàng đầu tiên (tài khoản đã có đơn trước đó)');
+        }
+      }
     }
     if (promotion.deliveryOnly && deliveryMethod !== 'DELIVERY') {
       throw new BadRequestException('Chỉ áp dụng cho đơn giao hàng');

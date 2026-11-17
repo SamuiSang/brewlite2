@@ -25,8 +25,15 @@ export async function loadPromotions(): Promise<Promotion[]> {
 }
 
 export async function validatePromotion(code: string, subtotal: number, deliveryMethod?: string) {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (typeof window !== 'undefined') {
+    try {
+      const token = localStorage.getItem('brewlite_access_token');
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+    } catch {}
+  }
   const response = await fetch(`${api}/validate`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    method: 'POST', headers,
     body: JSON.stringify({ code: code.trim().toUpperCase(), cartSubtotal: subtotal, ...(deliveryMethod ? { deliveryMethod } : {}) }),
   });
   const result = await response.json();
