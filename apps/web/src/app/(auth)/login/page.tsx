@@ -42,8 +42,7 @@ export default function LoginPage() {
         if (res.user) {
           localStorage.setItem('brewlite_user_profile', JSON.stringify(res.user));
         }
-        // Đồng bộ giỏ hàng tương ứng của tài khoản vừa đăng nhập
-        useCartStore.getState().clearCart();
+        // Khôi phục giỏ hàng của tài khoản vừa đăng nhập
         void useCartStore.persist.rehydrate();
         router.push(redirectTarget);
       }
