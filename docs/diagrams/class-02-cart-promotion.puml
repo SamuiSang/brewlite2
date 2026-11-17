@@ -77,6 +77,6 @@ class Product {
 Cart "1" *-down- "0..*" CartItem
 Cart "1" *-right- "0..1" AppliedPromotion
 CartItem "0..*" -down-> "0..*" Topping
-CartItem -right-> Product
-AppliedPromotion --down-> Promotion
+CartItem "0..*" -right-> "1" Product
+AppliedPromotion "0..*" --down-> "1" Promotion
 @enduml
