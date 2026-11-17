@@ -44,7 +44,7 @@
   </g>
 
   <!-- Right Actor: Nhân viên pha chế / Quản lý -->
-  <g transform="translate(1025, 345)">
+  <g transform="translate(1025, 355)">
     <circle cx="0" cy="-24" r="13" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
     <line x1="0" y1="-11" x2="0" y2="24" stroke="#000000" stroke-width="1.8"/>
     <line x1="-20" y1="2" x2="20" y2="2" stroke="#000000" stroke-width="1.8"/>
@@ -85,47 +85,42 @@
 
   <!-- Column 2 Use Cases (x = 745) -->
   <!-- Included UC: Kiểm tra quyền sở hữu -->
-  <g transform="translate(745, 165)">
+  <g transform="translate(745, 155)">
     <ellipse cx="0" cy="0" rx="135" ry="26" class="uc-ellipse"/>
     <text x="0" y="-3" class="uc-title">Kiểm tra quyền sở hữu đơn hàng</text>
     <text x="0" y="11" class="uc-sub">&amp; Xác thực phiên JWT</text>
   </g>
 
-  <!-- Included UC: Tích lũy điểm tự động -->
-  <g transform="translate(745, 265)">
+  <!-- Extended UC: Tích lũy điểm tự động -->
+  <g transform="translate(745, 250)">
     <ellipse cx="0" cy="0" rx="135" ry="26" class="uc-ellipse"/>
     <text x="0" y="-3" class="uc-title">Tích lũy điểm thưởng tự động</text>
     <text x="0" y="11" class="uc-sub">khi đơn PAID (Loyalty: EARN)</text>
   </g>
 
   <!-- UC-06.4: Nhân viên cập nhật trạng thái đơn -->
-  <g transform="translate(745, 375)">
-    <ellipse cx="0" cy="0" rx="140" ry="28" class="uc-ellipse"/>
+  <g transform="translate(745, 385)">
+    <ellipse cx="0" cy="0" rx="150" ry="28" class="uc-ellipse"/>
     <text x="0" y="-4" class="uc-title">UC-06.4: Cập nhật trạng thái đơn</text>
-    <text x="0" y="11" class="uc-sub">(PAID → PREPARING → COMPLETED)</text>
+    <text x="0" y="11" class="uc-sub">(PENDING → PAID → PREPARING → COMPLETED)</text>
   </g>
 
   <!-- Solid Association Lines (Actors <-> Use Cases) -->
   <line x1="125" y1="180" x2="235" y2="125" class="assoc-line"/>
   <line x1="125" y1="198" x2="235" y2="220" class="assoc-line"/>
   <line x1="125" y1="216" x2="235" y2="315" class="assoc-line"/>
-  <line x1="885" y1="375" x2="995" y2="355" class="assoc-line"/>
+  <line x1="895" y1="385" x2="998" y2="365" class="assoc-line"/>
 
   <!-- <<include>> Relationships -->
   <!-- UC-06.1 -> Verify Owner -->
-  <line x1="505" y1="128" x2="610" y2="155" class="dep-line"/>
-  <rect x="528" y="128" width="60" height="15" class="rel-tag-bg"/>
-  <text x="558" y="139" class="rel-label">&lt;&lt;include&gt;&gt;</text>
+  <line x1="505" y1="125" x2="610" y2="150" class="dep-line"/>
+  <rect x="528" y="129" width="60" height="15" class="rel-tag-bg"/>
+  <text x="558" y="140" class="rel-label">&lt;&lt;include&gt;&gt;</text>
 
   <!-- UC-06.2 -> Verify Owner -->
-  <line x1="505" y1="212" x2="610" y2="175" class="dep-line"/>
-  <rect x="528" y="186" width="60" height="15" class="rel-tag-bg"/>
-  <text x="558" y="197" class="rel-label">&lt;&lt;include&gt;&gt;</text>
-
-  <!-- UC-06.1 -> Earn Points -->
-  <line x1="490" y1="140" x2="625" y2="252" class="dep-line"/>
-  <rect x="535" y="218" width="60" height="15" class="rel-tag-bg"/>
-  <text x="565" y="229" class="rel-label">&lt;&lt;include&gt;&gt;</text>
+  <line x1="505" y1="215" x2="610" y2="162" class="dep-line"/>
+  <rect x="528" y="181" width="60" height="15" class="rel-tag-bg"/>
+  <text x="558" y="192" class="rel-label">&lt;&lt;include&gt;&gt;</text>
 
   <!-- <<extend>> Relationships -->
   <!-- Redeem Points -> UC-06.3 -->
@@ -133,10 +128,16 @@
   <rect x="380" y="352" width="58" height="15" class="rel-tag-bg"/>
   <text x="409" y="363" class="rel-label">&lt;&lt;extend&gt;&gt;</text>
 
+  <!-- Earn Points -> UC-06.4 (conditional extension when order reaches PAID) -->
+  <line x1="745" y1="276" x2="745" y2="357" class="dep-line"/>
+  <rect x="665" y="302" width="160" height="27" class="rel-tag-bg"/>
+  <text x="745" y="313" class="rel-label">&lt;&lt;extend&gt;&gt;</text>
+  <text x="745" y="324" class="uc-sub" style="font-size: 8.8px;">[khi chuyển sang PAID]</text>
+
   <!-- Legend Box (Widened to 880px so text never overflows the right border) -->
   <rect x="120" y="458" width="880" height="84" class="legend-box"/>
   <text x="138" y="476" class="legend-title">Ghi chú nghiệp vụ Chức năng 6 (Sang - Scrum Master | Chuẩn đơn sắc đen-trắng phục vụ in ấn báo cáo LaTeX):</text>
-  <text x="138" y="494" class="legend-text">• Sau khi đơn hàng chuyển sang PAID (UC-05), hệ thống tự động cộng điểm thưởng (EARN: mỗi 10.000đ = +1 điểm) vào LoyaltyTransaction.</text>
+  <text x="138" y="494" class="legend-text">• Tích điểm tự động (EARN: 10.000đ = +1 điểm) mở rộng &lt;&lt;extend&gt;&gt; cho UC-06.4 đúng 1 lần tại mốc chuyển sang PAID (chống cộng lặp).</text>
   <text x="138" y="511" class="legend-text">• Khách hàng chỉ xem được biên nhận và lịch sử đơn thuộc đúng userId của mình (chống truy cập chéo IDOR → trả về 403 Forbidden).</text>
-  <text x="138" y="528" class="legend-text">• Nhân viên pha chế / Quản lý cập nhật tiến trình đơn (PAID → PREPARING → COMPLETED); thanh OrderStatusStepper cập nhật tương ứng.</text>
+  <text x="138" y="528" class="legend-text">• Nhân viên quầy / Quản lý cập nhật tiến trình đơn (PENDING → PAID → PREPARING → COMPLETED); thanh OrderStatusStepper cập nhật theo.</text>
 </svg>

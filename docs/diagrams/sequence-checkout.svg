@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 980" width="1060" height="980" style="background-color:#ffffff;font-family:'Segoe UI',Arial,sans-serif;">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 685" width="980" height="685" style="background-color:#ffffff;font-family:'Segoe UI',Arial,sans-serif;">
   <defs>
     <marker id="arrow-solid" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
       <path d="M 0 1 L 9 5 L 0 9 z" fill="#000000"/>
@@ -7,124 +7,143 @@
       <path d="M 0 1 L 9 5 L 0 9" fill="none" stroke="#000000" stroke-width="1.3"/>
     </marker>
     <style>
-      .title { font-size: 14.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .title { font-size: 13.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
       .part-box { fill: #ffffff; stroke: #000000; stroke-width: 1.4; }
-      .part-text { font-size: 11.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
-      .actor-label { font-size: 12px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .part-text { font-size: 11px; font-weight: 700; fill: #000000; text-anchor: middle; }
+      .actor-label { font-size: 11.5px; font-weight: 700; fill: #000000; text-anchor: middle; }
       .lifeline { stroke: #000000; stroke-width: 1.2; stroke-dasharray: 5,4; }
       .act-bar { fill: #ffffff; stroke: #000000; stroke-width: 1.2; }
       .frag-box { fill: none; stroke: #000000; stroke-width: 1.2; }
       .frag-tag { fill: #ffffff; stroke: #000000; stroke-width: 1.2; }
       .frag-type { font-size: 10.5px; font-weight: 700; fill: #000000; }
-      .frag-cond { font-size: 10.5px; font-style: italic; fill: #000000; }
+      .frag-cond { font-size: 10px; font-style: italic; fill: #000000; }
       .frag-div { stroke: #000000; stroke-width: 1.1; stroke-dasharray: 4,3; }
       .msg-solid { fill: none; stroke: #000000; stroke-width: 1.25; marker-end: url(#arrow-solid); }
       .msg-dashed { fill: none; stroke: #000000; stroke-width: 1.2; stroke-dasharray: 5,3; marker-end: url(#arrow-open); }
-      .msg-label { font-size: 10.8px; fill: #000000; text-anchor: middle; }
-      .msg-self-label { font-size: 10.8px; fill: #000000; text-anchor: start; }
+      .msg-label { font-size: 10.2px; fill: #000000; text-anchor: middle; }
+      .msg-self-label { font-size: 10px; fill: #000000; text-anchor: start; }
     </style>
   </defs>
   <rect width="100%" height="100%" fill="#ffffff"/>
-  <text x="530" y="30" class="title">SƠ ĐỒ TUẦN TỰ TRỌNG TÂM (TASK 2.2): LUỒNG ĐẶT &amp; THANH TOÁN ĐƠN HÀNG (UC-04 &amp; UC-05)</text>
-  <!-- Actor: Khách hàng -->
-  <circle cx="65" cy="56" r="10" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
-  <line x1="65" y1="66" x2="65" y2="90" stroke="#000000" stroke-width="1.5"/>
-  <line x1="50" y1="74" x2="80" y2="74" stroke="#000000" stroke-width="1.5"/>
-  <line x1="65" y1="90" x2="54" y2="106" stroke="#000000" stroke-width="1.5"/>
-  <line x1="65" y1="90" x2="76" y2="106" stroke="#000000" stroke-width="1.5"/>
-  <text x="65" y="122" class="actor-label">Khách hàng</text>
-  <line x1="65" y1="116" x2="65" y2="952" class="lifeline"/>
-  <rect x="177.5" y="58" width="175" height="44" class="part-box"/>
-  <text x="265" y="75" class="part-text">«giao diện»</text>
-  <text x="265" y="92" class="part-text">:Next.js UI (Cart/Checkout)</text>
-  <line x1="265" y1="102" x2="265" y2="952" class="lifeline"/>
-  <rect x="412.5" y="58" width="185" height="44" class="part-box"/>
-  <text x="505" y="75" class="part-text">«điều khiển»</text>
-  <text x="505" y="92" class="part-text">:NestJS API (Orders/Pay)</text>
-  <line x1="505" y1="102" x2="505" y2="952" class="lifeline"/>
-  <rect x="662.5" y="58" width="165" height="44" class="part-box"/>
-  <text x="745" y="75" class="part-text">«thực thể»</text>
-  <text x="745" y="92" class="part-text">:Database (PostgreSQL)</text>
-  <line x1="745" y1="102" x2="745" y2="952" class="lifeline"/>
-  <rect x="862.5" y="58" width="175" height="44" class="part-box"/>
-  <text x="950" y="75" class="part-text">«hệ thống ngoài»</text>
-  <text x="950" y="92" class="part-text">:Cổng Thanh toán Sandbox</text>
-  <line x1="950" y1="102" x2="950" y2="952" class="lifeline"/>
-  <rect x="35" y="355" width="1005" height="575" class="frag-box"/>
-  <polygon points="35,355 77,355 77,366 69,374 35,374" class="frag-tag"/>
-  <text x="43" y="369" class="frag-type">alt</text>
-  <text x="87" y="369" class="frag-cond">[3a: Hết nguyên liệu hoặc Xung đột version (affectedRows == 0)]</text>
-  <line x1="35" y1="410" x2="1040" y2="410" class="frag-div"/>
-  <text x="49" y="426" class="frag-cond">[Đủ nguyên liệu &amp; Khớp version (Tạo đơn PENDING thành công)]</text>
-  <rect x="225" y="590" width="550" height="44" class="frag-box"/>
-  <polygon points="225,590 267,590 267,601 259,609 225,609" class="frag-tag"/>
-  <text x="233" y="604" class="frag-type">opt</text>
-  <text x="277" y="604" class="frag-cond">[5a: Gửi trùng Idempotency-Key do rớt mạng/bấm đúp]</text>
-  <rect x="225" y="750" width="560" height="165" class="frag-box"/>
-  <polygon points="225,750 267,750 267,761 259,769 225,769" class="frag-tag"/>
-  <text x="233" y="764" class="frag-type">alt</text>
-  <text x="277" y="764" class="frag-cond">[7a: Webhook JSON báo SUCCESS (Chữ ký HMAC hợp lệ)]</text>
-  <line x1="225" y1="842" x2="785" y2="842" class="frag-div"/>
-  <text x="239" y="858" class="frag-cond">[7b: Webhook JSON báo FAILED hoặc Quá hạn TTL 15 phút]</text>
-  <rect x="259.5" y="140" width="11" height="785" class="act-bar"/>
-  <rect x="499.5" y="170" width="11" height="740" class="act-bar"/>
-  <rect x="739.5" y="205" width="11" height="40" class="act-bar"/>
-  <rect x="739.5" y="300" width="11" height="40" class="act-bar"/>
-  <rect x="739.5" y="425" width="11" height="30" class="act-bar"/>
-  <rect x="739.5" y="550" width="11" height="30" class="act-bar"/>
-  <rect x="944.5" y="645" width="11" height="80" class="act-bar"/>
-  <rect x="739.5" y="790" width="11" height="35" class="act-bar"/>
-  <rect x="739.5" y="865" width="11" height="30" class="act-bar"/>
-  <line x1="65" y1="145" x2="259.5" y2="145" class="msg-solid"/>
-  <text x="162.25" y="139" class="msg-label">1. Nhấn Đặt hàng tại Giỏ hàng()</text>
-  <line x1="270.5" y1="175" x2="499.5" y2="175" class="msg-solid"/>
-  <text x="385" y="169" class="msg-label">2. POST /api/v1/orders (Bearer JWT, items[])()</text>
-  <line x1="510.5" y1="210" x2="739.5" y2="210" class="msg-solid"/>
-  <text x="625" y="204" class="msg-label">BEGIN TX &amp; Truy vấn giá gốc Product, RecipeItem()</text>
-  <line x1="739.5" y1="240" x2="510.5" y2="240" class="msg-dashed"/>
-  <text x="625" y="234" class="msg-label">bangGiaVaCongThuc</text>
-  <path d="M 510.5 256 L 546.5 256 L 546.5 276 L 510.5 276" class="msg-solid"/>
-  <text x="554.5" y="270" class="msg-self-label">3. Tính lại 100% tổng tiền tại Business Layer()</text>
-  <line x1="510.5" y1="305" x2="739.5" y2="305" class="msg-solid"/>
-  <text x="625" y="299" class="msg-label">Trừ kho Ingredient (Optimistic Lock: version = curVersion)()</text>
-  <line x1="739.5" y1="335" x2="510.5" y2="335" class="msg-dashed"/>
-  <text x="625" y="329" class="msg-label">affectedRows</text>
-  <line x1="499.5" y1="382" x2="270.5" y2="382" class="msg-dashed"/>
-  <text x="385" y="376" class="msg-label">3a. ROLLBACK &amp; Báo lỗi hết nguyên liệu (HTTP 409 Conflict)</text>
-  <line x1="259.5" y1="400" x2="65" y2="400" class="msg-dashed"/>
-  <text x="162.25" y="394" class="msg-label">Cảnh báo hết hàng &amp; yêu cầu sửa giỏ</text>
-  <line x1="510.5" y1="430" x2="739.5" y2="430" class="msg-solid"/>
-  <text x="625" y="424" class="msg-label">Lưu Order(PENDING, TTL 15p), OrderItem &amp; COMMIT()</text>
-  <line x1="739.5" y1="452" x2="510.5" y2="452" class="msg-dashed"/>
-  <text x="625" y="446" class="msg-label">orderPending</text>
-  <line x1="499.5" y1="474" x2="270.5" y2="474" class="msg-dashed"/>
-  <text x="385" y="468" class="msg-label">4. Trả về đơn PENDING (HTTP 201) &amp; Chuyển sang /checkout()</text>
-  <line x1="65" y1="500" x2="259.5" y2="500" class="msg-solid"/>
-  <text x="162.25" y="494" class="msg-label">5. Chọn phương thức &amp; Xác nhận thanh toán()</text>
-  <line x1="270.5" y1="525" x2="499.5" y2="525" class="msg-solid"/>
-  <text x="385" y="519" class="msg-label">POST /api/v1/payments [Header: Idempotency-Key]()</text>
-  <line x1="510.5" y1="555" x2="739.5" y2="555" class="msg-solid"/>
-  <text x="625" y="549" class="msg-label">Kiểm tra Idempotency-Key &amp; Tạo Payment(PENDING)()</text>
-  <line x1="739.5" y1="578" x2="510.5" y2="578" class="msg-dashed"/>
-  <text x="625" y="572" class="msg-label">paymentRecord</text>
-  <line x1="499.5" y1="622" x2="270.5" y2="622" class="msg-dashed"/>
-  <text x="385" y="616" class="msg-label">5a. Trả về kết quả cũ (HTTP 200 OK - Chống trừ tiền 2 lần)</text>
-  <line x1="510.5" y1="652" x2="944.5" y2="652" class="msg-solid"/>
-  <text x="727.5" y="646" class="msg-label">6. Khởi tạo phiên thanh toán Sandbox (orderId, finalAmount)()</text>
-  <line x1="944.5" y1="680" x2="270.5" y2="680" class="msg-dashed"/>
-  <text x="607.5" y="674" class="msg-label">Hiển thị mã QR / Giao diện Cổng Thanh toán Sandbox</text>
-  <line x1="944.5" y1="720" x2="510.5" y2="720" class="msg-solid"/>
-  <text x="727.5" y="714" class="msg-label">7. POST /api/v1/payments/webhook (JSON message + HMAC)()</text>
-  <line x1="510.5" y1="792" x2="739.5" y2="792" class="msg-solid"/>
-  <text x="625" y="786" class="msg-label">Cập nhật Payment=SUCCESS, Order=PAID &amp; Cộng điểm EARN()</text>
-  <line x1="739.5" y1="818" x2="510.5" y2="818" class="msg-dashed"/>
-  <text x="625" y="812" class="msg-label">Xác nhận COMMIT</text>
-  <line x1="499.5" y1="834" x2="270.5" y2="834" class="msg-dashed"/>
-  <text x="385" y="828" class="msg-label">8a. Báo thanh toán thành công &amp; Mở Biên nhận (/checkout/success)()</text>
-  <line x1="510.5" y1="870" x2="739.5" y2="870" class="msg-solid"/>
-  <text x="625" y="864" class="msg-label">Cập nhật Payment=FAILED, Order=CANCELLED &amp; Hoàn kho Ingredient()</text>
-  <line x1="499.5" y1="898" x2="270.5" y2="898" class="msg-dashed"/>
-  <text x="385" y="892" class="msg-label">8b. Báo giao dịch thất bại / Hủy đơn &amp; Hoàn trả tồn kho()</text>
-  <line x1="259.5" y1="918" x2="65" y2="918" class="msg-dashed"/>
-  <text x="162.25" y="912" class="msg-label">Hiển thị kết quả đơn hàng cho Khách hàng</text>
+  <text x="490" y="26" class="title">SƠ ĐỒ TUẦN TỰ TRỌNG TÂM: ĐẶT ĐƠN HÀNG &amp; THANH TOÁN (8 BƯỚC)</text>
+
+  <!-- 5 Lifelines -->
+  <circle cx="60" cy="52" r="9" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <line x1="60" y1="61" x2="60" y2="83" stroke="#000000" stroke-width="1.5"/>
+  <line x1="47" y1="69" x2="73" y2="69" stroke="#000000" stroke-width="1.5"/>
+  <line x1="60" y1="83" x2="50" y2="98" stroke="#000000" stroke-width="1.5"/>
+  <line x1="60" y1="83" x2="70" y2="98" stroke="#000000" stroke-width="1.5"/>
+  <text x="60" y="114" class="actor-label">Khách hàng</text>
+  <line x1="60" y1="122" x2="60" y2="672" class="lifeline"/>
+
+  <rect x="165" y="54" width="140" height="44" class="part-box"/>
+  <text x="235" y="72" class="part-text">«giao diện»</text>
+  <text x="235" y="88" class="part-text">:Màn hình Web</text>
+  <line x1="235" y1="98" x2="235" y2="672" class="lifeline"/>
+
+  <rect x="390" y="54" width="170" height="44" class="part-box"/>
+  <text x="475" y="72" class="part-text">«điều khiển»</text>
+  <text x="475" y="88" class="part-text">:Hệ thống Xử lý</text>
+  <line x1="475" y1="98" x2="475" y2="672" class="lifeline"/>
+
+  <rect x="640" y="54" width="150" height="44" class="part-box"/>
+  <text x="715" y="72" class="part-text">«thực thể»</text>
+  <text x="715" y="88" class="part-text">:Cơ sở dữ liệu</text>
+  <line x1="715" y1="98" x2="715" y2="672" class="lifeline"/>
+
+  <rect x="820" y="54" width="145" height="44" class="part-box"/>
+  <text x="892.5" y="72" class="part-text">«hệ thống ngoài»</text>
+  <text x="892.5" y="88" class="part-text">:Cổng Thanh toán</text>
+  <line x1="892.5" y1="98" x2="892.5" y2="672" class="lifeline"/>
+
+  <!-- Phần 1: Đặt đơn & Khóa kho -->
+  <rect x="229.5" y="144" width="11" height="190" class="act-bar"/>
+  <rect x="469.5" y="162" width="11" height="170" class="act-bar"/>
+  <rect x="709.5" y="180" width="11" height="16" class="act-bar"/>
+  <rect x="709.5" y="230" width="11" height="16" class="act-bar"/>
+
+  <line x1="60" y1="148" x2="229.5" y2="148" class="msg-solid"/>
+  <text x="145" y="142" class="msg-label">1. Bấm đặt hàng</text>
+  <line x1="240.5" y1="166" x2="469.5" y2="166" class="msg-solid"/>
+  <text x="355" y="160" class="msg-label">Gửi đơn (kèm đăng nhập)</text>
+  <line x1="480.5" y1="184" x2="709.5" y2="184" class="msg-solid"/>
+  <text x="595" y="178" class="msg-label">2. Lấy giá gốc &amp; định mức</text>
+
+  <path d="M 480.5 202 L 516 202 L 516 218 L 480.5 218" class="msg-solid"/>
+  <text x="523" y="213" class="msg-self-label">3. Tính lại tổng tiền ở máy chủ</text>
+
+  <line x1="480.5" y1="236" x2="709.5" y2="236" class="msg-solid"/>
+  <text x="595" y="230" class="msg-label">Khóa &amp; trừ kho (theo phiên bản)</text>
+
+  <rect x="32" y="248" width="768" height="86" class="frag-box"/>
+  <polygon points="32,248 74,248 74,258 66,266 32,266" class="frag-tag"/>
+  <text x="40" y="261" class="frag-type">alt</text>
+  <text x="84" y="261" class="frag-cond">[Hết nguyên liệu / đụng độ]</text>
+  <line x1="469.5" y1="276" x2="240.5" y2="276" class="msg-dashed"/>
+  <text x="355" y="270" class="msg-label">Hủy giao dịch (Lỗi 409)</text>
+  <line x1="229.5" y1="290" x2="60" y2="290" class="msg-dashed"/>
+  <text x="145" y="284" class="msg-label">Báo hết hàng</text>
+
+  <line x1="32" y1="298" x2="800" y2="298" class="frag-div"/>
+  <text x="44" y="310" class="frag-cond">[Đủ nguyên liệu]</text>
+  <rect x="709.5" y="312" width="11" height="14" class="act-bar"/>
+  <line x1="480.5" y1="316" x2="709.5" y2="316" class="msg-solid"/>
+  <text x="595" y="310" class="msg-label">4. Lưu đơn chờ (15 phút)</text>
+  <line x1="469.5" y1="328" x2="240.5" y2="328" class="msg-dashed"/>
+  <text x="355" y="322" class="msg-label">Sang trang thanh toán</text>
+
+  <!-- Phần 2: Thanh toán 2 bước -->
+  <rect x="229.5" y="354" width="11" height="306" class="act-bar"/>
+  <rect x="469.5" y="372" width="11" height="284" class="act-bar"/>
+  <rect x="709.5" y="390" width="11" height="14" class="act-bar"/>
+
+  <line x1="60" y1="358" x2="229.5" y2="358" class="msg-solid"/>
+  <text x="145" y="352" class="msg-label">5. Chọn cổng &amp; bấm thanh toán</text>
+  <line x1="240.5" y1="376" x2="469.5" y2="376" class="msg-solid"/>
+  <text x="355" y="370" class="msg-label">Thanh toán (kèm mã chống trùng)</text>
+  <line x1="480.5" y1="394" x2="709.5" y2="394" class="msg-solid"/>
+  <text x="595" y="388" class="msg-label">6. Kiểm tra mã chống trùng</text>
+
+  <rect x="32" y="408" width="936" height="260" class="frag-box"/>
+  <polygon points="32,408 74,408 74,418 66,426 32,426" class="frag-tag"/>
+  <text x="40" y="421" class="frag-type">alt</text>
+  <text x="84" y="421" class="frag-cond">[Mã đã có (Bấm đúp / Lag)]</text>
+  <line x1="469.5" y1="436" x2="240.5" y2="436" class="msg-dashed"/>
+  <text x="355" y="430" class="msg-label">Trả kết quả cũ (Không trừ 2 lần)</text>
+  <line x1="229.5" y1="450" x2="60" y2="450" class="msg-dashed"/>
+  <text x="145" y="444" class="msg-label">Hiện trạng thái hiện tại</text>
+
+  <line x1="32" y1="458" x2="968" y2="458" class="frag-div"/>
+  <text x="44" y="470" class="frag-cond">[Giao dịch mới]</text>
+  <rect x="887" y="476" width="11" height="58" class="act-bar"/>
+  <line x1="480.5" y1="480" x2="887" y2="480" class="msg-solid"/>
+  <text x="684" y="474" class="msg-label">7. Lưu chờ &amp; Tạo mã QR thanh toán</text>
+  <line x1="887" y1="498" x2="240.5" y2="498" class="msg-dashed"/>
+  <text x="564" y="492" class="msg-label">Hiện giao diện / Mã QR</text>
+  <line x1="60" y1="514" x2="887" y2="514" class="msg-solid"/>
+  <text x="474" y="508" class="msg-label">Quét QR xác nhận</text>
+  <line x1="887" y1="530" x2="480.5" y2="530" class="msg-solid"/>
+  <text x="684" y="524" class="msg-label">8. Gửi kết quả (kèm chữ ký bảo mật)</text>
+
+  <rect x="42" y="540" width="916" height="122" class="frag-box"/>
+  <polygon points="42,540 84,540 84,550 76,558 42,558" class="frag-tag"/>
+  <text x="50" y="553" class="frag-type">alt</text>
+  <text x="94" y="553" class="frag-cond">[Thành công &amp; đúng chữ ký]</text>
+  <rect x="709.5" y="564" width="11" height="14" class="act-bar"/>
+  <line x1="480.5" y1="568" x2="709.5" y2="568" class="msg-solid"/>
+  <text x="595" y="562" class="msg-label">Đổi Đã thanh toán &amp; Cộng điểm</text>
+  <line x1="469.5" y1="584" x2="240.5" y2="584" class="msg-dashed"/>
+  <text x="355" y="578" class="msg-label">Thành công → Mở biên nhận</text>
+  <line x1="229.5" y1="598" x2="60" y2="598" class="msg-dashed"/>
+  <text x="145" y="592" class="msg-label">Hiện biên nhận đơn hàng</text>
+
+  <line x1="42" y1="606" x2="958" y2="606" class="frag-div"/>
+  <text x="54" y="618" class="frag-cond">[Lỗi hoặc quá hạn 15 phút]</text>
+  <rect x="709.5" y="622" width="11" height="14" class="act-bar"/>
+  <line x1="480.5" y1="626" x2="709.5" y2="626" class="msg-solid"/>
+  <text x="595" y="620" class="msg-label">Hủy đơn &amp; Hoàn trả tồn kho</text>
+  <line x1="469.5" y1="642" x2="240.5" y2="642" class="msg-dashed"/>
+  <text x="355" y="636" class="msg-label">Báo thất bại / đã hủy</text>
+  <line x1="229.5" y1="656" x2="60" y2="656" class="msg-dashed"/>
+  <text x="145" y="650" class="msg-label">Cho chọn phương thức khác</text>
 </svg>
