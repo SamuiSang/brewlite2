@@ -6,7 +6,7 @@ node_modules/
 # Next.js & Build outputs
 .next/
 out/
-postman/
+/postman/
 .postman/
 dist/
 build/

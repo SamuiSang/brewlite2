@@ -12,10 +12,14 @@ RUN npm install
 # Stage 2: Build Next.js App Router bundle
 FROM node:20-alpine AS builder
 WORKDIR /app
+ARG NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
+ARG NEXT_PUBLIC_APP_NAME=BrewLite
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_APP_NAME=$NEXT_PUBLIC_APP_NAME
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+RUN npm run build && rm -rf .next/cache && npm prune --omit=dev
 
 # Stage 3: Minimal Non-root Production Runtime Image
 FROM node:20-alpine AS runner
