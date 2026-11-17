@@ -10,6 +10,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   ValidationPipe,
 } from '@nestjs/common';
 import {
@@ -40,12 +41,21 @@ export class PromotionsController {
   validate(
     @Body(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }))
     body: ValidatePromotionDto,
+    @Req() req?: any,
   ) {
     const amount = body.cartSubtotal ?? body.subtotal;
     if (amount === undefined || amount === null) {
       throw new BadRequestException('Giá trị đơn hàng (cartSubtotal hoặc subtotal) không hợp lệ');
     }
-    return this.promotions.validate(body.code, amount, body.deliveryMethod);
+    let userId = body.userId;
+    if (!userId && req?.headers?.authorization) {
+      try {
+        const token = req.headers.authorization.replace(/^Bearer\s+/i, '');
+        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+        userId = payload.sub || payload.id;
+      } catch {}
+    }
+    return this.promotions.validate(body.code, amount, body.deliveryMethod, userId);
   }
 
   /**

@@ -37,6 +37,10 @@ export class ValidatePromotionDto {
   @IsOptional()
   @IsIn(['PICKUP', 'DELIVERY'])
   deliveryMethod?: string;
+
+  @IsOptional()
+  @IsString()
+  userId?: string;
 }
 
 export class CreatePromotionDto {

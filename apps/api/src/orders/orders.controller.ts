@@ -37,12 +37,21 @@ export class OrdersController {
   async validateVoucher(
     @Body(new ValidationPipe({ transform: true, whitelist: true }))
     body: ValidatePromotionDto,
+    @Req() req?: any,
   ) {
     const amount = body.cartSubtotal ?? body.subtotal;
     if (amount === undefined || amount === null) {
       throw new BadRequestException('Giá trị đơn hàng (cartSubtotal hoặc subtotal) không hợp lệ');
     }
-    return await this.promotionsService.validate(body.code, amount, body.deliveryMethod);
+    let userId = body.userId;
+    if (!userId && req?.headers?.authorization) {
+      try {
+        const token = req.headers.authorization.replace(/^Bearer\s+/i, '');
+        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+        userId = payload.sub || payload.id;
+      } catch {}
+    }
+    return await this.promotionsService.validate(body.code, amount, body.deliveryMethod, userId);
   }
 
   private extractRequester(req: any) {
@@ -61,7 +70,17 @@ export class OrdersController {
   async createOrder(
     @Body(new ValidationPipe({ transform: true, whitelist: true }))
     dto: CreateOrderDto,
+    @Req() req?: any,
   ): Promise<OrderResponseDto> {
+    if (!dto.userId && req?.headers?.authorization) {
+      try {
+        const token = req.headers.authorization.replace(/^Bearer\s+/i, '');
+        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+        if (payload?.sub || payload?.id) {
+          dto.userId = payload.sub || payload.id;
+        }
+      } catch {}
+    }
     return await this.ordersService.createOrder(dto);
   }
 

@@ -25,8 +25,15 @@ export async function loadPromotions(): Promise<Promotion[]> {
 }
 
 export async function validatePromotion(code: string, subtotal: number, deliveryMethod?: string) {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (typeof window !== 'undefined') {
+    try {
+      const token = localStorage.getItem('brewlite_access_token');
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+    } catch {}
+  }
   const response = await fetch(`${api}/validate`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    method: 'POST', headers,
     body: JSON.stringify({ code: code.trim().toUpperCase(), cartSubtotal: subtotal, ...(deliveryMethod ? { deliveryMethod } : {}) }),
   });
   const result = await response.json();
@@ -37,12 +44,13 @@ export async function validatePromotion(code: string, subtotal: number, delivery
   return { code: result.code as string, discountAmount: result.discountAmount as number };
 }
 
-export function PromotionCard({ promotion: p, subtotal, busy, onApply, selected = false, onRemove, deliveryMethod = 'PICKUP' }: {
+export function PromotionCard({ promotion: p, subtotal, busy, onApply, selected = false, onRemove, deliveryMethod = 'PICKUP', canUseFirstOrder }: {
   promotion: Promotion; subtotal: number; busy: boolean; onApply: (code: string) => void;
-  selected?: boolean; onRemove?: () => void; deliveryMethod?: string;
+  selected?: boolean; onRemove?: () => void; deliveryMethod?: string; canUseFirstOrder?: boolean;
 }) {
   const missing = Math.max(0, p.minOrderValue - subtotal);
-  const restriction = p.firstOrderOnly ? 'Chỉ đơn đầu tiên.'
+  const isFirstOrderIneligible = p.firstOrderOnly && canUseFirstOrder === false;
+  const restriction = p.firstOrderOnly && canUseFirstOrder === undefined ? 'Chỉ đơn đầu tiên.'
     : p.deliveryOnly && deliveryMethod !== 'DELIVERY' ? 'Chỉ áp dụng giao hàng.' : '';
   const unavailable = missing > 0 || subtotal <= 0 || !!restriction || p.remainingUses === 0 || (p.expiresAt !== null && Date.parse(p.expiresAt) < Date.now());
   return <article className="rounded-xl border border-[#DDCCAE] bg-[#FFFCF5] p-3">
@@ -52,9 +60,15 @@ export function PromotionCard({ promotion: p, subtotal, busy, onApply, selected 
     <p className="mt-1 text-xs text-[#786B5A]">Đơn tối thiểu {money(p.minOrderValue)} · HSD {p.expiresAt === null ? 'Không giới hạn' : new Date(p.expiresAt).toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}</p>
     {missing > 0 && <p className="mt-2 text-xs">Mua thêm {money(missing)} để sử dụng mã</p>}
     {p.remainingUses != null && <p className="mt-1 text-xs">Còn {p.remainingUses} lượt</p>}
-    {restriction && <p className="mt-2 text-xs">{restriction}</p>}
-    <button type="button" disabled={busy || (!selected && unavailable)} onClick={() => selected ? onRemove?.() : onApply(p.code)}
-      aria-pressed={selected} aria-label={`${selected ? 'Bỏ áp dụng' : 'Áp dụng'} mã ${p.code}`} className="mt-2 min-h-11 rounded-lg bg-[#7D3F32] px-4 text-sm font-semibold text-white disabled:opacity-50">{selected ? 'Bỏ áp dụng' : 'Áp dụng'}</button>
+    {isFirstOrderIneligible ? (
+      <p className="mt-2 text-xs text-[#B42318] font-medium">Chỉ dành cho đơn đầu tiên (bạn đã hoàn thành đơn trước đó).</p>
+    ) : restriction ? (
+      <p className="mt-2 text-xs">{restriction}</p>
+    ) : null}
+    {!isFirstOrderIneligible && (
+      <button type="button" disabled={busy || (!selected && unavailable)} onClick={() => selected ? onRemove?.() : onApply(p.code)}
+        aria-pressed={selected} aria-label={`${selected ? 'Bỏ áp dụng' : 'Áp dụng'} mã ${p.code}`} className="mt-2 min-h-11 rounded-lg bg-[#7D3F32] px-4 text-sm font-semibold text-white disabled:opacity-50">{selected ? 'Bỏ áp dụng' : 'Áp dụng'}</button>
+    )}
   </article>;
 }
 
@@ -69,8 +83,36 @@ export default function VoucherInput({ deliveryMethod = 'PICKUP' }: { deliveryMe
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState('');
   const [attempt, setAttempt] = useState(0);
+  const [canUseFirstOrder, setCanUseFirstOrder] = useState<boolean>(true);
   const { items, appliedVoucher, setAppliedVoucher, getSubtotal } = useCartStore();
   const subtotal = getSubtotal();
+
+  useEffect(() => {
+    async function checkOrders() {
+      try {
+        if (typeof window === 'undefined') return;
+        const token = localStorage.getItem('brewlite_access_token');
+        if (!token) {
+          setCanUseFirstOrder(true);
+          return;
+        }
+        const res = await fetch(`${apiBase}/orders/my-orders`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const orders = await res.json();
+          if (Array.isArray(orders)) {
+            const placed = orders.filter((o: any) => o.status !== 'CANCELLED');
+            setCanUseFirstOrder(placed.length === 0);
+          }
+        }
+      } catch {
+        setCanUseFirstOrder(true);
+      }
+    }
+    checkOrders();
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     setLoading(true); setListError('');
@@ -81,6 +123,11 @@ export default function VoucherInput({ deliveryMethod = 'PICKUP' }: { deliveryMe
   }, [attempt]);
   const apply = async (selectedCode: string) => {
     if (pending.current || !items.length || !selectedCode.trim()) return;
+    const promo = offers.find(o => o.code.toUpperCase() === selectedCode.trim().toUpperCase());
+    if (promo?.firstOrderOnly && !canUseFirstOrder) {
+      setError('Mã ưu đãi này chỉ áp dụng cho đơn hàng đầu tiên (bạn đã có đơn trước đó).');
+      return;
+    }
     pending.current = true; setBusy(true); setError('');
     const snapshot = items;
     let changed = false;
@@ -97,7 +144,7 @@ export default function VoucherInput({ deliveryMethod = 'PICKUP' }: { deliveryMe
   return <div className="space-y-3">
     <h3 className="font-semibold">Ưu đãi khả dụng</h3>
     {loading ? <p role="status" className="text-sm">Đang tải ưu đãi…</p> : listError ? <div role="alert" className="text-sm"><p>{listError}</p><button type="button" onClick={() => setAttempt(n => n + 1)} className="min-h-11 underline">Thử lại</button></div> : offers.length ?
-      <div className="grid gap-3">{offers.map(p => <PromotionCard key={p.promoId} promotion={p} subtotal={subtotal} busy={busy} onApply={apply} deliveryMethod={deliveryMethod} selected={appliedVoucher?.code === p.code} onRemove={() => setAppliedVoucher(null)} />)}</div> : <p className="text-sm">Chưa có ưu đãi khả dụng.</p>}
+      <div className="grid gap-3">{offers.map(p => <PromotionCard key={p.promoId} promotion={p} subtotal={subtotal} busy={busy} onApply={apply} deliveryMethod={deliveryMethod} selected={appliedVoucher?.code === p.code} onRemove={() => setAppliedVoucher(null)} canUseFirstOrder={canUseFirstOrder} />)}</div> : <p className="text-sm">Chưa có ưu đãi khả dụng.</p>}
     <form onSubmit={event => { event.preventDefault(); void apply(code); }} className="space-y-2">
       <label htmlFor="voucher-code" className="block text-sm font-semibold">Nhập mã khác</label>
       <div className="flex gap-2">
