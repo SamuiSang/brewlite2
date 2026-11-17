@@ -57,6 +57,9 @@ describe('PaymentsService & VNPay Sandbox Gateway (Quang - Chức năng 5)', () 
             ingredient: {
               update: jest.fn(),
             },
+            promotion: {
+              updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+            },
             $transaction: jest.fn().mockImplementation(async (callback) => {
               return await callback(prisma);
             }),
@@ -294,6 +297,7 @@ describe('PaymentsService & VNPay Sandbox Gateway (Quang - Chức năng 5)', () 
 
       jest.spyOn(prisma.order, 'findFirst').mockResolvedValue({
         ...mockOrder,
+        promotionId: 'promo-uuid-1',
         items: [{ productId: 'prod-001', quantity: 2 }],
       } as any);
 
@@ -319,6 +323,11 @@ describe('PaymentsService & VNPay Sandbox Gateway (Quang - Chức năng 5)', () 
           stockQuantity: { increment: 40 },
           version: { increment: 1 },
         },
+      });
+      // Hoàn trả lượt sử dụng voucher
+      expect((prisma as any).promotion.updateMany).toHaveBeenCalledWith({
+        where: { id: 'promo-uuid-1', usedCount: { gt: 0 } },
+        data: { usedCount: { decrement: 1 } },
       });
     });
 

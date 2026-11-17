@@ -5,7 +5,11 @@ skinparam defaultFontName SansSerif
 skinparam backgroundColor white
 skinparam sequenceParticipantBackgroundColor white
 skinparam actorBackgroundColor white
-skinparam ParticipantPadding 20
+<style>
+participant {
+  Padding 20
+}
+</style>
 hide footbox
 title SƠ ĐỒ TUẦN TỰ (TASK 2.2): UC-02 - GIỎ HÀNG & KHUYẾN MÃI
 actor "Khách hàng" as C
@@ -15,51 +19,81 @@ participant "«điều khiển»\n:Khuyến mãi" as Promo
 participant "«thực thể»\n:Cơ sở dữ liệu" as DB
 
 C -> UI: 1. Mở giỏ hàng
+activate C
+activate UI
 UI -> Cart: Lấy giỏ hàng
+activate Cart
 Cart --> UI: Danh sách món & tổng tiền
+deactivate Cart
 UI --> C: Hiển thị giỏ hàng
+deactivate UI
 
 opt Thêm / sửa / xóa món
   C -> UI: 2. Chọn món, Size/Topping, số lượng\nhoặc xác nhận xóa
+  activate UI
   UI -> Cart: Kiểm tra & cập nhật giỏ
+  activate Cart
   alt Tùy chọn, số lượng hợp lệ & đủ tồn kho
     Cart --> UI: Giỏ đã cập nhật
   else Không hợp lệ / hủy xóa
     Cart --> UI: Báo lý do / giữ nguyên giỏ
   end
+  deactivate Cart
+  deactivate UI
 end
 
 opt Áp / thay mã Promotion
   C -> UI: 3. Nhập mã giảm giá
+  activate UI
   UI -> Cart: Lấy tạm tính
+  activate Cart
   Cart --> UI: Tạm tính giỏ hàng
+  deactivate Cart
   UI -> Promo: Kiểm tra mã với giỏ hiện tại
+  activate Promo
   Promo -> DB: Tra cứu Promotion
+  activate DB
   DB --> Promo: Kết quả tra cứu
+  deactivate DB
   alt Giỏ & mã đủ điều kiện áp dụng
     Promo --> UI: Tiền giảm dự kiến
-    UI -> Cart: Áp / thay mã nếu giỏ chưa đổi
   else Không hợp lệ / chưa kiểm tra được
     Promo --> UI: Báo lý do / yêu cầu thử lại
   end
+  deactivate Promo
+  deactivate UI
 end
 
 opt Hủy mã
   C -> UI: 4. Chọn hủy mã
+  activate UI
   UI -> Cart: Gỡ mã giảm giá
+  activate Cart
+  deactivate Cart
+  deactivate UI
 end
+
+activate UI
 UI -> Cart: 5. Tính lại tổng; gỡ mã nếu không còn đủ điều kiện
+activate Cart
 Cart --> UI: Giỏ hàng & tổng tiền dự kiến
+deactivate Cart
 UI --> C: Hiển thị kết quả
+deactivate UI
 
 opt Tiếp tục đặt hàng
   C -> UI: 6. Chọn Đặt hàng
+  activate UI
   UI -> Cart: Kiểm tra lại giỏ & trạng thái món
+  activate Cart
   Cart --> UI: Kết quả kiểm tra
+  deactivate Cart
   alt Giỏ có món & các món đã kiểm tra còn bán
     UI --> C: Chuyển sang đặt hàng (UC-04)
   else Chưa đủ điều kiện
     UI --> C: Yêu cầu kiểm tra lại giỏ
   end
+  deactivate UI
+  deactivate C
 end
 @enduml

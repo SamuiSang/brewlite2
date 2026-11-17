@@ -74,9 +74,9 @@ class Product {
   + checkAvailability(quantity: int): boolean
 }
 
-Cart "1" *-down- "0..*" CartItem : chứa
-Cart "1" *-right- "0..1" AppliedPromotion : áp dụng
-CartItem "0..*" -down-> "0..*" Topping : chọn thêm
-CartItem ..right.> Product : tham chiếu
-AppliedPromotion ..down.> Promotion : lấy thông tin từ
+Cart "1" *-down- "0..*" CartItem
+Cart "1" *-right- "0..1" AppliedPromotion
+CartItem "0..*" -down-> "0..*" Topping
+CartItem "0..*" -right-> "1" Product
+AppliedPromotion "0..*" --down-> "1" Promotion
 @enduml

@@ -1,11 +1,83 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { OrderStatus, Prisma, Promotion } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePromotionDto, QueryPromotionDto, UpdatePromotionDto } from './dto/promotions.dto';
 
 @Injectable()
-export class PromotionsService {
+export class PromotionsService implements OnModuleInit {
   constructor(private readonly prisma: PrismaService) {}
+
+  async onModuleInit() {
+    await this.cleanupOverdueOrders();
+  }
+
+  /**
+   * Tự động quét và hoàn lượt voucher cho các đơn hàng PENDING đã quá hạn thanh toán (TTL 15 phút)
+   */
+  async cleanupOverdueOrders() {
+    if (!this.prisma.order?.findMany || !this.prisma.$transaction) return;
+    try {
+      const now = new Date();
+      const overdueOrders = await this.prisma.order.findMany({
+        where: {
+          status: OrderStatus.PENDING,
+          expiresAt: { lt: now },
+        },
+        include: { items: true },
+      });
+
+      for (const overdue of overdueOrders) {
+        await this.prisma.$transaction(async (tx) => {
+          const updated = await tx.order.updateMany({
+            where: { id: overdue.id, status: OrderStatus.PENDING },
+            data: { status: OrderStatus.CANCELLED },
+          });
+          if (updated.count === 0) return;
+
+          // Hoàn lượt sử dụng voucher
+          if (overdue.promotionId && (tx as any).promotion?.updateMany) {
+            await (tx as any).promotion.updateMany({
+              where: { id: overdue.promotionId, usedCount: { gt: 0 } },
+              data: { usedCount: { decrement: 1 } },
+            });
+          }
+
+          // Hoàn kho nguyên liệu nếu có
+          for (const item of overdue.items || []) {
+            const recipes = await tx.recipeItem.findMany({
+              where: { productId: item.productId },
+            });
+            for (const recipe of recipes) {
+              const refundQty = Number(recipe.quantityRequired) * item.quantity;
+              if (refundQty > 0) {
+                await tx.ingredient.update({
+                  where: { id: recipe.ingredientId },
+                  data: {
+                    stockQuantity: { increment: refundQty },
+                    version: { increment: 1 },
+                  },
+                });
+              }
+            }
+          }
+
+          if ((tx as any).orderStatusLog?.create) {
+            await (tx as any).orderStatusLog.create({
+              data: {
+                orderId: overdue.id,
+                previousStatus: OrderStatus.PENDING,
+                newStatus: OrderStatus.CANCELLED,
+                changedBy: 'SYSTEM_TTL',
+                reason: '[PAYMENT_TIMEOUT_TTL] Quá hạn thời gian thanh toán. Tự động giải phóng voucher và hoàn kho.',
+              },
+            });
+          }
+        });
+      }
+    } catch {
+      // Bỏ qua lỗi nếu database chưa sẵn sàng
+    }
+  }
 
   private formatPromotion(p: Promotion) {
     return {
@@ -151,6 +223,7 @@ export class PromotionsService {
   }
 
   async validate(rawCode: string, cartSubtotal: number, deliveryMethod = 'PICKUP', userId?: string) {
+    await this.cleanupOverdueOrders();
     if (
       typeof rawCode !== 'string' ||
       !rawCode.trim() ||
@@ -217,6 +290,7 @@ export class PromotionsService {
   }
 
   async active() {
+    await this.cleanupOverdueOrders();
     const now = new Date();
     const promotions = await this.prisma.promotion.findMany({
       where: {

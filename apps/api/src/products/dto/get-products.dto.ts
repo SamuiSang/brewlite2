@@ -10,6 +10,14 @@ export { ProductCategory };
  */
 export class GetProductsDto {
   @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      const v = value.trim().toUpperCase();
+      if (v === 'ESPRESSO' || v === 'COLD_BREW') return ProductCategory.COFFEE;
+      return v;
+    }
+    return value;
+  })
   @IsEnum(ProductCategory, {
     message: 'Danh mục phải là một trong các giá trị: COFFEE, TEA, FREEZE, PASTRY',
   })
