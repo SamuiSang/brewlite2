@@ -34,6 +34,7 @@ import {
   Trash2,
   User as UserIcon,
   CreditCard,
+  Mail,
 } from 'lucide-react';
 
 interface UserProfile {
@@ -154,10 +155,7 @@ function ProfileContent() {
     : 'BL-MEMBER';
 
   const formatPhone = (phone?: string | null) => {
-    if (!phone) return profile?.email || 'Chưa cập nhật SĐT';
-    if (phone.length >= 10) {
-      return `${phone.slice(0, 3)} ••• ••${phone.slice(-2)}`;
-    }
+    if (!phone) return 'Chưa cập nhật SĐT';
     return phone;
   };
 
@@ -326,8 +324,134 @@ function ProfileContent() {
             </div>
           </div>
 
-          {/* CỘT PHẢI: DANH MỤC TIỆN ÍCH TÀI KHOẢN (Col 6-12 Desktop) */}
-          <div className="md:col-span-7">
+          {/* CỘT PHẢI: CHI TIẾT HỒ SƠ & SỔ ĐỊA CHỈ & TIỆN ÍCH (Col 6-12 Desktop) */}
+          <div className="md:col-span-7 space-y-6">
+            {/* 1. KHỐI THÔNG TIN HỒ SƠ CHI TIẾT */}
+            <div className="bg-[#FFFFFF] rounded-3xl border border-[#E8D7B8] p-6 shadow-sm">
+              <div className="flex items-center justify-between pb-4 border-b border-[#F4EFEA]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#F3E8D4]/60 text-[#7D3F32] flex items-center justify-center">
+                    <UserIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-base text-[#3F3027]">Thông tin cá nhân</h3>
+                    <p className="text-xs text-[#786B5A]">Chi tiết tài khoản và định danh thành viên</p>
+                  </div>
+                </div>
+                <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Đã xác thực</span>
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5 text-xs">
+                <div className="p-3.5 rounded-2xl bg-[#FDFBF7] border border-[#F0E6D2]">
+                  <span className="text-[#8C7A6B] block text-[11px] font-medium">Họ và tên</span>
+                  <span className="text-sm font-semibold text-[#3F3027] mt-0.5 block">
+                    {profile?.fullName || 'Khách hàng BrewLite'}
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-[#FDFBF7] border border-[#F0E6D2]">
+                  <span className="text-[#8C7A6B] block text-[11px] font-medium">Số điện thoại (Chi tiết)</span>
+                  <span className="text-sm font-semibold font-mono text-[#3F3027] mt-0.5 block">
+                    {profile?.phone || 'Chưa cập nhật SĐT'}
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-[#FDFBF7] border border-[#F0E6D2]">
+                  <span className="text-[#8C7A6B] block text-[11px] font-medium">Địa chỉ Email</span>
+                  <span className="text-sm font-semibold text-[#3F3027] mt-0.5 block truncate">
+                    {profile?.email || 'Chưa cập nhật'}
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-[#FDFBF7] border border-[#F0E6D2]">
+                  <span className="text-[#8C7A6B] block text-[11px] font-medium">Hạng thành viên &amp; Mã thẻ</span>
+                  <span className="text-sm font-semibold text-[#7D3F32] mt-0.5 block">
+                    {tierSummary.tierName} ({memberCode})
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. KHỐI SỔ ĐỊA CHỈ GIAO HÀNG TRỰC TIẾP */}
+            <div id="address-book" className="bg-[#FFFFFF] rounded-3xl border border-[#E8D7B8] p-6 shadow-sm">
+              <div className="flex items-center justify-between pb-4 border-b border-[#F4EFEA]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#F3E8D4]/60 text-[#7D3F32] flex items-center justify-center">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-base text-[#3F3027]">Sổ địa chỉ giao hàng</h3>
+                    <p className="text-xs text-[#786B5A]">Quản lý danh sách địa chỉ nhận cà phê của bạn</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAddressesModal(true)}
+                  className="px-3 py-1.5 rounded-xl bg-[#7D3F32] hover:bg-[#693327] text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Thêm địa chỉ</span>
+                </button>
+              </div>
+
+              {/* Danh sách địa chỉ hiển thị trực tiếp trên trang */}
+              <div className="mt-4 space-y-3">
+                {addresses.length === 0 ? (
+                  <div className="p-4 rounded-2xl bg-[#FDFBF7] border border-dashed border-[#DDCCAE] text-center text-xs text-[#786B5A]">
+                    Tài khoản này chưa lưu địa chỉ nhận hàng nào. Bấm &ldquo;Thêm địa chỉ&rdquo; để thiết lập địa chỉ mặc định.
+                  </div>
+                ) : (
+                  addresses.map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-[#FDFBF7] p-4 rounded-2xl border border-[#F0E6D2] relative flex items-start gap-3 hover:border-[#D9C19B] transition"
+                    >
+                      <MapPin className="w-4 h-4 text-[#7D3F32] shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold text-xs text-[#3F3027]">{item.label}</span>
+                            {item.isDefault && (
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                                Mặc định
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {!item.isDefault && (
+                              <button
+                                type="button"
+                                onClick={() => handleSetDefaultAddress(item.id)}
+                                className="text-[11px] font-semibold text-[#7D3F32] hover:underline cursor-pointer"
+                              >
+                                Đặt mặc định
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteAddress(item.id)}
+                              aria-label="Xóa địa chỉ"
+                              className="text-[#786B5A] hover:text-[#B42318] cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                        <p className="text-xs font-medium text-[#786B5A] mt-1">
+                          {item.receiver} • {item.phone}
+                        </p>
+                        <p className="text-xs text-[#3F3027] mt-0.5">{item.address}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* 3. DANH MỤC TIỆN ÍCH TÀI KHOẢN (Lịch sử đơn hàng, Ưu đãi, Cài đặt, Đăng xuất) */}
             <div className="bg-[#FFFFFF] rounded-3xl border border-[#E8D7B8] shadow-sm divide-y divide-[#F4EFEA] overflow-hidden">
               {/* 1. Lịch sử đơn hàng */}
               <Link
@@ -373,27 +497,7 @@ function ProfileContent() {
                 <ChevronRight className="w-5 h-5 text-[#A08F87] group-hover:translate-x-0.5 transition" />
               </button>
 
-              {/* 3. Địa chỉ đã lưu */}
-              <button
-                type="button"
-                onClick={() => setShowAddressesModal(true)}
-                className="w-full text-left flex items-center justify-between p-4.5 sm:p-5 hover:bg-[#FBF8F5] transition-colors group cursor-pointer"
-              >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-[#F3E8D4]/60 text-[#7D3F32] flex items-center justify-center group-hover:bg-[#E8D7B8]/40 transition">
-                    <MapPin className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-[#3F3027] group-hover:text-[#7D3F32] transition">
-                      Địa chỉ đã lưu
-                    </p>
-                    <p className="text-xs text-[#786B5A]">Quản lý địa chỉ nhận cà phê thường dùng</p>
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-[#A08F87] group-hover:translate-x-0.5 transition" />
-              </button>
-
-              {/* 4. Cài đặt tài khoản */}
+              {/* 3. Cài đặt tài khoản */}
               <button
                 type="button"
                 onClick={() => setShowSettingsModal(true)}
@@ -413,7 +517,7 @@ function ProfileContent() {
                 <ChevronRight className="w-5 h-5 text-[#A08F87] group-hover:translate-x-0.5 transition" />
               </button>
 
-              {/* 5. Đăng xuất (Màu đỏ chuẩn Figma) */}
+              {/* 4. Đăng xuất */}
               <button
                 type="button"
                 onClick={() => setShowLogoutConfirmModal(true)}
