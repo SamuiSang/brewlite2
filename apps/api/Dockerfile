@@ -12,6 +12,7 @@ RUN npm install
 # Stage 2: Generate Prisma Client & Build NestJS TypeScript
 FROM node:20-alpine AS builder
 WORKDIR /app
+RUN apk add --no-cache openssl
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate && npm run build
@@ -20,6 +21,7 @@ RUN npx prisma generate && npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+RUN apk add --no-cache openssl
 USER node
 
 COPY --from=builder --chown=node:node /app/package*.json ./

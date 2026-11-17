@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { ApiClient } from '@/lib/api-client';
 import { useCartStore } from '@/lib/store';
-import { ArrowRight, Home, Receipt, RefreshCw } from 'lucide-react';
+import { ArrowRight, Home, Loader2, Receipt, RefreshCw } from 'lucide-react';
 
 function VnpayReturnContent() {
   const searchParams = useSearchParams();
   const clearCart = useCartStore((state) => state.clearCart);
+  const syncedRef = useRef(false);
 
   const [mounted, setMounted] = useState(false);
 
@@ -18,20 +20,65 @@ function VnpayReturnContent() {
   const rawAmount = searchParams.get('vnp_Amount') || '0';
   const bankCode = searchParams.get('vnp_BankCode') || '';
   const payDate = searchParams.get('vnp_PayDate') || '';
+  const secureHash = searchParams.get('vnp_SecureHash') || '';
 
   const amount = Number(rawAmount) / 100;
-  const isSuccess = responseCode === '00';
+  const hasVnpayParams = Boolean(orderCode && secureHash);
+  const [isSyncing, setIsSyncing] = useState<boolean>(hasVnpayParams);
+  const [verifiedSuccess, setVerifiedSuccess] = useState<boolean>(
+    !hasVnpayParams && responseCode === '00',
+  );
+  const [syncNotice, setSyncNotice] = useState<string>('');
+  const isSuccess = hasVnpayParams ? verifiedSuccess : responseCode === '00';
 
   useEffect(() => {
     setMounted(true);
-    if (isSuccess) {
-      // Xóa sạch giỏ hàng khi thanh toán thành công
-      clearCart();
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('brewlite_cart');
+
+    if (!hasVnpayParams) {
+      if (responseCode === '00') {
+        clearCart();
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('brewlite_cart');
+        }
       }
+      return;
     }
-  }, [isSuccess, clearCart]);
+
+    if (syncedRef.current) return;
+    syncedRef.current = true;
+
+    const queryString = searchParams.toString();
+    setIsSyncing(true);
+    setSyncNotice('');
+
+    ApiClient.get<{
+      isValidSignature?: boolean;
+      isSuccess?: boolean;
+      message?: string;
+    }>(`/payments/vnpay-return?${queryString}`)
+      .then((res) => {
+        const confirmed = Boolean(res?.isSuccess);
+        setVerifiedSuccess(confirmed);
+        if (confirmed) {
+          clearCart();
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('brewlite_cart');
+          }
+        } else if (res?.message) {
+          setSyncNotice(res.message);
+        }
+      })
+      .catch(() => {
+        // Giữ trải nghiệm thông báo nếu kết nối API tạm gián đoạn
+        setVerifiedSuccess(responseCode === '00');
+        setSyncNotice(
+          'Không thể đồng bộ trực tiếp với máy chủ ngay lúc này. Vui lòng làm mới trạng thái trong mục Đơn hàng.',
+        );
+      })
+      .finally(() => {
+        setIsSyncing(false);
+      });
+  }, [hasVnpayParams, responseCode, searchParams, clearCart]);
 
   if (!mounted) {
     return null;
@@ -58,7 +105,17 @@ function VnpayReturnContent() {
             </span>
           </div>
 
-          {isSuccess ? (
+          {isSyncing ? (
+            <div className="py-10 text-center space-y-3">
+              <Loader2 className="w-8 h-8 animate-spin text-[#7D3F32] mx-auto" />
+              <p className="font-serif text-lg font-semibold text-[#3F3027]">
+                Đang xác thực giao dịch VNPay...
+              </p>
+              <p className="text-xs text-[#786B5A]">
+                Hệ thống đang đối soát chữ ký bảo mật và cập nhật trạng thái đơn hàng của bạn.
+              </p>
+            </div>
+          ) : isSuccess ? (
             /* TRẠNG THÁI THÀNH CÔNG (FRAME 06H FIGMA) */
             <>
               <div className="mb-4">
@@ -68,6 +125,11 @@ function VnpayReturnContent() {
                 <p className="text-xs sm:text-sm text-[#786B5A] mt-1">
                   Cảm ơn bạn! Đơn <b>{orderCode || 'BL-8924'}</b> đã được thanh toán và chuyển đến quầy pha chế.
                 </p>
+                {syncNotice && (
+                  <p className="text-xs text-[#92400E] bg-[#FEF3C7] border border-[#FCD34D] rounded-lg px-3 py-1.5 mt-2">
+                    {syncNotice}
+                  </p>
+                )}
               </div>
 
               {/* Hộp ĐÃ THANH TOÁN · VNPAY SANDBOX (#E6E8D5) */}

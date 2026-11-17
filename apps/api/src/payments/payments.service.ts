@@ -384,21 +384,34 @@ export class PaymentsService {
   }
 
   /**
-   * Xử lý khi khách hàng hoàn tất thanh toán trên VNPay và được redirect về Website
+   * Xử lý khi khách hàng hoàn tất thanh toán trên VNPay và được redirect về Website.
+   * Nếu chữ ký hợp lệ và đơn hàng vẫn ở trạng thái PENDING (ví dụ chạy Local không nhận được IPN từ Internet),
+   * tự động gọi handleVnpayIpn Idempotent để đồng bộ Order -> PAID/CANCELLED và cộng Hạt Loyalty.
    */
   async handleVnpayReturn(queryParams: Record<string, any>) {
     const verification = verifyVnpaySignature(queryParams, this.vnpHashSecret);
     const orderCode = queryParams['vnp_TxnRef'];
     const responseCode = queryParams['vnp_ResponseCode'];
 
-    const order = await this.prisma.order.findFirst({
+    let order = await this.prisma.order.findFirst({
       where: {
         OR: [{ orderCode: orderCode }, { id: orderCode }],
       },
       include: { payment: true },
     });
 
-    const isSuccess = verification.isValid && responseCode === '00';
+    if (verification.isValid && order && order.status === OrderStatus.PENDING) {
+      await this.handleVnpayIpn(queryParams);
+      order = await this.prisma.order.findFirst({
+        where: { id: order.id },
+        include: { payment: true },
+      });
+    }
+
+    const isSuccess =
+      verification.isValid &&
+      responseCode === '00' &&
+      (!order || order.status !== OrderStatus.PENDING);
 
     return {
       isValidSignature: verification.isValid,
