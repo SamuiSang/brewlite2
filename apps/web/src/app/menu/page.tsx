@@ -289,7 +289,11 @@ export default function MenuPage() {
     try {
       const params = new URLSearchParams();
       if (selectedCategory !== 'ALL') {
-        params.append('category', selectedCategory);
+        const cat =
+          selectedCategory === 'ESPRESSO' || selectedCategory === 'COLD_BREW'
+            ? 'COFFEE'
+            : selectedCategory;
+        params.append('category', cat);
       }
       if (debouncedKeyword) {
         params.append('keyword', debouncedKeyword);

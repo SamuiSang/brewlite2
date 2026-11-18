@@ -196,6 +196,14 @@ export default function CheckoutPage() {
       return;
     }
 
+    const invalidItem = items.find((it) => !UUID_V4_REGEX.test(it.productId));
+    if (invalidItem) {
+      setErrorMessage(
+        `Món "${invalidItem.name}" không còn tồn tại trên hệ thống hoặc cần chọn lại từ thực đơn mới. Vui lòng quay lại thực đơn để chọn món.`,
+      );
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {

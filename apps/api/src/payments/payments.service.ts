@@ -339,6 +339,19 @@ export class PaymentsService {
           }
         }
 
+        // Hoàn lượt sử dụng Promotion (nếu đơn có dùng voucher)
+        if (order.promotionId && (tx as any).promotion?.updateMany) {
+          await (tx as any).promotion.updateMany({
+            where: {
+              id: order.promotionId,
+              usedCount: { gt: 0 },
+            },
+            data: {
+              usedCount: { decrement: 1 },
+            },
+          });
+        }
+
         // Hoàn Hạt thưởng nếu đơn có dùng Hạt quy đổi
         const pointsUsed = Number((order as any).loyaltyPointsUsed || 0);
         if (order.userId && pointsUsed > 0 && (tx as any).loyaltyTransaction && (tx as any).user) {
