@@ -17,42 +17,42 @@ start
 |Hệ thống BrewLite|
 :2. Hiển thị món & giỏ hàng;
 |Khách hàng|
-if (Chọn thao tác) then (Thêm / sửa món)
+if () then ([Thêm / sửa món])
   :3. Chọn món, Size/Topping,\nđường, đá & số lượng;
   |Hệ thống BrewLite|
-  if (Tùy chọn & số lượng hợp lệ,\nmón còn bán và đủ tồn kho?) then (Có)
+  if () then ([Hợp lệ & đủ tồn kho])
     :4. Thêm / cập nhật món trong giỏ;
-  else (Không)
+  else ([Không hợp lệ hoặc hết hàng])
     :Thông báo không thể cập nhật;\ngiữ nguyên giỏ;
   endif
-elseif (Chọn thao tác) then (Xóa món / giỏ)
+elseif () then ([Xóa món / giỏ])
   |Khách hàng|
   :5. Chọn xóa & xác nhận;
   |Hệ thống BrewLite|
   :6. Xóa khi đồng ý;\nhủy thì giữ nguyên giỏ;
-elseif (Chọn thao tác) then (Áp mã)
+elseif () then ([Áp mã])
   |Khách hàng|
   :7. Nhập mã Promotion;
   |Hệ thống BrewLite|
-  if (Giỏ & mã đủ điều kiện áp dụng?) then (Có)
+  if () then ([Đủ điều kiện áp dụng])
     :8. Áp mã & tính tiền giảm dự kiến;\nthay mã cũ, không cộng dồn;
-  else (Không / chưa kiểm tra được)
+  else ([Không đủ điều kiện])
     :Thông báo lý do / yêu cầu thử lại;
   endif
-else (Hủy mã)
+else ([Hủy mã])
   |Khách hàng|
   :9. Chọn hủy mã;
   |Hệ thống BrewLite|
   :Gỡ mã giảm giá;
 endif
 |Hệ thống BrewLite|
-:10. Cập nhật giỏ & tổng tiền dự kiến;\ngỡ mã nếu giỏ không còn đủ điều kiện;
+:10. Cập nhật giỏ & tổng tiền dự kiến;
 |Khách hàng|
 :11. Xem giỏ & chọn Đặt hàng;
 |Hệ thống BrewLite|
-if (Giỏ có món & kiểm tra lại\ncác món còn bán?) then (Đủ điều kiện)
+if () then ([Đủ điều kiện đặt hàng])
   :12. Chuyển sang đặt hàng (UC-04);
-else (Chưa đủ điều kiện)
+else ([Chưa đủ điều kiện])
   :Yêu cầu kiểm tra lại giỏ;
 endif
 |Khách hàng|
