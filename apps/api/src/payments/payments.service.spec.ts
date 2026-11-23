@@ -374,4 +374,74 @@ describe('PaymentsService & VNPay Sandbox Gateway (Quang - Chức năng 5)', () 
       });
     });
   });
+
+  describe('4. VNPay Return Fallback Sync (Đồng bộ trạng thái đơn & Loyalty khi redirect về Website)', () => {
+    it('handleVnpayReturn tự động đồng bộ Order PENDING -> PAID khi chữ ký hợp lệ và vnp_ResponseCode=00', async () => {
+      const returnQuery: Record<string, any> = {
+        vnp_Amount: '4500000',
+        vnp_Command: 'pay',
+        vnp_ResponseCode: '00',
+        vnp_TmnCode: VNP_TMN_CODE,
+        vnp_TransactionNo: '14888888',
+        vnp_TxnRef: 'BL-9999',
+      };
+      const sorted = sortObject(returnQuery);
+      const signData = Object.entries(sorted)
+        .map(([k, v]) => `${k}=${v}`)
+        .join('&');
+      returnQuery['vnp_SecureHash'] = crypto
+        .createHmac('sha512', VNP_HASH_SECRET)
+        .update(Buffer.from(signData, 'utf-8'))
+        .digest('hex');
+
+      jest
+        .spyOn(prisma.order, 'findFirst')
+        .mockResolvedValueOnce({ ...mockOrder, status: OrderStatus.PENDING, payment: null } as any)
+        .mockResolvedValueOnce({ ...mockOrder, status: OrderStatus.PENDING, payment: null } as any)
+        .mockResolvedValueOnce({
+          ...mockOrder,
+          status: OrderStatus.PAID,
+          payment: { status: PaymentStatus.SUCCESS },
+        } as any);
+
+      const res = await service.handleVnpayReturn(returnQuery);
+      expect(res.isValidSignature).toBe(true);
+      expect(res.isSuccess).toBe(true);
+      expect(res.order?.status).toBe(OrderStatus.PAID);
+      expect(prisma.order.update).toHaveBeenCalledWith({
+        where: { id: mockOrder.id },
+        data: { status: OrderStatus.PAID },
+      });
+    });
+
+    it('handleVnpayReturn bỏ qua ghi trùng nếu đơn đã PAID sẵn từ IPN', async () => {
+      const returnQuery: Record<string, any> = {
+        vnp_Amount: '4500000',
+        vnp_Command: 'pay',
+        vnp_ResponseCode: '00',
+        vnp_TmnCode: VNP_TMN_CODE,
+        vnp_TransactionNo: '14888889',
+        vnp_TxnRef: 'BL-9999',
+      };
+      const sorted = sortObject(returnQuery);
+      const signData = Object.entries(sorted)
+        .map(([k, v]) => `${k}=${v}`)
+        .join('&');
+      returnQuery['vnp_SecureHash'] = crypto
+        .createHmac('sha512', VNP_HASH_SECRET)
+        .update(Buffer.from(signData, 'utf-8'))
+        .digest('hex');
+
+      jest.spyOn(prisma.order, 'findFirst').mockResolvedValue({
+        ...mockOrder,
+        status: OrderStatus.PAID,
+        payment: { status: PaymentStatus.SUCCESS },
+      } as any);
+
+      const res = await service.handleVnpayReturn(returnQuery);
+      expect(res.isSuccess).toBe(true);
+      expect(res.order?.status).toBe(OrderStatus.PAID);
+      expect(prisma.order.update).not.toHaveBeenCalled();
+    });
+  });
 });
