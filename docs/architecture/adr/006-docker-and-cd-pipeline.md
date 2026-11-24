@@ -10,7 +10,6 @@
 - **Tài liệu liên quan:**
   - [Bối cảnh và Phạm vi Hệ thống (docs/requirements/context-and-scope.md)](../../requirements/context-and-scope.md)
   - [Đặc tả Yêu cầu SRS Summary (docs/requirements/srs-summary.md)](../../requirements/srs-summary.md)
-  - [Sơ đồ Thành phần Hệ thống – UML Component Diagram (docs/diagrams/component-diagram.svg)](../../diagrams/component-diagram.svg)
   - [Sơ đồ Triển khai Hạ tầng – UML Deployment Diagram (docs/diagrams/deployment-diagram.svg)](../../diagrams/deployment-diagram.svg)
   - [Đặc tả Hạ tầng Triển khai Doanh nghiệp (docs/deployment.md)](../../deployment.md)
 
@@ -133,7 +132,7 @@ Quy trình tự động hóa được tách bạch thành 2 đường ống trê
 
 ### 5.1. Lợi ích Đạt được (Positive Consequences)
 - **Khởi chạy toàn bộ hệ thống bằng 1 lệnh duy nhất:** Mọi thành viên trong nhóm hoặc Giảng viên chấm bài chỉ cần chạy `docker compose up --build -d` là có ngay đầy đủ Frontend Next.js, Backend NestJS và PostgreSQL đã nạp sẵn dữ liệu mẫu (10 món đồ uống cùng định mức nguyên liệu `Ingredient` & `RecipeItem`).
-- **Truy vết đầy đủ từ Thiết kế UML sang Triển khai Thực tế:** Ánh xạ 1-1 giữa các tạo phẩm `<<artifact>>` trong `docs/diagrams/component-diagram.svg` và các Node phần cứng/container trong `docs/diagrams/deployment-diagram.svg`.
+- **Truy vết đầy đủ từ Kiến trúc Monorepo sang Triển khai Thực tế:** Ánh xạ 1-1 giữa 3 thành phần ứng dụng (`apps/web`, `apps/api`, `PostgreSQL 16`) và các Node phần cứng/container đóng gói trong `docs/diagrams/deployment-diagram.svg`.
 - **An toàn tuyệt đối khi phát hành:** Cơ chế chốt chặn CI (`ci.yml`) kết hợp kiểm tra sức khỏe `/api/v1/health` trong CD (`cd.yml`) giúp loại bỏ hoàn toàn tình trạng đẩy code lỗi làm sập trang Production trước giờ bảo vệ đồ án.
 
 ### 5.2. Chi phí & Đánh đổi (Trade-offs & Mitigations)
